@@ -256,7 +256,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maxCrystalHealth: 100
-  currentCrystalHealth: 0
+  currentCrystalHealth: 100
   CrystalHealthBar: {fileID: 215712877}
   timeBtShots: 0
   startTimeBtShots: 1

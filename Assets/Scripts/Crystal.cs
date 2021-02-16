@@ -30,10 +30,10 @@ public class Crystal : MonoBehaviour
         //Debug.Log(Vector2.Distance(transform.position, player.position));
 
         //// for testing
-        //if (Input.GetKeyDown(KeyCode.LeftControl))
-        //{
-        //    TakeDamage(10);
-        //}
+        if (Input.GetKey(KeyCode.R))
+        {
+            TakeDamage(10);
+        }
 /*        Debug.Log("Distance: ------");
         Debug.Log(Vector2.Distance(transform.position, player.position));*/
         if (Vector2.Distance(transform.position, player.position) <= firingRange)
@@ -53,11 +53,11 @@ public class Crystal : MonoBehaviour
         }
     }
 
-    //public void TakeDamage(int damage)
-    //{
-    //    currentCrystalHealth -= damage;
-    //    CrystalHealthBar.SetHealth(currentCrystalHealth);
-    //}
+    public void TakeDamage(int damage)
+    {
+        currentCrystalHealth -= damage;
+        CrystalHealthBar.SetHealth(currentCrystalHealth);
+    }
 
     //private void OnTriggerEnter2D(Collider2D collision)
     //{
