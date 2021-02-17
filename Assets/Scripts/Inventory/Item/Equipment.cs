@@ -4,18 +4,12 @@ using System.Collections;
 /// 装备类
 /// </summary>
 public class Equipment : Item{
-    public int Strength { get; set; }//力量
-    public int Intellect { get; set; }//智力
-    public int Agility { get; set; }//敏捷
-    public int Stamina { get; set; }//体力
+    public int DefensePoints { get; set; }//防御力
     public EquipmentType EquipType { get; set; }//装备类型
 
-    public Equipment(int id, string name, ItemType type, ItemQuality quality, string description, int capaticy, int buyPrice, int sellPrice, string sprite,int strength, int intellect,int agility,int stamina,EquipmentType equipType) : base(id, name, type, quality, description, capaticy, buyPrice, sellPrice,sprite) 
+    public Equipment(int id, string name, ItemType type, string description, int capaticy, int buyPrice, int sellPrice, string sprite,int defensePoints, EquipmentType equipType) : base(id, name, type, description, capaticy, buyPrice, sellPrice,sprite) 
     {
-        this.Strength = strength;
-        this.Intellect = intellect;
-        this.Agility = agility;
-        this.Stamina = stamina;
+        this.DefensePoints = defensePoints;
         this.EquipType = equipType;
     }
 
@@ -73,7 +67,7 @@ public class Equipment : Item{
         }
 
         string text = base.GetToolTipText();//调用父类的GetToolTipText()方法
-        string newText = string.Format("{0}\n<color=green>Strength：{1}</color>\n<color=yellow>Intelligent：{2}</color>\n<color=white>agility：{3}</color>\n<color=blue>stamina：{4}</color>\n<color=red>equipType：{5}</color>", text, Strength, Intellect, Agility, Stamina, strEquipType);
+        string newText = string.Format("{0}\n<size=40><color=green>Defense Points：{1}</color>\n<color=red>equipType：{2}</color></size>", text, DefensePoints, strEquipType);
         return newText;
     }
 }

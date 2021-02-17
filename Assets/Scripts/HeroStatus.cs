@@ -3,20 +3,11 @@ using UnityEngine.UI;
 public class HeroStatus : MonoBehaviour
 {
     //角色基本属性：
-    private int basicStrength = 10;
-    public int BasicStrength { get { return basicStrength; } }//基本力量
+    private int basicAttackPoints = 10;
+    public int BasicAttackPoints  { get { return basicAttackPoints; } }//基本攻击点
 
-    private int basicIntellect = 10;
-    public int BasicIntellect { get { return basicIntellect; } }//基本智力
-
-    private int basicAgility = 10;
-    public int BasicAgility { get { return basicAgility; } }//基本敏捷
-
-    private int basicStamina = 10;
-    public int BasicStamina { get { return basicStamina; } }//基本体力
-
-    private int basicDamage = 10;
-    public int BasicDamage { get { return basicDamage; } }//基本伤害
+    private int basicDefensePoints = 10;
+    public int BasicDefensePoints{ get { return basicDefensePoints; } }//基本防御点
 
     private Text coinText;//对金币Text组件的引用
     private int coinAmount = 100;//角色所持有的金币，用于从商贩那里购买物品

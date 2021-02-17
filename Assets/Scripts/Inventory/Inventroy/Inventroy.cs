@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 
 /// <summary>
-///存货类， 背包和箱子的基类
+///存货类，背包类的基类
 /// </summary>
 public class Inventroy : MonoBehaviour {
 

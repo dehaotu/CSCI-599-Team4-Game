@@ -36,7 +36,7 @@ public class CharacterPanel : Inventroy
     //更新角色属性显示
     private void UpdatePropertyText() 
     {
-        int strength = 0, intellect = 0, agility = 0, stamina = 0, damage = 0;
+        int attackPoints = 0, defensePoints = 0;
         foreach (EquipmentSlot slot in slotArray)//遍历角色面板中的装备物品槽
         {
             if (slot.transform.childCount > 0)//找到有物品的物品槽，获取里面装备的属性值
@@ -45,24 +45,18 @@ public class CharacterPanel : Inventroy
                 if (item is Equipment)//如果物品是装备，那就加角色对应的属性
                 {
                     Equipment e = (Equipment)item;
-                    strength += e.Strength;
-                    intellect += e.Intellect;
-                    agility += e.Agility;
-                    stamina += e.Stamina;
+                    defensePoints += e.DefensePoints;
                 }
                 else if (item is Weapon)///如果物品是武器，那就加角色的伤害（damage）属性
                 {
                     Weapon w = (Weapon)item;
-                    damage += w.Damage;
+                    attackPoints += w.AttackPoints;
                 }
             }
         }
-        strength += player.BasicStrength;
-        intellect += player.BasicIntellect;
-        agility += player.BasicAgility;
-        stamina += player.BasicStamina;
-        damage += player.BasicDamage;
-        string text = string.Format("Strength：{0}\nIntelligent：{1}\nagility：{2}\nstamina：{3}\ndamage：{4}\n", strength, intellect, agility, stamina, damage);
+        attackPoints += player.BasicAttackPoints;
+        defensePoints += player.BasicDefensePoints;
+        string text = string.Format("Attack：{0}\nDefense：{1}", attackPoints, defensePoints);
         characterPropertyText.text = text;
     }
 
