@@ -12,7 +12,7 @@ Character + Hero status
 
 Store + Items + Item description
 
-#### Show and hide panel:
+#### Show and hide panel
 
 B - Bag 
 
@@ -25,3 +25,5 @@ N - Store
 RightClick - Buy, Equip/Take off
 
 LeftClick - Pick Item (***TODO***: LeftClick conflicted with control of character)
+
+#### Network
