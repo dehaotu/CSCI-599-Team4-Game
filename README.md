@@ -12,6 +12,8 @@ Character + Hero status
 
 Store + Items + Item description
 
+Status board (***TODO***)
+
 #### Show and hide panel
 
 B - Bag 
@@ -20,10 +22,11 @@ V - Player
 
 N - Store
 
+S - Status board
+
 #### Operating
 
 RightClick - Buy, Equip/Take off
 
-LeftClick - Pick Item (***TODO*** May be able to sell or drop items in the future)
+LeftClick - Pick Item (First click would pick item, second click on store would sell item/second click outside all panels would throw away item)
 
-#### Network
