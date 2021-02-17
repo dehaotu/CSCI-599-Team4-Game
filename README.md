@@ -24,6 +24,6 @@ N - Store
 
 RightClick - Buy, Equip/Take off
 
-LeftClick - Pick Item (***TODO***: LeftClick conflicted with control of character)
+LeftClick - Pick Item (***TODO*** May be able to sell or drop items in the future)
 
 #### Network
