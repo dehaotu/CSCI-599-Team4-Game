@@ -23,6 +23,7 @@ public class CharacterPanel : Inventroy
 
     private Text characterPropertyText;//对角色属性面板中Text组件的引用
     private HeroStatus player;//对角色脚本的引用
+    private Text boardText;
 
     public override void Start()
     {
@@ -47,7 +48,7 @@ public class CharacterPanel : Inventroy
                     Equipment e = (Equipment)item;
                     defensePoints += e.DefensePoints;
                 }
-                else if (item is Weapon)///如果物品是武器，那就加角色的伤害（damage）属性
+                else if (item is Weapon)///如果物品是武器，那就加角色的伤害属性
                 {
                     Weapon w = (Weapon)item;
                     attackPoints += w.AttackPoints;
@@ -58,6 +59,12 @@ public class CharacterPanel : Inventroy
         defensePoints += player.BasicDefensePoints;
         string text = string.Format("Attack：{0}\nDefense：{1}", attackPoints, defensePoints);
         characterPropertyText.text = text;
+    }
+
+    //TODO:更新状态栏
+    private void UpdateSB()
+    {
+
     }
 
     //直接穿戴功能（不需拖拽）
@@ -87,6 +94,15 @@ public class CharacterPanel : Inventroy
             Knapscak.Instance.StoreItem(exitItem);//把角色面板上是物品替换到背包里面
         }
         UpdatePropertyText();//更新显示角色属性值
+
+        
+        boardText = GameObject.Find("StatusBoardPanel/Text").GetComponent<Text>();
+        System.Console.WriteLine(boardText.text);
+        System.Console.WriteLine("boardText.text");
+        boardText.text = "player put on " + item.Name;
+
+        UpdateSB();//更新状态板
+
     }
 
     //脱掉装备功能（不需拖拽）
@@ -94,5 +110,12 @@ public class CharacterPanel : Inventroy
     {
         Knapscak.Instance.StoreItem(item);//把角色面板上是物品替换到背包里面
         UpdatePropertyText();//更新显示角色属性值
+
+        boardText = GameObject.Find("StatusBoardPanel/Text").GetComponent<Text>();
+        System.Console.WriteLine(boardText.text);
+        System.Console.WriteLine("boardText.text");
+        boardText.text = "player put off " + item.Name;
+
+        UpdateSB();//更新状态板
     }
 }

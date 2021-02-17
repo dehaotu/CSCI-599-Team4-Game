@@ -54,6 +54,12 @@ public class HeroStatus : MonoBehaviour
         {
             Vendor.Instance.DisplaySwitch();
         }
+
+        //按下S键状态面板的显示和隐藏
+        if (Input.GetKeyDown(KeyCode.S))
+        {
+            StatusBoard.Instance.DisplaySwitch();
+        }
     }
 
     public bool checkAlive()
