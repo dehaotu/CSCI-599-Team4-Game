@@ -2,13 +2,25 @@
 
 ### Store part(Yijing):
 
+#### Parts
+
+Gold
+
+Bag Panels
+
+Character + Hero status
+
+Store + Items + Item description
+
 #### Show and hide panel:
 
-B - bag 
+B - Bag 
 
-V - player
+V - Player
 
-N - store
+N - Store
+
+#### Operating
 
 RightClick - Buy, Equip/Take off
 
