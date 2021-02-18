@@ -92,6 +92,7 @@ public class IsometricCharacterRenderer : MonoBehaviour
         animator.Play(attackDirections[lastDirection]);
     }
 
+    //Used By Controller to pause other animation untill Attack is finished playing
     public bool isPlayingAttack()
     {
         int animLayer = 0;

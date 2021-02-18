@@ -63,26 +63,25 @@ public class HeroStatus : NetworkBehaviour
 
         //按下B键控制背包的显示和隐藏
         //Bag
-        if (Input.GetKey(KeyCode.B))
+        if (Input.GetKeyDown(KeyCode.B))
         {
             Knapscak.Instance.DisplaySwitch();
         }
         //按下V键控制角色面板的显示和隐藏
         //Character Panel
-        if (Input.GetKey(KeyCode.V))
+        if (Input.GetKeyDown(KeyCode.V))
         {
             CharacterPanel.Instance.DisplaySwitch();
         }
         //按下N键商店小贩面板的显示和隐藏
         //Hide Shop Panel
-        if (Input.GetKey(KeyCode.N))
+        if (Input.GetKeyDown(KeyCode.N))
         {
             Vendor.Instance.DisplaySwitch();
         }
-
         //按下S键状态面板的显示和隐藏
         //Status Board
-        if (Input.GetKey(KeyCode.S))
+        if (Input.GetKeyDown(KeyCode.S))
         {
             StatusBoard.Instance.DisplaySwitch();
         }
