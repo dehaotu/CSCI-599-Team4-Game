@@ -109,7 +109,6 @@ public class InventroyManager : MonoBehaviour {
                     break;
             }
             itemList.Add(item);//把解析到的物品信息加入物品列表里面
-            Debug.Log(item);
         }
     }
 

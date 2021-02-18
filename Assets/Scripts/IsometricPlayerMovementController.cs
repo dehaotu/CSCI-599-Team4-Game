@@ -16,11 +16,15 @@ public class IsometricPlayerMovementController : NetworkBehaviour
 
     Rigidbody2D rbody;
     bool stopAction = false;
+
+    private Camera playerCamera;
+
     private void Awake()
     {
         rbody = GetComponent<Rigidbody2D>();
         isoRenderer = GetComponentInChildren<IsometricCharacterRenderer>();
         heroStatus = GetComponentInChildren<HeroStatus>();
+        playerCamera = GetComponentInChildren<Camera>();
         destination = rbody.position;
 
         agent = GetComponent<NavMeshAgent>();
@@ -32,20 +36,22 @@ public class IsometricPlayerMovementController : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        //if (!isLocalPlayer) return;
-
+        if (!isLocalPlayer) return;
+        if (isoRenderer.isPlayingAttack()) return;
         float horizontalInput = 0;
         float verticalInput = 0;
-        Vector2 inputVector = new Vector2(0, 0);
-        Vector2 currentPos = rbody.position;
+        
         if (Input.GetKeyDown(KeyCode.Mouse0) && heroStatus.checkAlive())
         {
             Vector2 mousePositionOnScreen = Input.mousePosition;
-            Vector2 mousePositionInGame = Camera.main.ScreenToWorldPoint(mousePositionOnScreen);
+            Vector2 mousePositionInGame = playerCamera.ScreenToWorldPoint(mousePositionOnScreen);
             destination = mousePositionInGame;
             agent.SetDestination(destination);
             Debug.Log("New destinaion: " + destination);
         }
+
+        Vector2 inputVector = new Vector2(0, 0);
+        Vector2 currentPos = rbody.position;
         inputVector = destination - currentPos;
 
         //Vector2 inputVector = new Vector2(horizontalInput, verticalInput);
@@ -55,9 +61,9 @@ public class IsometricPlayerMovementController : NetworkBehaviour
         /* Debug.Log("Destination:");
          Debug.Log(IsometricCharacterRenderer.DirectionToIndex(movement, 8));*/
 
-         
-        if(!stopAction) isoRenderer.SetDirection(movement);
+        CmdSetDirection(movement);
         if (heroStatus.checkAlive()) rbody.MovePosition(newPos);
+
 
         //test attack
         if (Input.GetKeyDown(KeyCode.F))
@@ -70,5 +76,10 @@ public class IsometricPlayerMovementController : NetworkBehaviour
             stopAction = true;
             isoRenderer.Dead();
         }
+    }
+
+    private void CmdSetDirection(Vector2 direction)
+    {
+        if (!stopAction) isoRenderer.SetDirection(direction);
     }
 }

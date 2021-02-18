@@ -61,7 +61,7 @@ public class StatusBoard : MonoBehaviour
     void Start()
     {
         boardText = GameObject.Find("StatusBoardPanel/Text").GetComponent<Text>();
-        boardText.text = "SB";
+        boardText.text = "StatusBoard";
         Show();
     }
 
