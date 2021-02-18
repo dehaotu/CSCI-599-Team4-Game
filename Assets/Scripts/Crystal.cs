@@ -1,8 +1,9 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using Mirror;
 
-public class Crystal : MonoBehaviour
+public class Crystal : NetworkBehaviour
 {
     public int maxCrystalHealth = 100;
     public int currentCrystalHealth = 100;
@@ -11,60 +12,56 @@ public class Crystal : MonoBehaviour
     [SerializeField]private float timeBtShots;
     public float startTimeBtShots = 1f;
     public float firingRange = 9f;
-    public GameObject CrystalBullet;
-    private Transform player;
+    public GameObject CrystalBulletPrefab;
+    private GameObject player;
 
     // Start is called before the first frame update
     void Start()
     {
-        //currentCrystalHealth = maxCrystalHealth;
-        //CrystalHealthBar.SetMaxHealth(maxCrystalHealth);
-
-        player = GameObject.FindGameObjectWithTag("Player").transform;
         timeBtShots = startTimeBtShots;
     }
 
-    // Update is called once per frame
     void FixedUpdate()
     {
-        //Debug.Log(Vector2.Distance(transform.position, player.position));
-
-        //// for testing
-        if (Input.GetKey(KeyCode.R))
+        //Get the local player
+        if (player == null)
+        {
+            foreach (var clientPlayer in GameObject.FindGameObjectsWithTag("Player"))
+            {
+                if (clientPlayer.GetComponent<HeroStatus>().isLocalPlayer)
+                {
+                    player = clientPlayer;
+                }
+            }
+            if (player == null) return;
+        }
+        
+        //For testing
+        /*if (Input.GetKey(KeyCode.R))
         {
             TakeDamage(10);
-        }
-/*        Debug.Log("Distance: ------");
-        Debug.Log(Vector2.Distance(transform.position, player.position));*/
-        if (Vector2.Distance(transform.position, player.position) <= firingRange)
+        }*/
+        if (Vector2.Distance(transform.position, player.transform.position) <= firingRange)
         {
-            Debug.Log("True");
-            if (timeBtShots <= 0 && GameObject.FindGameObjectWithTag("Player").GetComponent<HeroStatus>().checkAlive())
-            {
-                Instantiate(CrystalBullet, transform.position, Quaternion.identity);
-                timeBtShots = startTimeBtShots;
-
-            }
-            else
-            {
-
-                timeBtShots -= Time.deltaTime;
-            }
+            shoot();
         }
     }
 
+    public void shoot()
+    {
+        if (timeBtShots <= 0 && player.GetComponent<HeroStatus>().checkAlive())
+        {
+            GameObject bullet = Instantiate(CrystalBulletPrefab, transform.position, Quaternion.identity);
+            timeBtShots = startTimeBtShots;
+        }
+        else
+        {
+            timeBtShots -= Time.deltaTime;
+        }
+    }
     public void TakeDamage(int damage)
     {
         currentCrystalHealth -= damage;
         CrystalHealthBar.SetHealth(currentCrystalHealth);
     }
-
-    //private void OnTriggerEnter2D(Collider2D collision)
-    //{
-    //    if (collision.gameObject.tag == "Tower")
-    //    {
-    //        TakeDamage(5);
-
-    //    }
-    //}
 }

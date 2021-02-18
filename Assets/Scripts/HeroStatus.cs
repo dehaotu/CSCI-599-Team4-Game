@@ -1,28 +1,45 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-public class HeroStatus : MonoBehaviour
+using Mirror;
+
+public enum HeroClass : byte
 {
-    //角色基本属性：
+    Worrior,
+    Wizzard,
+    Priest,
+    Paladin
+}
+
+public class HeroStatus : NetworkBehaviour
+{
+    //Synchronized Fields
+    [SyncVar]
+    public int maxHealth = 100;
+    [SyncVar]
+    public int currentHealth;
+    [SerializeField]
+    [SyncVar]
+    private bool alive = true;
+    [SyncVar]
+    private HeroClass heroClass;
+
+    //Basic Attributes：
+    public HealthBar healthBar;
+
     private int basicAttackPoints = 10;
-    public int BasicAttackPoints  { get { return basicAttackPoints; } }//基本攻击点
+    public int BasicAttackPoints  { get { return basicAttackPoints; } }  //Basic Attack Points
 
     private int basicDefensePoints = 10;
-    public int BasicDefensePoints{ get { return basicDefensePoints; } }//基本防御点
+    public int BasicDefensePoints{ get { return basicDefensePoints; } }  //Basic Defense Points
 
-    private Text coinText;//对金币Text组件的引用
-    private int coinAmount = 100;//角色所持有的金币，用于从商贩那里购买物品
+    private Text coinText;  //Get gold amount from Coin GameObject
+    private int coinAmount = 100;  //Gold owned by the player, can be used to purchase items
     public int CoinAmount
     {
         get { return coinAmount; }
         set { coinAmount = value; coinText.text = coinAmount.ToString(); }
     }
 
-    public int maxHealth = 100;
-    public int currentHealth;
-
-    [SerializeField] private bool alive = true;
-
-    public HealthBar healthBar;
     void Start()
     {
         currentHealth = maxHealth;
@@ -31,31 +48,39 @@ public class HeroStatus : MonoBehaviour
         coinText.text = coinAmount.ToString();
     }
 
+    private void FixedUpdate()
+    {
+        healthBar.SetHealth(currentHealth);
+    }
+
     void Update()
     {
-        // for testing
-        if (Input.GetKeyDown(KeyCode.Space))
+        //For testing
+        /*if (Input.GetKeyDown(KeyCode.Space))
         {
             TakeDamage(10);
-        }
+        }*/
 
         //按下B键控制背包的显示和隐藏
+        //Bag
         if (Input.GetKeyDown(KeyCode.B))
         {
             Knapscak.Instance.DisplaySwitch();
         }
         //按下V键控制角色面板的显示和隐藏
+        //Character Panel
         if (Input.GetKeyDown(KeyCode.V))
         {
             CharacterPanel.Instance.DisplaySwitch();
         }
         //按下N键商店小贩面板的显示和隐藏
+        //Hide Shop Panel
         if (Input.GetKeyDown(KeyCode.N))
         {
             Vendor.Instance.DisplaySwitch();
         }
-
         //按下S键状态面板的显示和隐藏
+        //Status Board
         if (Input.GetKeyDown(KeyCode.S))
         {
             StatusBoard.Instance.DisplaySwitch();
@@ -67,10 +92,10 @@ public class HeroStatus : MonoBehaviour
         return alive;
     }
 
+    [Command]
     public void TakeDamage(int damage)
     {
         currentHealth -= damage;
-        healthBar.SetHealth(currentHealth);
         if (currentHealth <= 0)
         {
             alive = false;
@@ -78,21 +103,23 @@ public class HeroStatus : MonoBehaviour
     }
 
     //消费金币
+    //Use Coins
     public bool ConsumeCoin(int amount)
     {
         if (coinAmount >= amount)
         {
             coinAmount -= amount;
-            coinText.text = coinAmount.ToString();//更新金币数量
-            return true;//消费成功
+            coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
+            return true;  //消费成功 Successful purchase
         }
-        return false;//否则消费失败
+        return false;  //否则消费失败 Failed purchase
     }
 
     //赚取金币
+    //Earn Coins
     public void EarnCoin(int amount)
     {
         this.coinAmount += amount;
-        coinText.text = coinAmount.ToString();//更新金币数量
+        coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
     }
 }
