@@ -48,7 +48,7 @@ public class MenuController : MonoBehaviour
     public GameObject startButton;
     public GameObject settingButton;
     public GameObject exitButton;
-    public GameObject debug_LobbyServer;
+    public GameObject debug_LobbyServerButton;
     public GameObject lobbyPanel;
 
     public float cameraSpeedX = 0.4f;
@@ -64,7 +64,7 @@ public class MenuController : MonoBehaviour
         startButton.GetComponentInChildren<Text>().text = "Start";
         settingButton.GetComponentInChildren<Text>().text = "Setting";
         exitButton.GetComponentInChildren<Text>().text = "Exit";
-        debug_LobbyServer.GetComponentInChildren<Text>().text = "Debug_Start_LobbyServer";
+        debug_LobbyServerButton.GetComponentInChildren<Text>().text = "Debug_Start_LobbyServer";
     }
 
     // Update is called once per frame
@@ -92,7 +92,7 @@ public class MenuController : MonoBehaviour
         startButton.SetActive(false);
         settingButton.SetActive(false);
         exitButton.SetActive(false);
-        debug_LobbyServer.SetActive(false);
+        debug_LobbyServerButton.SetActive(false);
     }
 
     public void onClickDebugLobbyServer()
@@ -105,7 +105,7 @@ public class MenuController : MonoBehaviour
         startButton.SetActive(true);
         settingButton.SetActive(true);
         exitButton.SetActive(true);
-        debug_LobbyServer.SetActive(true);
+        debug_LobbyServerButton.SetActive(true);
         lobbyPanel.SetActive(false);
     }
 }
