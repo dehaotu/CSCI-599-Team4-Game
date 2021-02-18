@@ -44,6 +44,12 @@ MenuController consists of a menu animator, and different Button handlers.
 public class MenuController : MonoBehaviour
 {
     private MenuAnimator animator;
+    public GameObject backGroundMap;
+    public GameObject startButton;
+    public GameObject settingButton;
+    public GameObject exitButton;
+    public GameObject debug_LobbyServer;
+    public GameObject lobbyPanel;
 
     public float cameraSpeedX = 0.4f;
     public float cameraSpeedY = 0.2f;
@@ -52,14 +58,13 @@ public class MenuController : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
-        GameObject panel = GameObject.Find("BackGroundMap");
-        animator = new MenuAnimator(panel, cameraSpeedX, cameraSpeedY, period_rate);
+        animator = new MenuAnimator(backGroundMap, cameraSpeedX, cameraSpeedY, period_rate);
 
         //set Button Text
-        GameObject.Find("StartButton").GetComponentInChildren<Text>().text = "Start";
-        GameObject.Find("SettingButton").GetComponentInChildren<Text>().text = "Setting";
-        GameObject.Find("ExitButton").GetComponentInChildren<Text>().text = "Exit";
-        GameObject.Find("Debug_LobbyServer").GetComponentInChildren<Text>().text = "Debug_Start_LobbyServer";
+        startButton.GetComponentInChildren<Text>().text = "Start";
+        settingButton.GetComponentInChildren<Text>().text = "Setting";
+        exitButton.GetComponentInChildren<Text>().text = "Exit";
+        debug_LobbyServer.GetComponentInChildren<Text>().text = "Debug_Start_LobbyServer";
     }
 
     // Update is called once per frame
@@ -82,12 +87,26 @@ public class MenuController : MonoBehaviour
     public void onClickStartButton()
     {
         Debug.Log("onClickStartButton");
-        SceneManager.LoadScene ("TestScene");
+        //SceneManager.LoadScene ("TestScene");
+        lobbyPanel.SetActive(true);
+        startButton.SetActive(false);
+        settingButton.SetActive(false);
+        exitButton.SetActive(false);
+        debug_LobbyServer.SetActive(false);
     }
 
     public void onClickDebugLobbyServer()
     {
         Debug.Log("onClickDebugLobbyServer");
+    }
+
+    public void onClickLobby_backButton()
+    {
+        startButton.SetActive(true);
+        settingButton.SetActive(true);
+        exitButton.SetActive(true);
+        debug_LobbyServer.SetActive(true);
+        lobbyPanel.SetActive(false);
     }
 }
 
