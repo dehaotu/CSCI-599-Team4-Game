@@ -7,7 +7,7 @@ using Mirror;
 	API Reference: https://mirror-networking.com/docs/api/Mirror.NetworkManager.html
 */
 
-public class #SCRIPTNAME# : NetworkManager
+public class NetworkManagerStore: NetworkManager
 {
     #region Unity Callbacks
 

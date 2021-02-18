@@ -33,14 +33,6 @@ public class CrystalBullet : MonoBehaviour
         }
     }
 
-    //void OntrigerEnger2D(Collider2D other)
-    //{
-    //    if (other.CompareTag("Player"))
-    //    {
-    //        DestroyBullet();
-    //    }
-    //}
-
     void DestroyBullet()
     {
         Destroy(gameObject);
@@ -48,7 +40,6 @@ public class CrystalBullet : MonoBehaviour
 
     void ShootingDirection()
     {
-    
         Vector2 direction = new Vector2(player.position.x, player.position.y + verticalOffset);
         direction -= new Vector2(transform.position.x, transform.position.y);
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;

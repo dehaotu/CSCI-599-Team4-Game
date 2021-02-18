@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Text;
 
 /// <summary>
-///存货类， 背包和箱子的基类
+///存货类，背包类的基类
 /// </summary>
 public class Inventroy : MonoBehaviour {
 
@@ -14,7 +14,7 @@ public class Inventroy : MonoBehaviour {
     private float targetAlpha = 1f;//显示目标值
     private float smothing = 4f;//渐变平滑速度
     private CanvasGroup canvasGroupMy;
-    public CanvasGroup CanvasGroupMy      //对CanvasGroup的引用，用于制作隐藏显示效果
+    public virtual CanvasGroup CanvasGroupMy      //对CanvasGroup的引用，用于制作隐藏显示效果
     {
         get
         {

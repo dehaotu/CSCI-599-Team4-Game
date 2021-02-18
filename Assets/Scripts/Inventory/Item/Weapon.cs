@@ -4,13 +4,13 @@ using System.Collections;
 /// 武器类
 /// </summary>
 public class Weapon : Item{
-    public int Damage { get; set; }//伤害
+    public int AttackPoints { get; set; }//伤害
     public WeaponType WpType { get; set; }//武器类型
 
-    public Weapon(int id, string name, ItemType type, ItemQuality quality, string description, int capaticy, int buyPrice, int sellPrice, string sprite, int damage, WeaponType wpType)
-        : base(id, name, type, quality, description, capaticy, buyPrice, sellPrice,sprite)
+    public Weapon(int id, string name, ItemType type, string description, int capaticy, int buyPrice, int sellPrice, string sprite, int attackPoints, WeaponType wpType)
+        : base(id, name, type, description, capaticy, buyPrice, sellPrice,sprite)
     {
-        this.Damage = damage;
+        this.AttackPoints = attackPoints;
         this.WpType = wpType;
     }
     /// <summary>
@@ -38,7 +38,7 @@ public class Weapon : Item{
         }
 
         string text = base.GetToolTipText();//调用父类的GetToolTipText()方法
-        string newText = string.Format("{0}\n<color=red>damage：{1}</color>\n<color=yellow>Weapon type：{2}</color>", text, Damage, strWeaponType);
+        string newText = string.Format("{0}\n<size=40><color=red>Attack Points：{1}</color>\n<color=yellow>Weapon type：{2}</color></size>", text, AttackPoints, strWeaponType);
         return newText;
     }
 }
