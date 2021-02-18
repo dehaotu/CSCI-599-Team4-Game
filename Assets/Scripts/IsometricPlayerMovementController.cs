@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using Mirror;
 
-public class IsometricPlayerMovementController : MonoBehaviour
+public class IsometricPlayerMovementController : NetworkBehaviour
 {
 
     public float movementSpeed = 1f;
@@ -31,6 +32,8 @@ public class IsometricPlayerMovementController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        //if (!isLocalPlayer) return;
+
         float horizontalInput = 0;
         float verticalInput = 0;
         Vector2 inputVector = new Vector2(0, 0);
