@@ -80,12 +80,10 @@ public class InventroyManager : MonoBehaviour {
         foreach (var temp in j.list)
         {
             //物品类型字符串转化为枚举类型
+            //下面解析的是物品的共有属性, 注：temp["id"].n 的 .n，.str等是json插件的写法，用于解析
             Item.ItemType type = (Item.ItemType)System.Enum.Parse(typeof(Item.ItemType), temp["type"].str);
-            //print(type);
-            //下面解析的是物品的共有属性：id，name，quality。。。注：temp["id"].n 的 .n，.str等是json插件的写法，用于解析
             int id = (int)(temp["id"].n);
             string name = temp["name"].str;
-            Item.ItemQuality quality = (Item.ItemQuality)System.Enum.Parse(typeof(Item.ItemQuality), temp["quality"].str);
             string description = temp["description"].str;
             int capacity = (int)(temp["capacity"].n);
             int buyPrice = (int)(temp["buyPrice"].n);
@@ -97,23 +95,17 @@ public class InventroyManager : MonoBehaviour {
                 case Item.ItemType.Consumable:
                     int hp = (int)(temp["hp"].n);
                     int mp = (int)(temp["mp"].n);
-                    item = new Consumable(id, name, type, quality, description, capacity, buyPrice, sellPrice, sprite, hp, mp);
+                    item = new Consumable(id, name, type, description, capacity, buyPrice, sellPrice, sprite, hp, mp);
                     break;
                 case Item.ItemType.Equipment:
-                    int strength = (int)(temp["strength"].n);
-                    int intellect = (int)(temp["intellect"].n);
-                    int agility = (int)(temp["agility"].n);
-                    int stamina = (int)(temp["stamina"].n);
+                    int defensePoints = (int)(temp["defensePoints"].n);
                     Equipment.EquipmentType equiType = (Equipment.EquipmentType)System.Enum.Parse(typeof(Equipment.EquipmentType), temp["equipType"].str);
-                    item = new Equipment(id, name, type, quality, description, capacity, buyPrice, sellPrice, sprite,strength,intellect,agility,stamina,equiType);
+                    item = new Equipment(id, name, type, description, capacity, buyPrice, sellPrice, sprite,defensePoints, equiType);
                     break;
                 case Item.ItemType.Weapon:
-                    int damage = (int)(temp["damage"].n);
+                    int attackPoints = (int)(temp["attackPoints"].n);
                     Weapon.WeaponType weaponType = (Weapon.WeaponType)System.Enum.Parse(typeof(Weapon.WeaponType), temp["weaponType"].str);
-                    item = new Weapon(id, name, type, quality, description, capacity, buyPrice, sellPrice, sprite, damage, weaponType);
-                    break;
-                case Item.ItemType.Material:
-                    item = new Material(id, name, type, quality, description, capacity, buyPrice, sellPrice, sprite);
+                    item = new Weapon(id, name, type, description, capacity, buyPrice, sellPrice, sprite, attackPoints, weaponType);
                     break;
             }
             itemList.Add(item);//把解析到的物品信息加入物品列表里面

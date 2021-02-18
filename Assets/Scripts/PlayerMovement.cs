@@ -38,6 +38,7 @@ public class PlayerMovement : MonoBehaviour
     private bool isMoving = false;
 
     void Update(){
+
         if(Input.GetMouseButton(0)){
             SetTargetPosition();
         }
