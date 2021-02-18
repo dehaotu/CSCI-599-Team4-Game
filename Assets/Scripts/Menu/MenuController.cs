@@ -44,12 +44,16 @@ MenuController consists of a menu animator, and different Button handlers.
 public class MenuController : MonoBehaviour
 {
     private MenuAnimator animator;
+
     public GameObject backGroundMap;
     public GameObject startButton;
     public GameObject settingButton;
     public GameObject exitButton;
     public GameObject debug_LobbyServerButton;
     public GameObject lobbyPanel;
+    public GameObject roomPanel_server;
+    public GameObject roomPanel_client;
+    public GameObject networkRoomManager;
 
     public float cameraSpeedX = 0.4f;
     public float cameraSpeedY = 0.2f;
@@ -98,15 +102,52 @@ public class MenuController : MonoBehaviour
     public void onClickDebugLobbyServer()
     {
         Debug.Log("onClickDebugLobbyServer");
+        startButton.SetActive(false);
+        settingButton.SetActive(false);
+        exitButton.SetActive(false);
     }
 
-    public void onClickLobby_backButton()
+    public void onClick_Lobby_BackButton()
     {
+        Debug.Log("onClickLobby_backButton");
         startButton.SetActive(true);
         settingButton.SetActive(true);
         exitButton.SetActive(true);
         debug_LobbyServerButton.SetActive(true);
         lobbyPanel.SetActive(false);
+    }
+
+    public void onClick_Lobby_NewRoomButton()
+    {
+        Debug.Log("onClickLobby_NewRoomButton");
+        lobbyPanel.SetActive(false);
+        roomPanel_server.SetActive(true);
+    }
+
+    public void onClick_Lobby_RoomRow()
+    {
+        Debug.Log("onClick_Lobby_RoomRow");
+        lobbyPanel.SetActive(false);
+        roomPanel_client.SetActive(true);
+    }
+
+    public void onClick_Room_Client_BackButton()
+    {
+        Debug.Log("onClick_Room_Client_BackButton");
+        lobbyPanel.SetActive(true);
+        roomPanel_client.SetActive(false);
+    }
+
+    public void onClick_Room_Server_BackButton()
+    {
+        Debug.Log("onClick_Room_BackButton");
+        lobbyPanel.SetActive(true);
+        roomPanel_server.SetActive(false);
+    }
+
+    public void debug_onServerFound()
+    {
+        Debug.Log("Server Found.");
     }
 }
 
