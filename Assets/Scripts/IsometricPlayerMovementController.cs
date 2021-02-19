@@ -31,6 +31,7 @@ public class IsometricPlayerMovementController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (isoRenderer.isPlayingAttack()) return;
         float horizontalInput = 0;
         float verticalInput = 0;
         Vector2 inputVector = new Vector2(0, 0);
@@ -59,6 +60,7 @@ public class IsometricPlayerMovementController : MonoBehaviour
         //test attack
         if (Input.GetKeyDown(KeyCode.F))
         {
+            //stopAction = true;
             isoRenderer.Attack();
         }
 

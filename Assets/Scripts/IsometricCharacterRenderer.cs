@@ -98,6 +98,14 @@ public class IsometricCharacterRenderer : MonoBehaviour
     public void Attack()
     {
         animator.Play(attackDirections[lastDirection]);
+
+    }
+
+    public bool isPlayingAttack()
+    {
+        int animLayer = 0;
+        return (animator.GetCurrentAnimatorStateInfo(animLayer).IsName(attackDirections[lastDirection]) &&
+        animator.GetCurrentAnimatorStateInfo(animLayer).normalizedTime < 1.0f);
     }
 
     public void Dead()
