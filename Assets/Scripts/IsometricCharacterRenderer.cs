@@ -93,13 +93,6 @@ public class IsometricCharacterRenderer : MonoBehaviour
 
     }
 
-    public bool isPlayingAttack()
-    {
-        int animLayer = 0;
-        return (animator.GetCurrentAnimatorStateInfo(animLayer).IsName(attackDirections[lastDirection]) &&
-        animator.GetCurrentAnimatorStateInfo(animLayer).normalizedTime < 1.0f);
-    }
-
     //Used By Controller to pause other animation untill Attack is finished playing
     public bool isPlayingAttack()
     {
