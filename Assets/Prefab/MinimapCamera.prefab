@@ -42,7 +42,7 @@ Camera:
   m_Enabled: 1
   serializedVersion: 2
   m_ClearFlags: 2
-  m_BackGroundColor: {r: 0.3943574, g: 0.3962264, b: 0.39461318, a: 0.78039217}
+  m_BackGroundColor: {r: 0.26415092, g: 0.26415092, b: 0.26415092, a: 0.78039217}
   m_projectionMatrixMode: 1
   m_GateFitMode: 2
   m_FOVAxisMode: 0
@@ -63,7 +63,7 @@ Camera:
   m_Depth: 0
   m_CullingMask:
     serializedVersion: 2
-    m_Bits: 1536
+    m_Bits: 3584
   m_RenderingPath: -1
   m_TargetTexture: {fileID: 8400000, guid: 0dc9fc98171604a018ee7c7512d4977b, type: 2}
   m_TargetDisplay: 0

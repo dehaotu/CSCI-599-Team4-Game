@@ -91,7 +91,7 @@ MinimapWindow is a circle image with Mask component. The MinimapRenderder is a U
 
 
 
-### Tilemap
+### Map System
 
 Order of single tile: E -> N -> S -> W
 
@@ -102,6 +102,14 @@ Tilemap Renderer Sorting Layer:
 - Level -1: MapBorderCollider
 - Level 0: Ground
 - Level 1-5: Map Levels
+
+
+
+Add Background: the same color as Ground border color.
+
+- Layer: Ground
+
+- Render Layer: Level -2
 
 
 
