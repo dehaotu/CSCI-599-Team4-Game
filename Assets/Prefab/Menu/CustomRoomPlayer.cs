@@ -14,6 +14,9 @@ using Mirror;
 /// </summary>
 public class CustomRoomPlayer : NetworkRoomPlayer
 {
+    [SyncVar]
+    public string playerName;
+
     #region Start & Stop Callbacks
 
     /// <summary>

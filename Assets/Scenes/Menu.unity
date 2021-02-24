@@ -1685,7 +1685,7 @@ MonoBehaviour:
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60
   authenticator: {fileID: 0}
-  playerPrefab: {fileID: 8973956086453187366, guid: d6b1aa6af51fd424bb0ccf9aecce0b16,
+  playerPrefab: {fileID: 7891559232094816211, guid: db6b82463efddea4daed46e1edd710d7,
     type: 3}
   autoCreatePlayer: 0
   playerSpawnMethod: 0
@@ -1699,6 +1699,7 @@ MonoBehaviour:
   _allPlayersReady: 0
   roomSlots: []
   clientIndex: 0
+  menuController: {fileID: 1280086874}
 --- !u!4 &1116063842
 Transform:
   m_ObjectHideFlags: 0
@@ -1877,9 +1878,12 @@ MonoBehaviour:
   roomPanel: {fileID: 1007365389}
   loginPanel: {fileID: 305473427}
   mainMenuPanel: {fileID: 466611113}
+  playerListPanel: {fileID: 1438792311}
   nameInputField: {fileID: 1576756613}
   networkRoomManager: {fileID: 1116063841}
   roomDiscovery: {fileID: 1107837460}
+  playerInfoRowPrefab: {fileID: 6358321824382238178, guid: 243088d74d7958946837493baab73c0a,
+    type: 3}
   cameraSpeedX: 0.4
   cameraSpeedY: 0.2
   period_rate: 0.5
@@ -2109,7 +2113,18 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1435088653}
   m_OnClick:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 1280086874}
+        m_MethodName: onClick_Room_ReadyButton
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!114 &1435088653
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2159,7 +2174,7 @@ GameObject:
   - component: {fileID: 1438792314}
   - component: {fileID: 1438792313}
   m_Layer: 5
-  m_Name: TeamListPanel
+  m_Name: PlayerListPanel
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

@@ -14,15 +14,9 @@ public class PlayerInfoRow : MonoBehaviour
     public Text playerNameText;
     public Text readyText;
 
-    public PlayerInfoRow(string playerName, bool isReady)
-    {
-        setPlayerNameText(playerName);
-        setReadyText(isReady);
-        image = GetComponent<Image>();
-    }
-
     public void setReadyText(bool isReady) 
     {
+        image = GetComponent<Image>();
         if (isReady)
         {
             readyText.text = READY_TEXT;

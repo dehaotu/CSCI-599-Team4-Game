@@ -1,5 +1,12 @@
 ﻿using UnityEngine;
 using Mirror;
+using System;
+using System.Collections.Generic;
+
+public struct RoomPlayerInfoUpdateMessage : NetworkMessage
+{
+    public string playerName;
+}
 
 /*
 	Documentation: https://mirror-networking.com/docs/Components/NetworkRoomManager.html
@@ -18,6 +25,15 @@ using Mirror;
 /// </summary>
 public class CustomRoomManager : NetworkRoomManager
 {
+    private Dictionary<int, GameObject> connToRoomPlayer;
+
+    public MenuController menuController;
+
+    public CustomRoomManager()
+    {
+        connToRoomPlayer = new Dictionary<int, GameObject>();
+    }
+
 /************************************************************************************************
                                              Server                                             
 ************************************************************************************************/
@@ -62,9 +78,9 @@ public class CustomRoomManager : NetworkRoomManager
     public override void OnRoomServerConnect(NetworkConnection conn) {
         Debug.Log("Debug: A new player has joined the game!");
 
-        base.OnRoomServerConnect(conn);
+        connToRoomPlayer.Remove(conn.connectionId);
 
-        Debug.Log("Debug: There are " + numPlayers.ToString() + " in the room.");
+        base.OnRoomServerConnect(conn);
     }
 
     /// <summary>
@@ -75,8 +91,6 @@ public class CustomRoomManager : NetworkRoomManager
         Debug.Log("Debug: A player has disconnected!");
 
         base.OnRoomServerDisconnect(conn);
-
-        Debug.Log("Debug: There are " + numPlayers.ToString() + " in the room.");
     }
 
     /// <summary>
@@ -93,8 +107,13 @@ public class CustomRoomManager : NetworkRoomManager
     /// <returns>The new room-player object.</returns>
     public override GameObject OnRoomServerCreateRoomPlayer(NetworkConnection conn)
     {
-        Debug.Log("Hello from OnRoomServerCreateRoomPlayer(conn)");
-        return base.OnRoomServerCreateRoomPlayer(conn);
+        Debug.Log("Debug: OnRoomServerCreateRoomPlayer(conn) : " + conn.connectionId);
+        GameObject roomPlayer = Instantiate(roomPlayerPrefab.gameObject, Vector3.zero, Quaternion.identity);
+
+        connToRoomPlayer.Add(conn.connectionId, roomPlayer);
+        Action<NetworkConnection, RoomPlayerInfoUpdateMessage> roomPlayerInfoUpdateHandler = OnReceviveRoomPlayerInfoUpdateMessage;
+        NetworkServer.RegisterHandler<RoomPlayerInfoUpdateMessage>(roomPlayerInfoUpdateHandler, false);
+        return roomPlayer;
     }
 
     /// <summary>
@@ -106,7 +125,7 @@ public class CustomRoomManager : NetworkRoomManager
     /// <returns>A new GamePlayer object.</returns>
     public override GameObject OnRoomServerCreateGamePlayer(NetworkConnection conn, GameObject roomPlayer)
     {
-        Debug.Log("Hello from OnRoomServerCreateGamePlayer(conn, roomPlayer)");
+        Debug.Log("Debug: OnRoomServerCreateGamePlayer(conn, roomPlayer)");
         return base.OnRoomServerCreateGamePlayer(conn, roomPlayer);
 
     }
@@ -119,7 +138,7 @@ public class CustomRoomManager : NetworkRoomManager
     /// <param name="conn">The connection the player object is for.</param>
     public override void OnRoomServerAddPlayer(NetworkConnection conn)
     {
-        Debug.Log("Hello from OnRoomServerAddPlayer");
+        Debug.Log("OnRoomServerAddPlayer");
         base.OnRoomServerAddPlayer(conn);
     }
 
@@ -142,6 +161,7 @@ public class CustomRoomManager : NetworkRoomManager
     /// </summary>
     public override void OnRoomServerPlayersReady()
     {
+        Debug.Log("OnRoomServerPlayersReady");
         base.OnRoomServerPlayersReady();
     }
 
@@ -150,6 +170,20 @@ public class CustomRoomManager : NetworkRoomManager
     /// <para>May be called multiple times while not ready players are joining</para>
     /// </summary>
     public override void OnRoomServerPlayersNotReady() { }
+
+    // This additional method handles what happen when server receives RoomPlayerInfoUpdateMessage.
+    public void OnReceviveRoomPlayerInfoUpdateMessage(NetworkConnection conn, RoomPlayerInfoUpdateMessage msg)
+    {
+        Debug.Log("OnReceviveRoomPlayerInfoUpdateMessage");
+
+        GameObject roomPlayerObj = connToRoomPlayer[conn.connectionId];
+        if (roomPlayerObj != null)
+        {
+            CustomRoomPlayer roomPlayer = roomPlayerObj.GetComponent<CustomRoomPlayer>();
+            roomPlayer.playerName = msg.playerName;
+            //menuController.updateRoom();
+        }
+    }
 
     #endregion
 
@@ -181,6 +215,13 @@ public class CustomRoomManager : NetworkRoomManager
     public override void OnRoomClientConnect(NetworkConnection conn) {
         Debug.Log("OnRoomClientConnect");
         ClientScene.AddPlayer(conn);
+
+        //send player's name to server
+        RoomPlayerInfoUpdateMessage playerUpdateMsg;
+        playerUpdateMsg.playerName = menuController.myName;
+        conn.Send<RoomPlayerInfoUpdateMessage>(playerUpdateMsg);
+
+        Debug.Log("Send Player Update to server");
     }
 
     /// <summary>

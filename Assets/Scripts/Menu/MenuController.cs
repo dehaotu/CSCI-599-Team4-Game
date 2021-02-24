@@ -44,16 +44,19 @@ public class MenuController : MonoBehaviour
 {
     private bool isHost;    //true = host, false = client
     private MenuAnimator animator;
-    private string myName;
+
+    public string myName {set; get;}
 
     public GameObject backGroundMap;
     public GameObject lobbyPanel;
     public GameObject roomPanel;
     public GameObject loginPanel;
     public GameObject mainMenuPanel;
+    public GameObject playerListPanel;
     public GameObject nameInputField;
     public CustomRoomManager networkRoomManager;
     public CustomNetworkDiscovery roomDiscovery;
+    public PlayerInfoRow playerInfoRowPrefab;
 
     public float cameraSpeedX = 0.4f;
     public float cameraSpeedY = 0.2f;
@@ -71,6 +74,7 @@ public class MenuController : MonoBehaviour
     void Update()
     {
         animator.Update();
+        updateRoom();
     }
 
     public void onClickExitButton()
@@ -143,6 +147,13 @@ public class MenuController : MonoBehaviour
     public void onClick_Room_ReadyButton()
     {
         Debug.Log("onClick_Room_ReadyButton");
+        foreach (NetworkRoomPlayer roomPlayer in networkRoomManager.roomSlots)
+        {
+            if (roomPlayer.isLocalPlayer)
+            {
+                roomPlayer.CmdChangeReadyState(!roomPlayer.readyToBegin);
+            }
+        }
     }
 
     public void onClick_LoginPanel_Confirm()
@@ -174,7 +185,24 @@ public class MenuController : MonoBehaviour
         isHost = true;
     }
 
-}
+    public void updateRoom()
+    {
+        foreach (Transform child in playerListPanel.transform)
+        {
+            Destroy(child.gameObject);
+        }
+        
+        for (int i = 0; i < networkRoomManager.roomSlots.Count; i++)
+        {
+            NetworkRoomPlayer roomPlayer = networkRoomManager.roomSlots[i];
+            CustomRoomPlayer customRoomPlayer = roomPlayer.GetComponent<CustomRoomPlayer>();
+            GameObject playerRowObj = Instantiate(playerInfoRowPrefab.gameObject, Vector3.zero, Quaternion.identity, playerListPanel.transform);
+            PlayerInfoRow playerRow = playerRowObj.GetComponent<PlayerInfoRow>();
+            playerRow.setPlayerNameText(customRoomPlayer.playerName);
+            playerRow.setReadyText(customRoomPlayer.readyToBegin);
+            RectTransform tf = playerRowObj.GetComponent<RectTransform>();
+            tf.localPosition  = new Vector3(0, 100 - i * (tf.rect.height + 5), 0);    //TODO: fix the magic values
+        }
+    }
 
-//Note: Mirror Lobby tutorial
-//https://www.youtube.com/watch?v=Fx8efi2MNz0
+}
