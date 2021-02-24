@@ -6,12 +6,15 @@ public class IsometricCharacterRenderer : MonoBehaviour
 {
 
     public static readonly string[] staticDirections = { "Static N", "Static NW", "Static W", "Static SW", "Static S", "Static SE", "Static E", "Static NE" };
-    public static readonly string[] runDirections = {"Run N", "Run NW", "Run W", "Run SW", "Run S", "Run SE", "Run E", "Run NE"};
+    public static readonly string[] runDirections = { "Run N", "Run NW", "Run W", "Run SW", "Run S", "Run SE", "Run E", "Run NE" };
     public static readonly string[] deadDirections = { "Dead N", "Dead NW", "Dead W", "Dead SW", "Dead S", "Dead SE", "Dead E", "Dead NE" };
     public static readonly string[] attackDirections = { "Attack N", "Attack NW", "Attack W", "Attack SW", "Attack S", "Attack SE", "Attack E", "Attack NE" };
 
     Animator animator;
     private int lastDirection;
+
+    //Identification for separate attacks
+    private short attackID;
 
     private void Awake()
     {
@@ -19,7 +22,8 @@ public class IsometricCharacterRenderer : MonoBehaviour
         animator = GetComponent<Animator>();
     }
 
-    public void SetDirection(Vector2 direction){
+    public void SetDirection(Vector2 direction)
+    {
 
         //use the Run states by default
         string[] directionArray = null;
@@ -42,14 +46,15 @@ public class IsometricCharacterRenderer : MonoBehaviour
 
         //tell the animator to play the requested state
         animator.Play(directionArray[lastDirection]);
-        
+
     }
 
     //helper functions
 
     //this function converts a Vector2 direction to an index to a slice around a circle
     //this goes in a counter-clockwise direction.
-    public static int DirectionToIndex(Vector2 dir, int sliceCount){
+    public static int DirectionToIndex(Vector2 dir, int sliceCount)
+    {
         //get the normalized direction
         Vector2 normDir = dir.normalized;
         //calculate how many degrees one slice is
@@ -63,7 +68,8 @@ public class IsometricCharacterRenderer : MonoBehaviour
         //add the halfslice offset
         angle += halfstep;
         //if angle is negative, then let's make it positive by adding 360 to wrap it around.
-        if (angle < 0){
+        if (angle < 0)
+        {
             angle += 360;
         }
         //calculate the amount of steps required to reach this angle
@@ -90,7 +96,8 @@ public class IsometricCharacterRenderer : MonoBehaviour
     public void Attack()
     {
         animator.Play(attackDirections[lastDirection]);
-
+        attackID++;
+        attackID %= 100;
     }
 
     //Used By Controller to pause other animation untill Attack is finished playing
@@ -99,6 +106,11 @@ public class IsometricCharacterRenderer : MonoBehaviour
         int animLayer = 0;
         return (animator.GetCurrentAnimatorStateInfo(animLayer).IsName(attackDirections[lastDirection]) &&
         animator.GetCurrentAnimatorStateInfo(animLayer).normalizedTime < 1.0f);
+    }
+
+    public short getAttackID()
+    {
+        return attackID;
     }
 
     public void Dead()

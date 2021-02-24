@@ -15,8 +15,8 @@ public class Crystal : NetworkBehaviour
     public GameObject CrystalBulletPrefab;
     private GameObject player;
 
-    // Start is called before the first frame update
-    void Start()
+        // Start is called before the first frame update
+        void Start()
     {
         timeBtShots = startTimeBtShots;
     }
@@ -35,12 +35,13 @@ public class Crystal : NetworkBehaviour
             }
             if (player == null) return;
         }
-        
+
         //For testing
-        /*if (Input.GetKey(KeyCode.R))
+        if (Input.GetKey(KeyCode.R))
         {
-            TakeDamage(10);
-        }*/
+            TakeDamage(5);
+        }
+
         if (Vector2.Distance(transform.position, player.transform.position) <= firingRange)
         {
             shoot();
@@ -64,4 +65,5 @@ public class Crystal : NetworkBehaviour
         currentCrystalHealth -= damage;
         CrystalHealthBar.SetHealth(currentCrystalHealth);
     }
+
 }
