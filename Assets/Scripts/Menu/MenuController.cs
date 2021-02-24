@@ -5,6 +5,7 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Assertions;
 using UnityEngine.UI;
+using Mirror;
 
 /*
 A support class for helper MenuController to show animation effect in menu.
@@ -36,24 +37,23 @@ class MenuAnimator
     }
 }
 
-
-
 /*
 MenuController consists of a menu animator, and different Button handlers.
 */
 public class MenuController : MonoBehaviour
 {
+    private bool isHost;    //true = host, false = client
     private MenuAnimator animator;
+    private string myName;
 
     public GameObject backGroundMap;
-    public GameObject startButton;
-    public GameObject settingButton;
-    public GameObject exitButton;
-    public GameObject debug_LobbyServerButton;
     public GameObject lobbyPanel;
-    public GameObject roomPanel_server;
-    public GameObject roomPanel_client;
-    public GameObject networkRoomManager;
+    public GameObject roomPanel;
+    public GameObject loginPanel;
+    public GameObject mainMenuPanel;
+    public GameObject nameInputField;
+    public CustomRoomManager networkRoomManager;
+    public CustomNetworkDiscovery roomDiscovery;
 
     public float cameraSpeedX = 0.4f;
     public float cameraSpeedY = 0.2f;
@@ -64,11 +64,7 @@ public class MenuController : MonoBehaviour
     {
         animator = new MenuAnimator(backGroundMap, cameraSpeedX, cameraSpeedY, period_rate);
 
-        //set Button Text
-        startButton.GetComponentInChildren<Text>().text = "Start";
-        settingButton.GetComponentInChildren<Text>().text = "Setting";
-        exitButton.GetComponentInChildren<Text>().text = "Exit";
-        debug_LobbyServerButton.GetComponentInChildren<Text>().text = "Debug_Start_LobbyServer";
+        isHost = false;
     }
 
     // Update is called once per frame
@@ -92,63 +88,92 @@ public class MenuController : MonoBehaviour
     {
         Debug.Log("onClickStartButton");
         //SceneManager.LoadScene ("TestScene");
+        mainMenuPanel.SetActive(false);
         lobbyPanel.SetActive(true);
-        startButton.SetActive(false);
-        settingButton.SetActive(false);
-        exitButton.SetActive(false);
-        debug_LobbyServerButton.SetActive(false);
+
+        roomDiscovery.StartDiscovery();
     }
 
     public void onClickDebugLobbyServer()
     {
         Debug.Log("onClickDebugLobbyServer");
-        startButton.SetActive(false);
-        settingButton.SetActive(false);
-        exitButton.SetActive(false);
+        mainMenuPanel.SetActive(false);
     }
 
     public void onClick_Lobby_BackButton()
     {
         Debug.Log("onClickLobby_backButton");
-        startButton.SetActive(true);
-        settingButton.SetActive(true);
-        exitButton.SetActive(true);
-        debug_LobbyServerButton.SetActive(true);
         lobbyPanel.SetActive(false);
+        mainMenuPanel.SetActive(true);
+
+        roomDiscovery.StartDiscovery();
     }
 
     public void onClick_Lobby_NewRoomButton()
     {
         Debug.Log("onClickLobby_NewRoomButton");
         lobbyPanel.SetActive(false);
-        roomPanel_server.SetActive(true);
+        roomPanel.SetActive(true);
+        startHost();
     }
 
     public void onClick_Lobby_RoomRow()
     {
         Debug.Log("onClick_Lobby_RoomRow");
         lobbyPanel.SetActive(false);
-        roomPanel_client.SetActive(true);
+        joinGame();
+        roomPanel.SetActive(true);
     }
 
-    public void onClick_Room_Client_BackButton()
-    {
-        Debug.Log("onClick_Room_Client_BackButton");
-        lobbyPanel.SetActive(true);
-        roomPanel_client.SetActive(false);
-    }
-
-    public void onClick_Room_Server_BackButton()
+    public void onClick_Room_BackButton()
     {
         Debug.Log("onClick_Room_BackButton");
         lobbyPanel.SetActive(true);
-        roomPanel_server.SetActive(false);
+        roomPanel.SetActive(false);
+        if (isHost)
+        {
+            networkRoomManager.StopHost();
+        }
+        else
+        {
+            networkRoomManager.StopClient();
+        }
+    }
+
+    public void onClick_Room_ReadyButton()
+    {
+        Debug.Log("onClick_Room_ReadyButton");
+    }
+
+    public void onClick_LoginPanel_Confirm()
+    {
+        Debug.Log("onClick_LoginPanel_Confirm");
+        InputField inputField = nameInputField.GetComponent<InputField>();
+        myName = inputField.text;
+        Debug.Log("Debug: set name to " + myName);
+        loginPanel.SetActive(false);
+        mainMenuPanel.SetActive(true);
     }
 
     public void debug_onServerFound()
     {
         Debug.Log("Server Found.");
     }
+
+    public void joinGame()
+    {
+        networkRoomManager.StartClient();
+        roomDiscovery.StopDiscovery();
+        isHost = false;
+    }
+
+    public void startHost()
+    {
+        roomDiscovery.AdvertiseServer();
+        networkRoomManager.StartHost();
+        isHost = true;
+    }
+
 }
 
 //Note: Mirror Lobby tutorial

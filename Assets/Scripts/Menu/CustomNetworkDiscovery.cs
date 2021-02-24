@@ -57,7 +57,7 @@ public class CustomNetworkDiscovery : NetworkDiscoveryBase<DiscoveryRequest, Dis
     {
         Debug.Log("Received Client request.");
         DiscoveryResponse response = new DiscoveryResponse();
-        response.numPlayers = networkRoomManager.getNumPlayers();
+        response.numPlayers = networkRoomManager.numPlayers;
         Debug.Log("Response is ready:" + response.numPlayers.ToString());
         return response;
     }

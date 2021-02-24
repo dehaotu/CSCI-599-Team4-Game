@@ -18,7 +18,6 @@ using Mirror;
 /// </summary>
 public class CustomRoomManager : NetworkRoomManager
 {
-    int numPlayers = 0;
 /************************************************************************************************
                                              Server                                             
 ************************************************************************************************/
@@ -29,6 +28,7 @@ public class CustomRoomManager : NetworkRoomManager
     /// </summary>
     public override void OnRoomStartServer() {
         Debug.Log("Start Server");
+        base.OnRoomStartServer();
     }
 
     /// <summary>
@@ -36,6 +36,7 @@ public class CustomRoomManager : NetworkRoomManager
     /// </summary>
     public override void OnRoomStopServer() {
         Debug.Log("Debug: Stop Server");
+        base.OnRoomStopServer();
     }
 
     /// <summary>
@@ -43,6 +44,7 @@ public class CustomRoomManager : NetworkRoomManager
     /// </summary>
     public override void OnRoomStartHost() {
         Debug.Log("Debug: Started Hosting Game");
+        base.OnRoomStartHost();
     }
 
     /// <summary>
@@ -50,6 +52,7 @@ public class CustomRoomManager : NetworkRoomManager
     /// </summary>
     public override void OnRoomStopHost() {
         Debug.Log("Debug: Stop Host");
+        base.OnRoomStopHost();
     }
 
     /// <summary>
@@ -58,7 +61,10 @@ public class CustomRoomManager : NetworkRoomManager
     /// <param name="conn">The new connection.</param>
     public override void OnRoomServerConnect(NetworkConnection conn) {
         Debug.Log("Debug: A new player has joined the game!");
-        numPlayers++;
+
+        base.OnRoomServerConnect(conn);
+
+        Debug.Log("Debug: There are " + numPlayers.ToString() + " in the room.");
     }
 
     /// <summary>
@@ -67,7 +73,10 @@ public class CustomRoomManager : NetworkRoomManager
     /// <param name="conn">The connection that disconnected.</param>
     public override void OnRoomServerDisconnect(NetworkConnection conn) {
         Debug.Log("Debug: A player has disconnected!");
-        numPlayers--;
+
+        base.OnRoomServerDisconnect(conn);
+
+        Debug.Log("Debug: There are " + numPlayers.ToString() + " in the room.");
     }
 
     /// <summary>
@@ -84,6 +93,7 @@ public class CustomRoomManager : NetworkRoomManager
     /// <returns>The new room-player object.</returns>
     public override GameObject OnRoomServerCreateRoomPlayer(NetworkConnection conn)
     {
+        Debug.Log("Hello from OnRoomServerCreateRoomPlayer(conn)");
         return base.OnRoomServerCreateRoomPlayer(conn);
     }
 
@@ -96,7 +106,9 @@ public class CustomRoomManager : NetworkRoomManager
     /// <returns>A new GamePlayer object.</returns>
     public override GameObject OnRoomServerCreateGamePlayer(NetworkConnection conn, GameObject roomPlayer)
     {
+        Debug.Log("Hello from OnRoomServerCreateGamePlayer(conn, roomPlayer)");
         return base.OnRoomServerCreateGamePlayer(conn, roomPlayer);
+
     }
 
     /// <summary>
@@ -107,6 +119,7 @@ public class CustomRoomManager : NetworkRoomManager
     /// <param name="conn">The connection the player object is for.</param>
     public override void OnRoomServerAddPlayer(NetworkConnection conn)
     {
+        Debug.Log("Hello from OnRoomServerAddPlayer");
         base.OnRoomServerAddPlayer(conn);
     }
 
@@ -138,11 +151,6 @@ public class CustomRoomManager : NetworkRoomManager
     /// </summary>
     public override void OnRoomServerPlayersNotReady() { }
 
-    public int getNumPlayers()
-    {
-        return numPlayers;
-    }
-
     #endregion
 
 /************************************************************************************************
@@ -153,47 +161,71 @@ public class CustomRoomManager : NetworkRoomManager
     /// <summary>
     /// This is a hook to allow custom behaviour when the game client enters the room.
     /// </summary>
-    public override void OnRoomClientEnter() { }
+    public override void OnRoomClientEnter() { 
+        Debug.Log("OnRoomClientEnter");
+        base.OnRoomClientEnter();
+    }
 
     /// <summary>
     /// This is a hook to allow custom behaviour when the game client exits the room.
     /// </summary>
-    public override void OnRoomClientExit() { }
+    public override void OnRoomClientExit() {
+        Debug.Log("OnRoomClientExit");
+        base.OnRoomClientExit();
+    }
 
     /// <summary>
     /// This is called on the client when it connects to server.
     /// </summary>
     /// <param name="conn">The connection that connected.</param>
-    public override void OnRoomClientConnect(NetworkConnection conn) { }
+    public override void OnRoomClientConnect(NetworkConnection conn) {
+        Debug.Log("OnRoomClientConnect");
+        ClientScene.AddPlayer(conn);
+    }
 
     /// <summary>
     /// This is called on the client when disconnected from a server.
     /// </summary>
     /// <param name="conn">The connection that disconnected.</param>
-    public override void OnRoomClientDisconnect(NetworkConnection conn) { }
+    public override void OnRoomClientDisconnect(NetworkConnection conn) {
+        Debug.Log("OnRoomClientDisconnect");
+        base.OnRoomClientDisconnect(conn);
+    }
 
     /// <summary>
     /// This is called on the client when a client is started.
     /// </summary>
     /// <param name="roomClient">The connection for the room.</param>
-    public override void OnRoomStartClient() { }
+    public override void OnRoomStartClient() {
+        Debug.Log("OnRoomStartClient");
+        base.OnRoomStartClient();
+    }
 
     /// <summary>
     /// This is called on the client when the client stops.
     /// </summary>
-    public override void OnRoomStopClient() { }
+    public override void OnRoomStopClient() {
+        Debug.Log("OnRoomStopClient");
+        base.OnRoomStopClient();
+    }
 
     /// <summary>
     /// This is called on the client when the client is finished loading a new networked scene.
     /// </summary>
     /// <param name="conn">The connection that finished loading a new networked scene.</param>
-    public override void OnRoomClientSceneChanged(NetworkConnection conn) { }
+    public override void OnRoomClientSceneChanged(NetworkConnection conn) {
+        Debug.Log("OnRoomClientSceneChanged");
+        base.OnRoomClientSceneChanged(conn);
+    }
 
     /// <summary>
     /// Called on the client when adding a player to the room fails.
     /// <para>This could be because the room is full, or the connection is not allowed to have more players.</para>
     /// </summary>
-    public override void OnRoomClientAddPlayerFailed() { }
+    public override void OnRoomClientAddPlayerFailed() {
+        Debug.Log("OnRoomClientAddPlayerFailed");
+        base.OnRoomClientAddPlayerFailed();
+    }
 
     #endregion
 
