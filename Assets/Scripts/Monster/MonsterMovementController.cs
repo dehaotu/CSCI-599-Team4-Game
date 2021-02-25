@@ -1,13 +1,15 @@
 ﻿using UnityEngine;
+using Mirror;
 
-public class MonsterMovementController : MonoBehaviour
+// A client side script
+
+public class MonsterMovementController : NetworkBehaviour
 {
 
     public float movementSpeed = 1f;
 
     IsometricCharacterRenderer isoRenderer;
     MonsterStatus monsterStatus;
-
 
     Rigidbody2D monster;
 
@@ -20,6 +22,7 @@ public class MonsterMovementController : MonoBehaviour
         isoRenderer = GetComponentInChildren<IsometricCharacterRenderer>();
         monsterStatus = GetComponentInChildren<MonsterStatus>();
     }
+
     void Update()
     {
         GameObject closestPlayer = GetClosestAlivePlayer();
@@ -35,6 +38,7 @@ public class MonsterMovementController : MonoBehaviour
             Vector2 inputVector = Vector2.ClampMagnitude(mosterInitialPosition - monsterPosition, 1);
             Vector2 movement = inputVector * movementSpeed;
             Vector2 newMonsterPosition = monsterPosition + movement * Time.fixedDeltaTime;
+            isoRenderer.SetDirection(movement);
             monster.MovePosition(newMonsterPosition);
         }
         else if (monsterBaseCollider.bounds.Contains(playerPosition) && monsterStatus.IsAlive())
@@ -49,7 +53,7 @@ public class MonsterMovementController : MonoBehaviour
         }
     }
 
-    public void SetCollider(Collider2D collider)
+    public void SetMosterBaseCollider(Collider2D collider)
     {
         monsterBaseCollider = collider;
     }
@@ -58,6 +62,7 @@ public class MonsterMovementController : MonoBehaviour
     {
         mosterInitialPosition = position;
         monster.position = position;
+        isoRenderer.SetDirection(new Vector2(1, -1)); // Set direction to SE
     }
 
     public GameObject GetClosestAlivePlayer()

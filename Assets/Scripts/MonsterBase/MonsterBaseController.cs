@@ -1,9 +1,10 @@
 ﻿using System.Collections;
 using UnityEngine;
+using Mirror;
 
-public abstract class MonsterBaseController : MonoBehaviour
+public abstract class MonsterBaseController : NetworkBehaviour
 {
-    public float respawnWaitTime;
+    public float respawnWaitTime = 5.0f;
 
     public PolygonCollider2D monsterBaseCollider;
 
@@ -27,7 +28,7 @@ public abstract class MonsterBaseController : MonoBehaviour
         }
     }
 
-    // Destroy and instantiate monsters after waiting for several seconds.l
+    // Destroy and instantiate monsters after waiting for several seconds.
     IEnumerator DestroyAndInstantiate(float seconds)
     {
         DestroyMonsters();

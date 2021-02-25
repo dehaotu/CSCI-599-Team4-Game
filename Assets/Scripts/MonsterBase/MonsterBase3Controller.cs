@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Mirror;
 
 public class MonsterBase3Controller : MonsterBaseController
 {
@@ -37,24 +38,27 @@ public class MonsterBase3Controller : MonsterBaseController
     {
         monster1 = Instantiate(monster1Prefab);
         monster1.GetComponent<MonsterMovementController>().SetInitialPosition(position: centralPosition + monster1RelativePosition);
-        monster1.GetComponent<MonsterMovementController>().SetCollider(collider: monsterBaseCollider);
+        monster1.GetComponent<MonsterMovementController>().SetMosterBaseCollider(collider: monsterBaseCollider);
         monster1Status = monster1.GetComponent<MonsterStatus>();
+        NetworkServer.Spawn(monster1);
 
-        monster2 = Instantiate(monster1Prefab);
+        monster2 = Instantiate(monster2Prefab);
         monster2.GetComponent<MonsterMovementController>().SetInitialPosition(position: centralPosition + monster2RelativePosition);
-        monster2.GetComponent<MonsterMovementController>().SetCollider(collider: monsterBaseCollider);
+        monster2.GetComponent<MonsterMovementController>().SetMosterBaseCollider(collider: monsterBaseCollider);
         monster2Status = monster2.GetComponent<MonsterStatus>();
+        NetworkServer.Spawn(monster2);
 
-        monster3 = Instantiate(monster1Prefab);
+        monster3 = Instantiate(monster3Prefab);
         monster3.GetComponent<MonsterMovementController>().SetInitialPosition(position: centralPosition + monster3RelativePosition);
-        monster3.GetComponent<MonsterMovementController>().SetCollider(collider: monsterBaseCollider);
+        monster3.GetComponent<MonsterMovementController>().SetMosterBaseCollider(collider: monsterBaseCollider);
         monster3Status = monster3.GetComponent<MonsterStatus>();
+        NetworkServer.Spawn(monster3);
     }
 
     public override void DestroyMonsters()
     {
-        Destroy(monster1);
-        Destroy(monster2);
-        Destroy(monster3);
+        NetworkServer.Destroy(monster1);
+        NetworkServer.Destroy(monster2);
+        NetworkServer.Destroy(monster3);
     }
 }
