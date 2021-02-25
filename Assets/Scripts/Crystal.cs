@@ -9,21 +9,27 @@ public class Crystal : NetworkBehaviour
     public int currentCrystalHealth = 100;
     public HealthBar CrystalHealthBar;
 
-    [SerializeField]private float timeBtShots;
+    [SerializeField] private float timeBtShots;
     public float startTimeBtShots = 1f;
-    public float firingRange = 9f;
+    public float firingRange = 5f;
     public GameObject CrystalBulletPrefab;
     private GameObject player;
 
-        // Start is called before the first frame update
-        void Start()
+    // add
+    private string shootTag = "Player";
+    private Transform shootTarget;
+
+    void Start()
     {
         timeBtShots = startTimeBtShots;
+        InvokeRepeating("UpdateTarget", 0.0f, 0.5f); // invoke UpdateTarget() every 0.5 seconds starts from 0 second
+
     }
 
-    void FixedUpdate()
+    // void FixedUpdate()
+    private void Update()
     {
-        //Get the local player
+        // Get the local player
         if (player == null)
         {
             foreach (var clientPlayer in GameObject.FindGameObjectsWithTag("Player"))
@@ -33,37 +39,81 @@ public class Crystal : NetworkBehaviour
                     player = clientPlayer;
                 }
             }
-            if (player == null) return;
+            // if (player == null) return;
+        }
+        if (shootTarget == null)
+        {
+            return;
         }
 
-        //For testing
-        if (Input.GetKey(KeyCode.R))
+        if (timeBtShots <= 0.0f && player.GetComponent<HeroStatus>().checkAlive())
+        // if (timeBtShots <= 0.0f)
         {
-            TakeDamage(5);
+            Shoot();
+            timeBtShots = startTimeBtShots;
         }
 
-        if (Vector2.Distance(transform.position, player.transform.position) <= firingRange)
-        {
-            shoot();
-        }
+        timeBtShots -= Time.deltaTime;
+
     }
 
-    public void shoot()
+    private void UpdateTarget()
     {
-        if (timeBtShots <= 0 && player.GetComponent<HeroStatus>().checkAlive())
+        GameObject[] targets = GameObject.FindGameObjectsWithTag(shootTag);
+        GameObject nearestTarget = null;
+        float shortestDistance = Mathf.Infinity;
+
+        foreach (var target in targets)
         {
-            GameObject bullet = Instantiate(CrystalBulletPrefab, transform.position, Quaternion.identity);
-            timeBtShots = startTimeBtShots;
+            float distance = Vector2.Distance(transform.position, target.transform.position);
+            if (distance < shortestDistance)
+            {
+                shortestDistance = distance;
+                nearestTarget = target;
+            }
+        }
+
+        if (shortestDistance <= firingRange && nearestTarget != null)
+        {
+            shootTarget = nearestTarget.transform;
         }
         else
         {
-            timeBtShots -= Time.deltaTime;
+            shootTarget = null;
         }
     }
+
+    // public void Shoot()
+    // {
+    // if (timeBtShots <= 0 && player.GetComponent<HeroStatus>().checkAlive())
+    // {
+    //     GameObject bullet = Instantiate(CrystalBulletPrefab, transform.position, Quaternion.identity);
+    //     timeBtShots = startTimeBtShots;
+    // }
+    // else
+    // {
+    //     timeBtShots -= Time.deltaTime;
+    // }
+    // }
+
+    private void Shoot()
+    {
+        // "object casting": create a temporary gameObject for Instantiate object
+        GameObject bulletInst = (GameObject)Instantiate(CrystalBulletPrefab, transform.position, Quaternion.identity);
+        CrystalBullet bullet = bulletInst.GetComponent<CrystalBullet>();
+
+        if (bullet != null)
+        {
+            bullet.LocateTarget(shootTarget);
+        }
+
+        Debug.Log("shoot");
+    }
+
+    // tower health
     public void TakeDamage(int damage)
     {
         currentCrystalHealth -= damage;
         CrystalHealthBar.SetHealth(currentCrystalHealth);
     }
-
 }
