@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-
 public class IsometricCharacterRenderer : MonoBehaviour
 {
 
@@ -12,14 +11,13 @@ public class IsometricCharacterRenderer : MonoBehaviour
     public static readonly string[] attackDirections = { "Attack N", "Attack NW", "Attack W", "Attack SW", "Attack S", "Attack SE", "Attack E", "Attack NE" };
 
     Animator animator;
-    int lastDirection;
+    private int lastDirection;
 
     private void Awake()
     {
         //cache the animator component
         animator = GetComponent<Animator>();
     }
-
 
     public void SetDirection(Vector2 direction){
 
@@ -74,12 +72,6 @@ public class IsometricCharacterRenderer : MonoBehaviour
         return Mathf.FloorToInt(stepCount);
     }
 
-
-
-
-
-
-
     //this function converts a string array to a int (animator hash) array.
     public static int[] AnimatorStringArrayToHashArray(string[] animationArray)
     {
@@ -98,6 +90,14 @@ public class IsometricCharacterRenderer : MonoBehaviour
     public void Attack()
     {
         animator.Play(attackDirections[lastDirection]);
+    }
+
+    //Used By Controller to pause other animation untill Attack is finished playing
+    public bool isPlayingAttack()
+    {
+        int animLayer = 0;
+        return (animator.GetCurrentAnimatorStateInfo(animLayer).IsName(attackDirections[lastDirection]) &&
+        animator.GetCurrentAnimatorStateInfo(animLayer).normalizedTime < 1.0f);
     }
 
     public void Dead()

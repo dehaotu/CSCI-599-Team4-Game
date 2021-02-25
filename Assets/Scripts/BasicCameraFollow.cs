@@ -5,13 +5,19 @@ public class BasicCameraFollow : MonoBehaviour
 {
 
 	private Vector3 startingPosition;
-	public Transform followTarget;
+	private Transform followTarget;
 	private Vector3 targetPos;
 	public float moveSpeed;
 	
 	void Start()
 	{
 		startingPosition = transform.position;
+        if (!GetComponentInParent<HeroStatus>().isLocalPlayer)
+        {
+            gameObject.SetActive(false);
+            return;
+        }
+        followTarget = GetComponentInParent<HeroStatus>().gameObject.transform;
 	}
 
 	void Update () 
