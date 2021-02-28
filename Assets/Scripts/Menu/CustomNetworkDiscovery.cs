@@ -55,7 +55,6 @@ public class CustomNetworkDiscovery : NetworkDiscoveryBase<DiscoveryRequest, Dis
     /// <returns>A message containing information about this server</returns>
     protected override DiscoveryResponse ProcessRequest(DiscoveryRequest request, IPEndPoint endpoint) 
     {
-        Debug.Log("Received Client request.");
         DiscoveryResponse response = new DiscoveryResponse();
         response.numPlayers = networkRoomManager.numPlayers;
         Debug.Log("Response is ready:" + response.numPlayers.ToString());
@@ -88,7 +87,6 @@ public class CustomNetworkDiscovery : NetworkDiscoveryBase<DiscoveryRequest, Dis
     /// <param name="response">Response that came from the server</param>
     /// <param name="endpoint">Address of the server that replied</param>
     protected override void ProcessResponse(DiscoveryResponse response, IPEndPoint endpoint) {
-        Debug.Log("Received Server response: " + response.numPlayers.ToString());
         roomListPanel.UpdateRoom(endpoint, response.numPlayers);
     }
 

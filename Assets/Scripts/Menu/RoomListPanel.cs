@@ -9,23 +9,17 @@ using Mirror;
 //The Panel that lists all game rooms in lobby.
 public class RoomListPanel : MonoBehaviour
 {
-    
+    private const int NUM_PLAYERS = 4;
+
     public GameObject roomRowPrefab;
-    public NetworkRoomManager networkManager;
     public MenuController menuController;
     public CustomNetworkDiscovery networkDiscovery;
-
-    // Start is called before the first frame update
-    void Start()
-    {
-
-    }
 
     public void UpdateRoom(IPEndPoint idAddress, int numPlayers)
     {
         GameObject newRow = Instantiate(roomRowPrefab, this.transform);
         Button roomRow = newRow.GetComponent<Button>();
-        roomRow.GetComponentInChildren<Text>().text = "Room     " + numPlayers.ToString() + "/4";
+        roomRow.GetComponentInChildren<Text>().text = "Room     " + numPlayers.ToString() + "/" + NUM_PLAYERS.ToString();
         roomRow.onClick.AddListener(() => {menuController.onClick_Lobby_RoomRow();});
     }
 
