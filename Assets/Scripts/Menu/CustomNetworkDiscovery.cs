@@ -1,3 +1,4 @@
+﻿using UnityEngine;
 using System.Net;
 using Mirror;
 using Mirror.Discovery;
@@ -18,10 +19,14 @@ public class DiscoveryResponse : NetworkMessage
 {
     // Add properties for whatever information you want the server to return to
     // clients for them to display or consume for establishing a connection.
+    public int numPlayers;
 }
 
-public class #SCRIPTNAME# : NetworkDiscoveryBase<DiscoveryRequest, DiscoveryResponse>
+public class CustomNetworkDiscovery : NetworkDiscoveryBase<DiscoveryRequest, DiscoveryResponse>
 {
+    public CustomRoomManager networkRoomManager;
+    public RoomListPanel roomListPanel;
+
     #region Server
 
     /// <summary>
@@ -31,7 +36,7 @@ public class #SCRIPTNAME# : NetworkDiscoveryBase<DiscoveryRequest, DiscoveryResp
     /// Override if you wish to ignore server requests based on
     /// custom criteria such as language, full server game mode or difficulty
     /// </remarks>
-    /// <param name="request">Request coming from client</param>
+    /// <param name="request">Request comming from client</param>
     /// <param name="endpoint">Address of the client that sent the request</param>
     protected override void ProcessClientRequest(DiscoveryRequest request, IPEndPoint endpoint)
     {
@@ -45,16 +50,15 @@ public class #SCRIPTNAME# : NetworkDiscoveryBase<DiscoveryRequest, DiscoveryResp
     /// Override if you wish to provide more information to the clients
     /// such as the name of the host player
     /// </remarks>
-<<<<<<< HEAD
     /// <param name="request">Request comming from client</param>
-=======
-    /// <param name="request">Request coming from client</param>
->>>>>>> master
     /// <param name="endpoint">Address of the client that sent the request</param>
     /// <returns>A message containing information about this server</returns>
     protected override DiscoveryResponse ProcessRequest(DiscoveryRequest request, IPEndPoint endpoint) 
     {
-        return new DiscoveryResponse();
+        DiscoveryResponse response = new DiscoveryResponse();
+        response.numPlayers = networkRoomManager.numPlayers;
+        Debug.Log("Response is ready:" + response.numPlayers.ToString());
+        return response;
     }
 
     #endregion
@@ -82,7 +86,9 @@ public class #SCRIPTNAME# : NetworkDiscoveryBase<DiscoveryRequest, DiscoveryResp
     /// </remarks>
     /// <param name="response">Response that came from the server</param>
     /// <param name="endpoint">Address of the server that replied</param>
-    protected override void ProcessResponse(DiscoveryResponse response, IPEndPoint endpoint) { }
+    protected override void ProcessResponse(DiscoveryResponse response, IPEndPoint endpoint) {
+        roomListPanel.UpdateRoom(endpoint, response.numPlayers);
+    }
 
     #endregion
 }
