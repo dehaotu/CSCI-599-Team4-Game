@@ -59,7 +59,8 @@ public class Crystal : NetworkBehaviour
             timeBtShots -= Time.deltaTime;
         }
     }
-    public void TakeDamage(int damage)
+    [Command]
+    public void CmdTakeDamage(int damage)
     {
         currentCrystalHealth -= damage;
         CrystalHealthBar.SetHealth(currentCrystalHealth);

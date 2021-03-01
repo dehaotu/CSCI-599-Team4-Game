@@ -278,6 +278,7 @@ GameObject:
   m_Component:
   - component: {fileID: 9099581092763991482}
   - component: {fileID: 9099581092763991483}
+  - component: {fileID: 1476026731}
   m_Layer: 0
   m_Name: BaseCollider
   m_TagString: Untagged
@@ -324,10 +325,22 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: 0.06834459, y: -0.24973094}
-      - {x: -0.43358946, y: -0.48182842}
-      - {x: 0.066370964, y: -0.7601994}
-      - {x: 0.55849457, y: -0.5063474}
+    - - {x: 0.054621696, y: 0.8206533}
+      - {x: -2.7536998, y: -0.7245741}
+      - {x: -0.59268856, y: -2.3318906}
+      - {x: 1.608294, y: -0.417149}
+--- !u!114 &1476026731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9099581092763991485}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8615d78919c4c704da2ae5dea2968dfa, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &9099581092880510725
 GameObject:
   m_ObjectHideFlags: 0
