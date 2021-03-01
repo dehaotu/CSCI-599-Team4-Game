@@ -1827,14 +1827,14 @@ MonoBehaviour:
   playerPrefab: {fileID: 7891559232094816211, guid: db6b82463efddea4daed46e1edd710d7,
     type: 3}
   autoCreatePlayer: 0
-  playerSpawnMethod: 0
+  playerSpawnMethod: 1
   spawnPrefabs: []
   showRoomGUI: 0
   minPlayers: 1
   roomPlayerPrefab: {fileID: 1257700833802494063, guid: d73367814be36b34e9812a10338ef602,
     type: 3}
   RoomScene: Assets/Scenes/Menu.unity
-  GameplayScene: Assets/Scenes/TestScene.unity
+  GameplayScene: Assets/Scenes/DT-TestScene.unity
   _allPlayersReady: 0
   roomSlots: []
   clientIndex: 0
