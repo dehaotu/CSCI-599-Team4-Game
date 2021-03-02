@@ -16,6 +16,16 @@ public class StatusBoard : Inventroy
             return _instance;
         }
     }
+
+    [SerializeField]
+    private Text otherPlayerText;
+
+    public void UpdatePlayerAttribute(string text)
+    {
+        otherPlayerText = transform.Find("AvatarPlayer/SectionFrame/Attributes").GetComponent<Text>();
+        otherPlayerText.text = text;
+    }
+
    
     //控制面板的显示和隐藏相关变量
    /* private CanvasGroup canvasGroupMy;
@@ -61,7 +71,7 @@ public class StatusBoard : Inventroy
     {
         base.Start();
         boardText = GetComponentInChildren<Text>();
-        boardText.text = "StatusBoard";
+        boardText.text = "Status Board";
         Hide();
     }
 
