@@ -25,14 +25,18 @@ public class HeroStatus : NetworkBehaviour
 
     //Basic Attributes：
     public HealthBar healthBar;
-
+    [SerializeField]
+    [SyncVar(hook = nameof(SetAttack))]
     private int basicAttackPoints = 10;
-    public int BasicAttackPoints  { get { return basicAttackPoints; } }  //Basic Attack Points
-
+    public int BasicAttackPoints { get { return basicAttackPoints; } set { CmdSetAttack(value); } }  //Basic Attack Points
+    [SerializeField]
+    [SyncVar(hook = nameof(SetDefense))]
     private int basicDefensePoints = 10;
-    public int BasicDefensePoints{ get { return basicDefensePoints; } }  //Basic Defense Points
+    public int BasicDefensePoints{ get { return basicDefensePoints; } set { CmdSetDefense(value); } }  //Basic Defense Points
+
 
     private Text coinText;  //Get gold amount from Coin GameObject
+    [SyncVar]
     private int coinAmount = 100;  //Gold owned by the player, can be used to purchase items
     public int CoinAmount
     {
@@ -46,6 +50,7 @@ public class HeroStatus : NetworkBehaviour
         healthBar.SetMaxHealth(maxHealth);
         coinText = GameObject.Find("Coin").GetComponentInChildren<Text>();
         coinText.text = coinAmount.ToString();
+        Debug.Log(GetComponent<NetworkIdentity>().netId.ToString());
     }
 
     private void FixedUpdate()
@@ -93,7 +98,7 @@ public class HeroStatus : NetworkBehaviour
     }
 
     [Command]
-    public void TakeDamage(int damage)
+    public void CmdTakeDamage(int damage)
     {
         currentHealth -= damage;
         if (currentHealth <= 0)
@@ -101,6 +106,49 @@ public class HeroStatus : NetworkBehaviour
             alive = false;
         }
     }
+
+
+    [Command]
+    public void CmdSetAttack(int value)
+    {
+        basicAttackPoints = value;
+    }
+
+    [Command]
+    public void CmdSetDefense(int value)
+    {
+        basicDefensePoints = value;
+    }
+
+    public void SetAttack(int oldAttack, int newAttack)
+    {
+        //string text = string.Format("Attack：{0}\nDefense：{1}", newAttack, basicDefensePoints);
+        //StatusBoard.Instance.UpdatePlayerAttribute(text);
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        foreach(var player in players)
+        {
+            if (!player.GetComponent<HeroStatus>().isLocalPlayer)
+            {
+                string text = string.Format("Attack：{0}\nDefense：{1}", newAttack, player.GetComponent<HeroStatus>().BasicDefensePoints);
+                StatusBoard.Instance.UpdatePlayerAttribute(text);
+            }
+        }
+        
+    }
+
+    public void SetDefense(int oldDefense, int newDefense)
+    {
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        foreach (var player in players)
+        {
+            if (!player.GetComponent<HeroStatus>().isLocalPlayer)
+            {
+                string text = string.Format("Attack：{0}\nDefense：{1}", player.GetComponent<HeroStatus>().BasicAttackPoints, newDefense);
+                StatusBoard.Instance.UpdatePlayerAttribute(text);
+            }
+        }
+    }
+
 
     //消费金币
     //Use Coins
@@ -121,5 +169,19 @@ public class HeroStatus : NetworkBehaviour
     {
         this.coinAmount += amount;
         coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
+    }
+
+    /// <summary>
+    /// Only Top gameobject can have network identity, thus need to have this function for children scripts
+    /// </summary>
+    /// <returns></returns>
+    public bool thisIsLocalPlayer()
+    {
+        return isLocalPlayer;
+    }
+
+    public bool thisIsSever()
+    {
+        return isServer;
     }
 }

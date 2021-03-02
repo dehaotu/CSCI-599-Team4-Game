@@ -13,6 +13,9 @@ public class IsometricCharacterRenderer : MonoBehaviour
     Animator animator;
     private int lastDirection;
 
+    //Identification for separate attacks
+    private short attackID;
+
     private void Awake()
     {
         //cache the animator component
@@ -90,6 +93,8 @@ public class IsometricCharacterRenderer : MonoBehaviour
     public void Attack()
     {
         animator.Play(attackDirections[lastDirection]);
+        attackID++;
+        attackID %= 100;
     }
 
     //Used By Controller to pause other animation untill Attack is finished playing
@@ -98,6 +103,11 @@ public class IsometricCharacterRenderer : MonoBehaviour
         int animLayer = 0;
         return (animator.GetCurrentAnimatorStateInfo(animLayer).IsName(attackDirections[lastDirection]) &&
         animator.GetCurrentAnimatorStateInfo(animLayer).normalizedTime < 1.0f);
+    }
+
+    public short getAttackID()
+    {
+        return attackID;
     }
 
     public void Dead()
