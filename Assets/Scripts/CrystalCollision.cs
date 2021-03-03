@@ -29,7 +29,7 @@ public class CrystalCollision : MonoBehaviour
     {
         if (attackStatus != null && attackStatus.isPlayingAttack() && currAttackID != attackStatus.getAttackID())
         {
-            crystalStatus.CmdTakeDamage(2);
+            crystalStatus.TakeDamage(10);
             currAttackID = attackStatus.getAttackID();
         }
     }
