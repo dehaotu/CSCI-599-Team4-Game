@@ -103,7 +103,7 @@ public class EnemyController : NetworkBehaviour
                     isoRenderer.SetDirection(Vector2.zero);
                     if (targetObject.tag.Equals("Player"))
                     {
-                        targetObject.GetComponent<HeroStatus>().TakeDamage(basicAttackPoints);
+                        targetObject.GetComponent<HeroStatus>().CmdTakeDamage(basicAttackPoints);
                     } else if (targetObject.tag.Equals("PlayerMinion") || targetObject.tag.Equals("EnemyMinion"))
                     {
                         targetObject.GetComponent<EnemyController>().TakeDamage(basicAttackPoints);
