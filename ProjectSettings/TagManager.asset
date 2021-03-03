@@ -8,6 +8,7 @@ TagManager:
   - Tower
   - StatusBoard
   - Confiner
+  - Monster
   layers:
   - Default
   - TransparentFX
