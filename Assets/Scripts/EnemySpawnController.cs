@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 using Mirror;
 
 public class EnemySpawnController : NetworkBehaviour
@@ -27,10 +28,8 @@ public class EnemySpawnController : NetworkBehaviour
         {
             EnemyController minion = Instantiate(minionPrefab, transform.position, Quaternion.identity) as EnemyController;
             minion.targetPosition = targetPosition;
-            if (isEnemySide)
-                minion.gameObject.tag = "EnemyMinion";
-            else
-                minion.gameObject.tag = "PlayerMinion";
+            minion.gameObject.tag = (isEnemySide) ? "EnemyMinion" : "PlayerMinion";
+            minion.gameObject.GetComponentInChildren<Text>().text = (isEnemySide) ? "Enemy Minion" : "Player Minion";
             timer = 0f;
         }
     }

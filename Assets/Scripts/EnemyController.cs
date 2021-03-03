@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 using Mirror;
 
 public class EnemyController : NetworkBehaviour
@@ -41,6 +42,7 @@ public class EnemyController : NetworkBehaviour
         currentHealthPoints = maxHealthPoints;
         healthBar.SetMaxHealth(maxHealthPoints);
         NetworkServer.Spawn(this.gameObject);
+        Debug.Log(gameObject.GetComponentInChildren<Text>().text);
     }
 
     private GameObject FindNearestObjectByTags(string[] tags)
