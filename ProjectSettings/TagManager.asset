@@ -7,6 +7,8 @@ TagManager:
   - Bullet
   - Tower
   - StatusBoard
+  - PlayerMinion
+  - EnemyMinion
   layers:
   - Default
   - TransparentFX

@@ -2,10 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Mirror;
 
-public class EnemyController : MonoBehaviour
+public class EnemyController : NetworkBehaviour
 {
-    public float healthPoints = 30;
+    public int currentHealthPoints = 0;
+    public int maxHealthPoints = 30;
     public float movementSpeed = 1f;
     public float waitingTime = 2f;
 
@@ -15,11 +17,20 @@ public class EnemyController : MonoBehaviour
     public float maxChaseDistance = 3f;
     private float timer = 0f;
 
+    //Basic Attributes：
+    public HealthBar healthBar;
+
+    public Vector2 targetPosition;
+
     IsometricCharacterRenderer isoRenderer;
     Rigidbody2D rbody;
     bool stopAction = false;
     bool isPlayerClose = false;
     GameObject targetObject;
+
+    [SerializeField]
+    [SyncVar]
+    private bool alive = true;
 
     // Start is called before the first frame update
     void Start()
@@ -27,11 +38,20 @@ public class EnemyController : MonoBehaviour
         rbody = GetComponent<Rigidbody2D>();
         isoRenderer = GetComponentInChildren<IsometricCharacterRenderer>();
         timer = 0f;
+        currentHealthPoints = maxHealthPoints;
+        healthBar.SetMaxHealth(maxHealthPoints);
+        NetworkServer.Spawn(this.gameObject);
     }
 
-    private GameObject FindNearestObjectByTag(string tag)
+    private GameObject FindNearestObjectByTags(string[] tags)
     {
-        var objects = GameObject.FindGameObjectsWithTag(tag).ToList();
+        List<GameObject> objects = new List<GameObject>();
+
+        foreach (string tag in tags)
+        {
+            List<GameObject> findObjects = GameObject.FindGameObjectsWithTag(tag).ToList();
+            foreach (GameObject findObject in findObjects) objects.Add(findObject);
+        }
         var neareastObject = objects
             .OrderBy(obj =>
             {
@@ -42,41 +62,66 @@ public class EnemyController : MonoBehaviour
         return neareastObject;
     }
 
+    public void Move(Vector2 targetPosition)
+    {
+        Vector2 currentPos = rbody.position;
+        float horizontalInput = targetPosition.x - transform.position.x;
+        float verticalInput = targetPosition.y - transform.position.y;
+        Vector2 inputVector = new Vector2(horizontalInput, verticalInput);
+        inputVector = Vector2.ClampMagnitude(inputVector, 1);
+        Vector2 movement = inputVector * movementSpeed;
+        Vector2 newPos = currentPos + movement * Time.fixedDeltaTime;
+        if (!stopAction) isoRenderer.SetDirection(movement);
+        rbody.MovePosition(newPos);
+        CmdSyncPos(gameObject.transform.position);
+    }
+
     // Update is called once per frame
     void Update()
     {
+        string[] findTags = gameObject.tag.Equals("EnemyMinion") ? new string[]{ "Player", "PlayerMinion" } : new string[]{ "EnemyMinion" };
+        GameObject findObject = FindNearestObjectByTags(findTags);
         timer += Time.deltaTime;
-        GameObject player = FindNearestObjectByTag("Player");
-        Vector2 playerPosition = player.transform.position;
-        if (Vector2.Distance(playerPosition, rbody.position) <= maxChaseDistance)
-        {
-            if (!isPlayerClose)
+
+        if (!alive) NetworkServer.Destroy(this.gameObject);
+
+        if (findObject != null) {
+            healthBar.SetHealth(currentHealthPoints);
+            Vector2 playerPosition = findObject.transform.position;
+            if (Vector2.Distance(playerPosition, rbody.position) <= maxChaseDistance)
             {
-                Vector2 currentPos = rbody.position;
-                float horizontalInput = playerPosition.x - transform.position.x;
-                float verticalInput = playerPosition.y - transform.position.y;
-                Vector2 inputVector = new Vector2(horizontalInput, verticalInput);
-                inputVector = Vector2.ClampMagnitude(inputVector, 1);
-                Vector2 movement = inputVector * movementSpeed;
-                Vector2 newPos = currentPos + movement * Time.fixedDeltaTime;
-                if (!stopAction) isoRenderer.SetDirection(movement);
-                rbody.MovePosition(newPos);
-            }
-            else if (isPlayerClose && timer > waitingTime)
+                if (!isPlayerClose)
+                {
+                    Move(playerPosition);
+                }
+                else if (isPlayerClose && timer > waitingTime)
+                {
+                    
+                    timer = 0f;
+                    isoRenderer.SetDirection(Vector2.zero);
+                    if (targetObject.tag.Equals("Player"))
+                    {
+                        targetObject.GetComponent<HeroStatus>().TakeDamage(basicAttackPoints);
+                    } else if (targetObject.tag.Equals("PlayerMinion") || targetObject.tag.Equals("EnemyMinion"))
+                    {
+                        targetObject.GetComponent<EnemyController>().TakeDamage(basicAttackPoints);
+                    }
+                }
+            } else
             {
-                // Attack the player
-                targetObject.GetComponent<HeroStatus>().TakeDamage(basicAttackPoints);
-                timer = 0f;
+                Move(targetPosition);
             }
-        } else
-        {
-            isoRenderer.SetDirection(Vector2.zero);
         }
     }
 
     void OnCollisionEnter2D(Collision2D other)
     {
-        if (other.gameObject.CompareTag("Player"))
+        if ((other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("PlayerMinion")) && gameObject.tag.Equals("EnemyMinion"))
+        {
+            isoRenderer.SetDirection(Vector2.zero);
+            isPlayerClose = true;
+            targetObject = other.gameObject;
+        } else if (gameObject.tag.Equals("PlayerMinion") && other.gameObject.CompareTag("EnemyMinion"))
         {
             isoRenderer.SetDirection(Vector2.zero);
             isPlayerClose = true;
@@ -88,5 +133,33 @@ public class EnemyController : MonoBehaviour
     {
         isPlayerClose = false;
         targetObject = null;
+    }
+    public bool checkAlive()
+    {
+        return alive;
+    }
+
+    [Command]
+    protected void CmdSyncPos(Vector2 localPosition)
+    {
+        RpcSyncPos(localPosition);
+    }
+
+    [ClientRpc]
+    void RpcSyncPos(Vector2 localPosition)
+    {
+        if (!isLocalPlayer)
+        {
+            transform.localPosition = localPosition;
+        }
+    }
+
+    public void TakeDamage(int damage)
+    {
+        currentHealthPoints -= damage;
+        if (currentHealthPoints <= 0)
+        {
+            alive = false;
+        }
     }
 }
