@@ -76,7 +76,7 @@ public class EnemyController : NetworkBehaviour
         Vector2 newPos = currentPos + movement * Time.fixedDeltaTime;
         if (!stopAction) isoRenderer.SetDirection(movement);
         rbody.MovePosition(newPos);
-        CmdSyncPos(gameObject.transform.position);
+        /*CmdSyncPos(gameObject.transform.position);*/
     }
 
     // Update is called once per frame
@@ -141,9 +141,9 @@ public class EnemyController : NetworkBehaviour
     {
         return alive;
     }
-
+/*
     [Command]
-    protected void CmdSyncPos(Vector2 localPosition)
+    public void CmdSyncPos(Vector2 localPosition)
     {
         RpcSyncPos(localPosition);
     }
@@ -156,7 +156,7 @@ public class EnemyController : NetworkBehaviour
             transform.localPosition = localPosition;
         }
     }
-
+*/
     public void TakeDamage(int damage)
     {
         currentHealthPoints -= damage;
