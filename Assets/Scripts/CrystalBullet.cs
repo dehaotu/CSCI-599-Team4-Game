@@ -5,14 +5,14 @@ using UnityEngine;
 public class CrystalBullet : MonoBehaviour
 {
 
-    public float speed = 5.0f;
+    public float speed = 6.0f;
     public float verticalOffset = 0.7f;
     //public GameObject bulletPrefabs;
-    private Transform player;
+/*    private Transform player;*/
     // private Vector2 target;
 
     //add
-    private Transform target;
+    private GameObject target;
     private int damage = 5;
 
     // Start is called before the first frame update
@@ -22,23 +22,10 @@ public class CrystalBullet : MonoBehaviour
     //     target = new Vector2(player.position.x, player.position.y + verticalOffset);
     // }
 
-    public void LocateTarget(Transform _target)
+    public void LocateTarget(GameObject _target)
     {
         target = _target;
     }
-
-    // Update is called once per frame
-    // void FixedUpdate()
-    // {
-    //     // transform.position = Vector2.MoveTowards(transform.position, target, speed * Time.deltaTime);
-
-    //     ShootingDirection();
-
-    //     if (Mathf.Abs(transform.position.x - target.x) <= .5f && Mathf.Abs(transform.position.y - target.y) <= .5f)
-    //     {
-    //         DestroyBullet();
-    //     }
-    // }
 
     private void FixedUpdate()
     {
@@ -47,11 +34,11 @@ public class CrystalBullet : MonoBehaviour
             Destroy(gameObject);
             return;
         }
-        Vector2 direction = target.position - transform.position;
+        Vector2 direction = target.transform.position - transform.position;
         float distanceThisFrame = speed * Time.deltaTime;
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg;
 
-        if (direction.magnitude <= distanceThisFrame)
+        if (Vector2.Distance(gameObject.transform.position, target.transform.position) <= .5f)
         {
             HitTarget();
             return;
@@ -64,7 +51,8 @@ public class CrystalBullet : MonoBehaviour
     private void HitTarget()
     {
         Destroy(gameObject);
-        target.GetComponent<HeroStatus>().CmdTakeDamage(damage);
+        Debug.Log("Hit");
+        target.GetComponent<HeroStatus>().TakeDamage(damage);
 
     }
 

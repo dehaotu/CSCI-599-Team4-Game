@@ -7,6 +7,7 @@ using Mirror;
 
 public class EnemyController : NetworkBehaviour
 {
+    [SyncVar]
     public int currentHealthPoints = 0;
     public int maxHealthPoints = 30;
     public float movementSpeed = 1f;
@@ -103,7 +104,7 @@ public class EnemyController : NetworkBehaviour
                     isoRenderer.SetDirection(Vector2.zero);
                     if (targetObject.tag.Equals("Player"))
                     {
-                        targetObject.GetComponent<HeroStatus>().CmdTakeDamage(basicAttackPoints);
+                        targetObject.GetComponent<HeroStatus>().TakeDamage(basicAttackPoints);
                     } else if (targetObject.tag.Equals("PlayerMinion") || targetObject.tag.Equals("EnemyMinion"))
                     {
                         targetObject.GetComponent<EnemyController>().TakeDamage(basicAttackPoints);
