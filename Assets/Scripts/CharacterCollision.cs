@@ -1,4 +1,4 @@
-﻿using System.Collections;
+﻿/*using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -13,7 +13,8 @@ public class CharacterCollision : MonoBehaviour
     {
         if (collision.gameObject.tag == "Bullet")
         {
-            heroStatus.TakeDamage(20);
+            heroStatus.CmdTakeDamage(20);
         }
     }
 }
+*/

@@ -9,6 +9,8 @@ TagManager:
   - StatusBoard
   - PlayerMinion
   - EnemyMinion
+  - Confiner
+  - Monster
   layers:
   - Default
   - TransparentFX
@@ -19,8 +21,8 @@ TagManager:
   - 
   - 
   - Confiner
-  - 
-  - 
+  - Minimap
+  - Ground
   - 
   - 
   - 
@@ -48,4 +50,7 @@ TagManager:
     locked: 0
   - name: Default
     uniqueID: 0
+    locked: 0
+  - name: Avatar
+    uniqueID: 1488546673
     locked: 0

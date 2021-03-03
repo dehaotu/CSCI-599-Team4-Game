@@ -23,6 +23,7 @@ public class CharacterPanel : Inventroy
     private Text characterPropertyText;//对角色属性面板中Text组件的引用
     private HeroStatus player;//对角色脚本的引用
     private Text boardText;
+    private int attackPoints = 0, defensePoints = 0;
 
     public override void Start()
     {
@@ -36,7 +37,7 @@ public class CharacterPanel : Inventroy
     //更新角色属性显示
     private void UpdatePropertyText() 
     {
-        int attackPoints = 0, defensePoints = 0;
+        
         foreach (EquipmentSlot slot in slotArray)//遍历角色面板中的装备物品槽
         {
             if (slot.transform.childCount > 0)//找到有物品的物品槽，获取里面装备的属性值
@@ -56,15 +57,26 @@ public class CharacterPanel : Inventroy
         }
         attackPoints += player.BasicAttackPoints;
         defensePoints += player.BasicDefensePoints;
+        //if (!GetComponentInParent<HeroStatus>().thisIsSever() && GetComponentInParent<HeroStatus>().thisIsLocalPlayer()) CmdUpdateSB();
         string text = string.Format("Attack：{0}\nDefense：{1}", attackPoints, defensePoints);
         characterPropertyText.text = text;
+
+        // Update player attackpoints
+        player.BasicAttackPoints = attackPoints;
+        player.BasicDefensePoints = defensePoints;
     }
 
     //TODO:更新状态栏
     private void UpdateSB()
     {
-
     }
+
+/*    private void RpcUpdateSB()
+    {
+        characterPropertyText.text = GetComponentInParent<NetworkIdentity>().netId.ToString();
+        Debug.Log(GetComponent<NetworkIdentity>().netId.ToString());
+    }*/
+
 
     //直接穿戴功能（不需拖拽）
     public void PutOn(Item item) 
@@ -95,12 +107,12 @@ public class CharacterPanel : Inventroy
         UpdatePropertyText();//更新显示角色属性值
 
         
-        boardText = GameObject.Find("StatusBoardPanel/Text").GetComponent<Text>();
-        System.Console.WriteLine(boardText.text);
-        System.Console.WriteLine("boardText.text");
-        boardText.text = "player put on " + item.Name;
+        //boardText = GameObject.Find("StatusBoardPanel/Text").GetComponent<Text>();
+       /* System.Console.WriteLine(boardText.text);
+        System.Console.WriteLine("boardText.text");*/
+        //boardText.text = "player put on " + item.Name;
 
-        UpdateSB();//更新状态板
+        /*UpdateSB();//更新状态板*/
 
     }
 
@@ -110,11 +122,11 @@ public class CharacterPanel : Inventroy
         Knapscak.Instance.StoreItem(item);//把角色面板上是物品替换到背包里面
         UpdatePropertyText();//更新显示角色属性值
 
-        boardText = GameObject.Find("StatusBoardPanel/Text").GetComponent<Text>();
-        System.Console.WriteLine(boardText.text);
-        System.Console.WriteLine("boardText.text");
-        boardText.text = "player put off " + item.Name;
+        //boardText = GameObject.Find("StatusBoardPanel/Text").GetComponent<Text>();
+       /* System.Console.WriteLine(boardText.text);
+        System.Console.WriteLine("boardText.text");*/
+        //boardText.text = "player put off " + item.Name;
 
-        UpdateSB();//更新状态板
+       /* UpdateSB();//更新状态板*/
     }
 }
