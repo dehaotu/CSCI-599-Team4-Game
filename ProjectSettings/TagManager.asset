@@ -8,6 +8,7 @@ TagManager:
   - Tower
   - StatusBoard
   - Confiner
+  - PlayerTower
   layers:
   - Default
   - TransparentFX

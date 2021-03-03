@@ -36,9 +36,14 @@ public class CursorController : MonoBehaviour
                 ShowClickEffect(hit2D.point);
             }
 
-            if (hit2D.collider.tag == "Tower")
+            else if (hit2D.collider.tag == "Tower")
             {
                 customCurser(attackCursor);
+            }
+
+            else if (hit2D.collider.tag == "PlayerTower")
+            {
+                customCurser(pointCursor);
             }
 
             else
