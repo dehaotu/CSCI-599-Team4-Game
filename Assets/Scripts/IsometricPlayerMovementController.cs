@@ -68,6 +68,7 @@ public class IsometricPlayerMovementController : NetworkBehaviour
         //test attack
         if (Input.GetKeyDown(KeyCode.F))
         {
+            if(heroStatus.checkAlive())
             isoRenderer.Attack();
         }
 

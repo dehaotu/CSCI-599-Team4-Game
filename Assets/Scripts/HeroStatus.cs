@@ -97,9 +97,10 @@ public class HeroStatus : NetworkBehaviour
         return alive;
     }
 
-    [Command]
-    public void CmdTakeDamage(int damage)
+
+    public void TakeDamage(int damage)
     {
+        if (!this.isServer) return;
         currentHealth -= damage;
         if (currentHealth <= 0)
         {

@@ -7,6 +7,7 @@ using Mirror;
 
 public class EnemyController : NetworkBehaviour
 {
+    [SyncVar]
     public int currentHealthPoints = 0;
     public int maxHealthPoints = 30;
     public float movementSpeed = 1f;
@@ -75,7 +76,7 @@ public class EnemyController : NetworkBehaviour
         Vector2 newPos = currentPos + movement * Time.fixedDeltaTime;
         if (!stopAction) isoRenderer.SetDirection(movement);
         rbody.MovePosition(newPos);
-        CmdSyncPos(gameObject.transform.position);
+        /*CmdSyncPos(gameObject.transform.position);*/
     }
 
     // Update is called once per frame
@@ -103,7 +104,7 @@ public class EnemyController : NetworkBehaviour
                     isoRenderer.SetDirection(Vector2.zero);
                     if (targetObject.tag.Equals("Player"))
                     {
-                        targetObject.GetComponent<HeroStatus>().CmdTakeDamage(basicAttackPoints);
+                        targetObject.GetComponent<HeroStatus>().TakeDamage(basicAttackPoints);
                     } else if (targetObject.tag.Equals("PlayerMinion") || targetObject.tag.Equals("EnemyMinion"))
                     {
                         targetObject.GetComponent<EnemyController>().TakeDamage(basicAttackPoints);
@@ -140,9 +141,9 @@ public class EnemyController : NetworkBehaviour
     {
         return alive;
     }
-
+/*
     [Command]
-    protected void CmdSyncPos(Vector2 localPosition)
+    public void CmdSyncPos(Vector2 localPosition)
     {
         RpcSyncPos(localPosition);
     }
@@ -155,7 +156,7 @@ public class EnemyController : NetworkBehaviour
             transform.localPosition = localPosition;
         }
     }
-
+*/
     public void TakeDamage(int damage)
     {
         currentHealthPoints -= damage;
