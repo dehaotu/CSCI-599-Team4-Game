@@ -5,6 +5,7 @@ using UnityEngine;
 public class CrystalCollision : MonoBehaviour
 {
     private Crystal crystalStatus;
+    private HeroStatus attacker;
     private IsometricCharacterRenderer attackStatus;
 
     private short currAttackID;
@@ -21,7 +22,8 @@ public class CrystalCollision : MonoBehaviour
 
         if (collision.gameObject.name == "PlayerCollider")
         {
-            attackStatus = collision.GetComponentInParent<HeroStatus>().gameObject.GetComponentInChildren<IsometricCharacterRenderer>();
+            attackStatus = collision.GetComponentInParent<HeroStatus>().transform.gameObject.GetComponentInChildren<IsometricCharacterRenderer>();
+            attacker = collision.GetComponentInParent<HeroStatus>();
         }
     }
 
@@ -29,7 +31,7 @@ public class CrystalCollision : MonoBehaviour
     {
         if (attackStatus != null && attackStatus.isPlayingAttack() && currAttackID != attackStatus.getAttackID())
         {
-            crystalStatus.CmdTakeDamage(2);
+            crystalStatus.TakeDamage(10);
             currAttackID = attackStatus.getAttackID();
         }
     }

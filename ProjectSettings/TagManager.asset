@@ -7,8 +7,11 @@ TagManager:
   - Bullet
   - Tower
   - StatusBoard
+  - PlayerMinion
+  - EnemyMinion
   - Confiner
   - PlayerTower
+  - Monster
   layers:
   - Default
   - TransparentFX

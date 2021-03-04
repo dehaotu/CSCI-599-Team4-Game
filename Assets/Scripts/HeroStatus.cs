@@ -28,11 +28,11 @@ public class HeroStatus : NetworkBehaviour
     [SerializeField]
     [SyncVar(hook = nameof(SetAttack))]
     private int basicAttackPoints = 10;
-    public int BasicAttackPoints { get { return basicAttackPoints; } set { CmdSetAttack(value); } }  //Basic Attack Points
+    public int BasicAttackPoints { get { return basicAttackPoints; } set { SetAttack(value); } }  //Basic Attack Points
     [SerializeField]
     [SyncVar(hook = nameof(SetDefense))]
     private int basicDefensePoints = 10;
-    public int BasicDefensePoints{ get { return basicDefensePoints; } set { CmdSetDefense(value); } }  //Basic Defense Points
+    public int BasicDefensePoints{ get { return basicDefensePoints; } set { SetDefense(value); } }  //Basic Defense Points
 
 
     private Text coinText;  //Get gold amount from Coin GameObject
@@ -112,9 +112,10 @@ public class HeroStatus : NetworkBehaviour
         return alive;
     }
 
-    [Command]
-    public void CmdTakeDamage(int damage)
+
+    public void TakeDamage(int damage)
     {
+        if (!this.isServer) return;
         currentHealth -= damage;
         if (currentHealth <= 0)
         {
@@ -123,16 +124,14 @@ public class HeroStatus : NetworkBehaviour
     }
 
 
-    [Command]
-    public void CmdSetAttack(int value)
+    public void SetAttack(int value)
     {
-        basicAttackPoints = value;
+        if(isServer) basicAttackPoints = value;
     }
 
-    [Command]
-    public void CmdSetDefense(int value)
+    public void SetDefense(int value)
     {
-        basicDefensePoints = value;
+        if (isServer) basicDefensePoints = value;
     }
 
     public void SetAttack(int oldAttack, int newAttack)

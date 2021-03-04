@@ -69,6 +69,7 @@ public class IsometricPlayerMovementController : NetworkBehaviour
         //test attack
         if (Input.GetKeyDown(KeyCode.F))
         {
+            if(heroStatus.checkAlive())
             isoRenderer.Attack();
         }
 
@@ -77,10 +78,28 @@ public class IsometricPlayerMovementController : NetworkBehaviour
             stopAction = true;
             isoRenderer.Dead();
         }
+
+        // test attack monster
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            CmdMockAttack();
+        }
     }
 
     private void CmdSetDirection(Vector2 direction)
     {
         if (!stopAction) isoRenderer.SetDirection(direction);
+    }
+
+    [Command]
+    private void CmdMockAttack()
+    {
+        GameObject[] monsters = GameObject.FindGameObjectsWithTag("Monster");
+        foreach (GameObject monster in monsters)
+        {
+            // Get player alive status.
+            monster.GetComponent<MonsterStatus>().CreateDamage(5);
+        }
+        Debug.Log("In mock attack");
     }
 }
