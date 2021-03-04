@@ -9,7 +9,7 @@ public class EnemySpawnController : NetworkBehaviour
 {
     public float waitingTime = 5f;
     public Vector2 targetPosition;
-    public EnemyController minionPrefab;
+    public GameObject minionPrefab;
     public bool isEnemySide = true;
     private float timer = 0f;
 
@@ -26,11 +26,17 @@ public class EnemySpawnController : NetworkBehaviour
         timer += Time.deltaTime;
         if (timer > waitingTime)
         {
-            EnemyController minion = Instantiate(minionPrefab, transform.position, Quaternion.identity) as EnemyController;
-            minion.targetPosition = targetPosition;
-            minion.gameObject.tag = (isEnemySide) ? "EnemyMinion" : "PlayerMinion";
-            minion.gameObject.GetComponentInChildren<Text>().text = (isEnemySide) ? "Enemy Minion" : "Player Minion";
+            GameObject minion = Instantiate(minionPrefab, transform.position, Quaternion.identity) as GameObject;
+            var minionController = minion.GetComponent<EnemyController>();
+            minionController.targetPosition = targetPosition;
+            minionController.gameObject.tag = (isEnemySide) ? "EnemyMinion" : "PlayerMinion";
+            minion.GetComponentInChildren<Text>().text = (isEnemySide) ? "Enemy Minion" : "Player Minion";
             timer = 0f;
+            // only spawn if it's server
+            if (isServer)
+            {
+                NetworkServer.Spawn(minion);
+            }
         }
     }
 }

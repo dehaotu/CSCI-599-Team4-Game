@@ -5,19 +5,23 @@ using Mirror;
 public abstract class MonsterBaseController : NetworkBehaviour
 {
     public float respawnWaitTime = 5.0f;
-
-    public PolygonCollider2D monsterBaseCollider;
-
+    [SerializeField]
+    protected PolygonCollider2D monsterBaseCollider;
+    bool initialMonsterInit = true; //one time usage, only start first monster init if server is active
     // Start game.
     public virtual void Start()
     {
         monsterBaseCollider = GetComponent<PolygonCollider2D>();
-        InstantiateMonsters();
     }
 
     // Update per frame.
     public void Update()
     {
+        if (isServer && initialMonsterInit)
+        {
+            InstantiateMonsters();
+            initialMonsterInit = false;
+        }
         if (IsSpawnable())
         {
             StartCoroutine(DestroyAndInstantiate(respawnWaitTime));
