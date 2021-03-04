@@ -12,6 +12,8 @@ public class CursorController : MonoBehaviour
 
     private void Start()
     {
+        // defaultCursor.Resize(16, 16);
+        // defaultCursor.Apply();
         customCurser(defaultCursor);
         Cursor.lockState = CursorLockMode.Confined;
     }
@@ -27,7 +29,7 @@ public class CursorController : MonoBehaviour
         Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
         RaycastHit2D hit2D = Physics2D.GetRayIntersection(ray);
 
-        if (hit2D.collider != null)
+        if (hit2D.collider != null && !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
         {
             // Debug.Log("tag is:" + hit2D.collider.tag);
 
@@ -36,9 +38,14 @@ public class CursorController : MonoBehaviour
                 ShowClickEffect(hit2D.point);
             }
 
-            if (hit2D.collider.tag == "Tower")
+            else if (hit2D.collider.tag == "Tower")
             {
                 customCurser(attackCursor);
+            }
+
+            else if (hit2D.collider.tag == "PlayerTower")
+            {
+                customCurser(pointCursor);
             }
 
             else
