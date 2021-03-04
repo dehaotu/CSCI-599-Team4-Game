@@ -75,6 +75,9 @@ public class MenuController : MonoBehaviour
     void Start()
     {
         animator = new MenuAnimator(backGroundMap, cameraSpeedX, cameraSpeedY, period_rate);
+#if UNITY_SERVER
+        onClickDebugLobbyServer();
+#endif
     }
 
     // Update is called once per frame

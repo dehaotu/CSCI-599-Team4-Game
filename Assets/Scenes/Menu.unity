@@ -1743,6 +1743,7 @@ MonoBehaviour:
   ActiveDiscoveryInterval: 3
   networkRoomManager: {fileID: 1116063841}
   roomListPanel: {fileID: 271566536}
+  roomServerIP: localhost
 --- !u!4 &1107837461
 Transform:
   m_ObjectHideFlags: 0
@@ -1811,7 +1812,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dontDestroyOnLoad: 1
   runInBackground: 1
-  autoStartServerBuild: 1
+  autoStartServerBuild: 0
   showDebugMessages: 0
   serverTickRate: 30
   serverBatching: 0
