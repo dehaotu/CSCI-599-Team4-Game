@@ -14,6 +14,7 @@ public class MonsterMovementController : NetworkBehaviour
     Rigidbody2D monster;
 
     Vector2 mosterInitialPosition;
+    [SerializeField]
     Collider2D monsterBaseCollider;
 
     private void Awake()
@@ -29,7 +30,7 @@ public class MonsterMovementController : NetworkBehaviour
 
         // Chase and attack nearest player.
         Vector2 playerPosition = GetPlayerPosition(closestPlayer);
-        if (!monsterBaseCollider.bounds.Contains(playerPosition) && monsterStatus.IsAlive())
+        if (isServer && !monsterBaseCollider.bounds.Contains(playerPosition) && monsterStatus.IsAlive())
         {
             // Go back to initial position and heal.
             monsterStatus.AutoHeal();
@@ -41,7 +42,7 @@ public class MonsterMovementController : NetworkBehaviour
             isoRenderer.SetDirection(movement);
             monster.MovePosition(newMonsterPosition);
         }
-        else if (monsterBaseCollider.bounds.Contains(playerPosition) && monsterStatus.IsAlive())
+        else if (isServer && monsterBaseCollider.bounds.Contains(playerPosition) && monsterStatus.IsAlive())
         {
             // If the player is in the bound, chase player.
             Vector2 monsterPosition = monster.position;

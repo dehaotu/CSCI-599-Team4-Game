@@ -49,10 +49,13 @@ MonoBehaviour:
   syncInterval: 0.1
   respawnWaitTime: 5
   monsterBaseCollider: {fileID: 2147647881534218794}
-  monster1Prefab: {fileID: 0}
-  monster2Prefab: {fileID: 0}
-  monster3Prefab: {fileID: 0}
-  centralPosition: {x: 0, y: 0}
+  monster1Prefab: {fileID: 3339481645408498929, guid: aceaf90ffcd43416ca4efd60516fa8f3,
+    type: 3}
+  monster2Prefab: {fileID: 3339481645408498929, guid: aceaf90ffcd43416ca4efd60516fa8f3,
+    type: 3}
+  monster3Prefab: {fileID: 3339481645408498929, guid: 354d229f6349b4ccaae26ad4fc7c63bc,
+    type: 3}
+  centralPosition: {x: -9, y: 7.5}
   monster1RelativePosition: {x: 0.75, y: -0.5}
   monster2RelativePosition: {x: -0.75, y: -0.5}
   monster3RelativePosition: {x: 0, y: 0.75}
@@ -81,10 +84,11 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: 3.37896, y: -0.17516279}
-      - {x: 0.0020093918, y: 1.5756054}
-      - {x: -3.4337864, y: -0.1943698}
-      - {x: -0.0057091713, y: -1.8310041}
+    - - {x: 2.915113, y: -1.1464076}
+      - {x: 2.8599281, y: 0.44767475}
+      - {x: -0.482419, y: 1.3679934}
+      - {x: -3.2261753, y: 0.29005957}
+      - {x: -2.4624543, y: -1.4503813}
 --- !u!114 &2147647881534218793
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 3339481643503506217}
   - component: {fileID: 3339481643503506218}
   m_Layer: 0
-  m_Name: PlayerCollider
+  m_Name: EnemyCollider
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -285,6 +285,7 @@ MonoBehaviour:
   basicDefensePoints: 10
   maxChaseDistance: 3
   healthBar: {fileID: 7226297582729692934}
+  targetPosition: {x: 0, y: 0}
   alive: 1
 --- !u!114 &6479296231621225486
 MonoBehaviour:

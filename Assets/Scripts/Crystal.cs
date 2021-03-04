@@ -7,7 +7,7 @@ public class Crystal : NetworkBehaviour
 {
     
     public int maxCrystalHealth = 100;
-   
+    [SyncVar]
     public int currentCrystalHealth = 100;
     public HealthBar CrystalHealthBar;
 
@@ -112,7 +112,7 @@ public class Crystal : NetworkBehaviour
 
     public void TakeDamage(int damage)
     {
-        currentCrystalHealth -= damage;
+        if(isServer) currentCrystalHealth -= damage;
         CrystalHealthBar.SetHealth(currentCrystalHealth);
     }
 }
