@@ -41,7 +41,8 @@ public class IsometricPlayerMovementController : NetworkBehaviour
         float horizontalInput = 0;
         float verticalInput = 0;
         
-        if (Input.GetKeyDown(KeyCode.Mouse0) && heroStatus.checkAlive())
+        // edited
+        if (Input.GetKeyDown(KeyCode.Mouse0) && heroStatus.checkAlive() && !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
         {
             Vector2 mousePositionOnScreen = Input.mousePosition;
             Vector2 mousePositionInGame = playerCamera.ScreenToWorldPoint(mousePositionOnScreen);
