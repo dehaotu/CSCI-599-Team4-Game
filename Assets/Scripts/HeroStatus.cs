@@ -44,6 +44,11 @@ public class HeroStatus : NetworkBehaviour
         set { coinAmount = value; coinText.text = coinAmount.ToString(); }
     }
 
+    // add
+    public GameObject chatWindow;
+    public InputFieldController inputFieldController;
+
+
     void Start()
     {
         currentHealth = maxHealth;
@@ -51,6 +56,10 @@ public class HeroStatus : NetworkBehaviour
         coinText = GameObject.Find("Coin").GetComponentInChildren<Text>();
         coinText.text = coinAmount.ToString();
         Debug.Log(GetComponent<NetworkIdentity>().netId.ToString());
+
+        //add
+        chatWindow.GetComponent<RectTransform>().localScale = new Vector2(0,0);
+
     }
 
     private void FixedUpdate()
@@ -68,27 +77,33 @@ public class HeroStatus : NetworkBehaviour
 
         //按下B键控制背包的显示和隐藏
         //Bag
-        if (Input.GetKeyDown(KeyCode.B))
+        if (Input.GetKeyDown(KeyCode.B) && !inputFieldController.isEditingInputField)
         {
             Knapscak.Instance.DisplaySwitch();
         }
         //按下V键控制角色面板的显示和隐藏
         //Character Panel
-        if (Input.GetKeyDown(KeyCode.V))
+        if (Input.GetKeyDown(KeyCode.V) && !inputFieldController.isEditingInputField)
         {
             CharacterPanel.Instance.DisplaySwitch();
         }
         //按下N键商店小贩面板的显示和隐藏
         //Hide Shop Panel
-        if (Input.GetKeyDown(KeyCode.N))
+        if (Input.GetKeyDown(KeyCode.N) && !inputFieldController.isEditingInputField)
         {
             Vendor.Instance.DisplaySwitch();
         }
         //按下S键状态面板的显示和隐藏
         //Status Board
-        if (Input.GetKeyDown(KeyCode.S))
+        if (Input.GetKeyDown(KeyCode.S) && !inputFieldController.isEditingInputField)
         {
             StatusBoard.Instance.DisplaySwitch();
+        }
+
+        // add
+        if (Input.GetKeyDown(KeyCode.C) && !inputFieldController.isEditingInputField) 
+        {
+            chatWindow.GetComponent<RectTransform>().localScale = new Vector2(1,1);
         }
     }
 
