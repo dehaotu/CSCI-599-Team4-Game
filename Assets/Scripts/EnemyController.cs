@@ -42,7 +42,7 @@ public class EnemyController : NetworkBehaviour
         timer = 0f;
         currentHealthPoints = maxHealthPoints;
         healthBar.SetMaxHealth(maxHealthPoints);
-        NetworkServer.Spawn(this.gameObject);
+        //NetworkServer.Spawn(this.gameObject);
         Debug.Log(gameObject.GetComponentInChildren<Text>().text);
     }
 
@@ -82,6 +82,8 @@ public class EnemyController : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
+        
+
         string[] findTags = gameObject.tag.Equals("EnemyMinion") ? new string[]{ "Player", "PlayerMinion" } : new string[]{ "EnemyMinion" };
         GameObject findObject = FindNearestObjectByTags(findTags);
         timer += Time.deltaTime;

@@ -24,7 +24,6 @@ public class MonsterBase3Controller : MonsterBaseController
 
     public override void Start()
     {
-
         base.Start();
     }
 
@@ -36,9 +35,11 @@ public class MonsterBase3Controller : MonsterBaseController
 
     public override void InstantiateMonsters()
     {
+        
         monster1 = Instantiate(monster1Prefab);
-        monster1.GetComponent<MonsterMovementController>().SetInitialPosition(position: centralPosition + monster1RelativePosition);
-        monster1.GetComponent<MonsterMovementController>().SetMosterBaseCollider(collider: monsterBaseCollider);
+        var monster1Controller = monster1.GetComponent<MonsterMovementController>();
+        monster1Controller.SetInitialPosition(position: centralPosition + monster1RelativePosition);
+        monster1Controller.SetMosterBaseCollider(collider: monsterBaseCollider);
         monster1Status = monster1.GetComponent<MonsterStatus>();
         NetworkServer.Spawn(monster1);
 
