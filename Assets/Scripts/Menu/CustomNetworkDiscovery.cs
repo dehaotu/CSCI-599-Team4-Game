@@ -1,7 +1,11 @@
 ﻿using UnityEngine;
+using System;
 using System.Net;
+using System.Net.Sockets;
+using System.Threading.Tasks;
 using Mirror;
 using Mirror.Discovery;
+
 
 /*
 	Discovery Guide: https://mirror-networking.com/docs/Guides/NetworkDiscovery.html
@@ -26,6 +30,7 @@ public class CustomNetworkDiscovery : NetworkDiscoveryBase<DiscoveryRequest, Dis
 {
     public CustomRoomManager networkRoomManager;
     public RoomListPanel roomListPanel;
+    public string roomServerIP = "localhost";
 
     #region Server
 
@@ -64,6 +69,68 @@ public class CustomNetworkDiscovery : NetworkDiscoveryBase<DiscoveryRequest, Dis
     #endregion
 
     #region Client
+    /// <summary>
+    /// Start Active Discovery
+    /// </summary>
+    public void StartDiscovery()
+    {
+        //if roomServer is at localhost, use UDP boardcast instead
+        if (String.Equals(roomServerIP, "localhost")) {
+            base.StartDiscovery();
+            return;
+        }
+
+        if (!SupportedOnThisPlatform)
+            throw new PlatformNotSupportedException("Network discovery not supported in this platform");
+
+        StopDiscovery();
+
+
+        try
+        {
+            clientUdpClient = new UdpClient(0); // Setup port
+        }
+        catch (Exception)
+        {
+            serverUdpClient.Close(); // Free the port if we took it
+            throw;
+        }
+
+        _ = ClientListenAsync();
+        InvokeRepeating(nameof(SendDiscoveryRequest), 0, 3);
+    }
+
+    /// <summary>
+    /// Send DiscoveryRequest to roomServer
+    /// </summary>
+    public void SendDiscoveryRequest()
+    {  
+        if (clientUdpClient == null)
+            return;
+
+        
+        IPEndPoint endPoint = new IPEndPoint(IPAddress.Parse(roomServerIP), serverBroadcastListenPort);
+
+        using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+        {
+            writer.WriteInt64(secretHandshake);
+
+            try
+            {
+                DiscoveryRequest request = GetRequest();
+
+                writer.Write(request);
+
+                ArraySegment<byte> data = writer.ToArraySegment();
+
+                clientUdpClient.SendAsync(data.Array, data.Count, endPoint);
+            }
+            catch (Exception)
+            {
+                // It is ok if we can't broadcast to one of the addresses
+            }
+        }
+    }
 
     /// <summary>
     /// Create a message that will be broadcasted on the network to discover servers
