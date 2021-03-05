@@ -720,7 +720,7 @@ SortingGroup:
   m_Enabled: 1
   m_SortingLayerID: -211649221
   m_SortingLayer: -1
-  m_SortingOrder: 6
+  m_SortingOrder: 5
 --- !u!114 &4889866394235891595
 MonoBehaviour:
   m_ObjectHideFlags: 0
