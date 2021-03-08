@@ -218,7 +218,7 @@ Rigidbody2D:
   m_AngularDrag: 0.05
   m_GravityScale: 0
   m_Material: {fileID: 0}
-  m_Interpolate: 0
+  m_Interpolate: 2
   m_SleepingMode: 1
   m_CollisionDetection: 0
   m_Constraints: 4
@@ -257,7 +257,7 @@ MonoBehaviour:
   currHP: 200
   autoHealPerFrame: 1
   alive: 1
-  healthBar: {fileID: 0}
+  healthBar: {fileID: 931492558059662320}
 --- !u!114 &-5487003430000364066
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -453,3 +453,15 @@ RectTransform:
     type: 3}
   m_PrefabInstance: {fileID: 8006412501683243215}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &931492558059662320 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7201588182994084671, guid: 5399561a8388c493e863361c7299d3f8,
+    type: 3}
+  m_PrefabInstance: {fileID: 8006412501683243215}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: bf594e15e7e2dd34abeeae7d82f1463d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
