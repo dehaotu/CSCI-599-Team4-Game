@@ -17,6 +17,8 @@ public class MonsterMovementController : NetworkBehaviour
 
     private float attackMinDist = 0.5f;
 
+    public int attackDamage;
+
     [SerializeField] private Collider2D monsterBaseCollider;
 
     private void Awake()
@@ -116,11 +118,11 @@ public class MonsterMovementController : NetworkBehaviour
     {
         if ((playerPosition - monster.position).magnitude <= attackMinDist)
         {
-            if (!isoRenderer.isPlayingAttack())
-            {
-                Debug.Log("In attack.");
-                isoRenderer.Attack();
-            }
+            // Do attack action.
+            isoRenderer.Attack();
+
+            // -HP
+            player.GetComponent<HeroStatus>().TakeDamage(attackDamage);
         }
     }
 

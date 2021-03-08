@@ -342,6 +342,8 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   movementSpeed: 1
+  attackDamage: 100
+  monsterBaseCollider: {fileID: 0}
 --- !u!114 &8207291274246736843
 MonoBehaviour:
   m_ObjectHideFlags: 0
