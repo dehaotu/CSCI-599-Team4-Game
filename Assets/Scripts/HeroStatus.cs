@@ -25,14 +25,18 @@ public class HeroStatus : NetworkBehaviour
 
     //Basic Attributes：
     public HealthBar healthBar;
-
+    [SerializeField]
+    [SyncVar(hook = nameof(SetAttack))]
     private int basicAttackPoints = 10;
-    public int BasicAttackPoints  { get { return basicAttackPoints; } }  //Basic Attack Points
-
+    public int BasicAttackPoints { get { return basicAttackPoints; } set { SetAttack(value); } }  //Basic Attack Points
+    [SerializeField]
+    [SyncVar(hook = nameof(SetDefense))]
     private int basicDefensePoints = 10;
-    public int BasicDefensePoints{ get { return basicDefensePoints; } }  //Basic Defense Points
+    public int BasicDefensePoints{ get { return basicDefensePoints; } set { SetDefense(value); } }  //Basic Defense Points
+
 
     private Text coinText;  //Get gold amount from Coin GameObject
+    [SyncVar]
     private int coinAmount = 100;  //Gold owned by the player, can be used to purchase items
     public int CoinAmount
     {
@@ -40,12 +44,22 @@ public class HeroStatus : NetworkBehaviour
         set { coinAmount = value; coinText.text = coinAmount.ToString(); }
     }
 
+    // add
+    public GameObject chatWindow;
+    public InputFieldController inputFieldController;
+
+
     void Start()
     {
         currentHealth = maxHealth;
         healthBar.SetMaxHealth(maxHealth);
         coinText = GameObject.Find("Coin").GetComponentInChildren<Text>();
         coinText.text = coinAmount.ToString();
+        Debug.Log(GetComponent<NetworkIdentity>().netId.ToString());
+
+        //add
+        chatWindow.GetComponent<RectTransform>().localScale = new Vector2(0,0);
+
     }
 
     private void FixedUpdate()
@@ -63,27 +77,33 @@ public class HeroStatus : NetworkBehaviour
 
         //按下B键控制背包的显示和隐藏
         //Bag
-        if (Input.GetKeyDown(KeyCode.B))
+        if (Input.GetKeyDown(KeyCode.B) && !inputFieldController.isEditingInputField)
         {
             Knapscak.Instance.DisplaySwitch();
         }
         //按下V键控制角色面板的显示和隐藏
         //Character Panel
-        if (Input.GetKeyDown(KeyCode.V))
+        if (Input.GetKeyDown(KeyCode.V) && !inputFieldController.isEditingInputField)
         {
             CharacterPanel.Instance.DisplaySwitch();
         }
         //按下N键商店小贩面板的显示和隐藏
         //Hide Shop Panel
-        if (Input.GetKeyDown(KeyCode.N))
+        if (Input.GetKeyDown(KeyCode.N) && !inputFieldController.isEditingInputField)
         {
             Vendor.Instance.DisplaySwitch();
         }
         //按下S键状态面板的显示和隐藏
         //Status Board
-        if (Input.GetKeyDown(KeyCode.S))
+        if (Input.GetKeyDown(KeyCode.S) && !inputFieldController.isEditingInputField)
         {
             StatusBoard.Instance.DisplaySwitch();
+        }
+
+        // add
+        if (Input.GetKeyDown(KeyCode.C) && !inputFieldController.isEditingInputField) 
+        {
+            chatWindow.GetComponent<RectTransform>().localScale = new Vector2(1,1);
         }
     }
 
@@ -92,15 +112,57 @@ public class HeroStatus : NetworkBehaviour
         return alive;
     }
 
-    [Command]
+
     public void TakeDamage(int damage)
     {
+        if (!this.isServer) return;
         currentHealth -= damage;
         if (currentHealth <= 0)
         {
             alive = false;
         }
     }
+
+
+    public void SetAttack(int value)
+    {
+        if(isServer) basicAttackPoints = value;
+    }
+
+    public void SetDefense(int value)
+    {
+        if (isServer) basicDefensePoints = value;
+    }
+
+    public void SetAttack(int oldAttack, int newAttack)
+    {
+        //string text = string.Format("Attack：{0}\nDefense：{1}", newAttack, basicDefensePoints);
+        //StatusBoard.Instance.UpdatePlayerAttribute(text);
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        foreach(var player in players)
+        {
+            if (!player.GetComponent<HeroStatus>().isLocalPlayer)
+            {
+                string text = string.Format("Attack：{0}\nDefense：{1}", newAttack, player.GetComponent<HeroStatus>().BasicDefensePoints);
+                StatusBoard.Instance.UpdatePlayerAttribute(text);
+            }
+        }
+        
+    }
+
+    public void SetDefense(int oldDefense, int newDefense)
+    {
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        foreach (var player in players)
+        {
+            if (!player.GetComponent<HeroStatus>().isLocalPlayer)
+            {
+                string text = string.Format("Attack：{0}\nDefense：{1}", player.GetComponent<HeroStatus>().BasicAttackPoints, newDefense);
+                StatusBoard.Instance.UpdatePlayerAttribute(text);
+            }
+        }
+    }
+
 
     //消费金币
     //Use Coins
@@ -121,5 +183,19 @@ public class HeroStatus : NetworkBehaviour
     {
         this.coinAmount += amount;
         coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
+    }
+
+    /// <summary>
+    /// Only Top gameobject can have network identity, thus need to have this function for children scripts
+    /// </summary>
+    /// <returns></returns>
+    public bool thisIsLocalPlayer()
+    {
+        return isLocalPlayer;
+    }
+
+    public bool thisIsSever()
+    {
+        return isServer;
     }
 }
