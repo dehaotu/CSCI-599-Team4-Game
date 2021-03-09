@@ -1,0 +1,16 @@
+fileFormatVersion: 2
+guid: f0a74c68be12c4dc1b9cbd5553360115
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences:
+  - defaultCursor: {fileID: 2800000, guid: d0e0bd783c5ac40b59311a4ca200edcf, type: 3}
+  - clickPositionCursor: {fileID: 100010, guid: 462a97d0e7fe38845aaa96c35ee7ab29,
+      type: 3}
+  - pointCursor: {fileID: 2800000, guid: 2ad70fe2154c94bbe9a0b72dbc660a57, type: 3}
+  - attackCursor: {fileID: 2800000, guid: 0313df9a69fd0404f878c2d679ea785f, type: 3}
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

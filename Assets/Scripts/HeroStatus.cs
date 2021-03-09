@@ -1,64 +1,122 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-public class HeroStatus : MonoBehaviour
+using Mirror;
+
+public enum HeroClass : byte
 {
-    //角色基本属性：
+    Worrior,
+    Wizzard,
+    Priest,
+    Paladin
+}
+
+public class HeroStatus : NetworkBehaviour
+{
+    //Synchronized Fields
+    [SyncVar]
+    public int maxHealth = 100;
+    [SyncVar]
+    public int currentHealth;
+    [SerializeField]
+    [SyncVar]
+    private bool alive = true;
+    [SyncVar]
+    private HeroClass heroClass;
+
+    //Basic Attributes：
+    public HealthBar healthBar;
+    [SerializeField]
+    [SyncVar(hook = nameof(SetAttack))]
     private int basicAttackPoints = 10;
-    public int BasicAttackPoints  { get { return basicAttackPoints; } }//基本攻击点
-
+    public int BasicAttackPoints { get { return basicAttackPoints; } set { SetAttack(value); } }  //Basic Attack Points
+    [SerializeField]
+    [SyncVar(hook = nameof(SetDefense))]
     private int basicDefensePoints = 10;
-    public int BasicDefensePoints{ get { return basicDefensePoints; } }//基本防御点
+    public int BasicDefensePoints{ get { return basicDefensePoints; } set { SetDefense(value); } }  //Basic Defense Points
 
-    private Text coinText;//对金币Text组件的引用
-    private int coinAmount = 100;//角色所持有的金币，用于从商贩那里购买物品
+
+    private Text coinText;  //Get gold amount from Coin GameObject
+    [SyncVar]
+    private int coinAmount = 100;  //Gold owned by the player, can be used to purchase items
     public int CoinAmount
     {
         get { return coinAmount; }
         set { coinAmount = value; coinText.text = coinAmount.ToString(); }
     }
 
-    public int maxHealth = 100;
-    public int currentHealth;
+    // add: chat window control
+    private Canvas chatCanvas;
+    private CanvasGroup canvasGroup;
+    public InputFieldController inputFieldController;
 
-    [SerializeField] private bool alive = true;
+    private void Awake() {
+        chatCanvas = GameObject.Find("ChatCanvas").GetComponent<Canvas>();
+        canvasGroup = chatCanvas.GetComponent<CanvasGroup>();
+    }
 
-    public HealthBar healthBar;
     void Start()
     {
         currentHealth = maxHealth;
         healthBar.SetMaxHealth(maxHealth);
         coinText = GameObject.Find("Coin").GetComponentInChildren<Text>();
         coinText.text = coinAmount.ToString();
+        Debug.Log(GetComponent<NetworkIdentity>().netId.ToString());
+
+        //add
+        // chatWindow.GetComponent<RectTransform>().localScale = new Vector2(0,0);
+        canvasGroup.alpha = 0.0f;
+
+    }
+
+    private void FixedUpdate()
+    {
+        healthBar.SetHealth(currentHealth);
     }
 
     void Update()
     {
-        // for testing
-        if (Input.GetKeyDown(KeyCode.Space))
+        //For testing
+        /*if (Input.GetKeyDown(KeyCode.Space))
         {
             TakeDamage(10);
-        }
+        }*/
 
         //按下B键控制背包的显示和隐藏
-        if (Input.GetKeyDown(KeyCode.B))
+        //Bag
+        if (Input.GetKeyDown(KeyCode.B) && !inputFieldController.isEditingInputField)
         {
             Knapscak.Instance.DisplaySwitch();
         }
         //按下V键控制角色面板的显示和隐藏
-        if (Input.GetKeyDown(KeyCode.V))
+        //Character Panel
+        if (Input.GetKeyDown(KeyCode.V) && !inputFieldController.isEditingInputField)
         {
             CharacterPanel.Instance.DisplaySwitch();
         }
         //按下N键商店小贩面板的显示和隐藏
-        if (Input.GetKeyDown(KeyCode.N))
+        //Hide Shop Panel
+        if (Input.GetKeyDown(KeyCode.N) && !inputFieldController.isEditingInputField)
         {
             Vendor.Instance.DisplaySwitch();
         }
-
         //按下S键状态面板的显示和隐藏
-        if (Input.GetKeyDown(KeyCode.S))
+        //Status Board
+        if (Input.GetKeyDown(KeyCode.S) && !inputFieldController.isEditingInputField)
         {
             StatusBoard.Instance.DisplaySwitch();
+        }
+
+        // add: press C to show or hide chat window
+        if (Input.GetKeyDown(KeyCode.C) && !inputFieldController.isEditingInputField) 
+        {
+            // chatWindow.GetComponent<RectTransform>().localScale = new Vector2(1,1);
+            if(canvasGroup.alpha == 0.0f) {
+                canvasGroup.alpha = 1.0f;
+            }
+
+            else if (canvasGroup.alpha == 1.0f) {
+                canvasGroup.alpha = 0.0f;
+            }
         }
     }
 
@@ -67,32 +125,90 @@ public class HeroStatus : MonoBehaviour
         return alive;
     }
 
+
     public void TakeDamage(int damage)
     {
+        if (!this.isServer) return;
         currentHealth -= damage;
-        healthBar.SetHealth(currentHealth);
         if (currentHealth <= 0)
         {
             alive = false;
         }
     }
 
+
+    public void SetAttack(int value)
+    {
+        if(isServer) basicAttackPoints = value;
+    }
+
+    public void SetDefense(int value)
+    {
+        if (isServer) basicDefensePoints = value;
+    }
+
+    public void SetAttack(int oldAttack, int newAttack)
+    {
+        //string text = string.Format("Attack：{0}\nDefense：{1}", newAttack, basicDefensePoints);
+        //StatusBoard.Instance.UpdatePlayerAttribute(text);
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        foreach(var player in players)
+        {
+            if (!player.GetComponent<HeroStatus>().isLocalPlayer)
+            {
+                string text = string.Format("Attack：{0}\nDefense：{1}", newAttack, player.GetComponent<HeroStatus>().BasicDefensePoints);
+                StatusBoard.Instance.UpdatePlayerAttribute(text);
+            }
+        }
+        
+    }
+
+    public void SetDefense(int oldDefense, int newDefense)
+    {
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        foreach (var player in players)
+        {
+            if (!player.GetComponent<HeroStatus>().isLocalPlayer)
+            {
+                string text = string.Format("Attack：{0}\nDefense：{1}", player.GetComponent<HeroStatus>().BasicAttackPoints, newDefense);
+                StatusBoard.Instance.UpdatePlayerAttribute(text);
+            }
+        }
+    }
+
+
     //消费金币
+    //Use Coins
     public bool ConsumeCoin(int amount)
     {
         if (coinAmount >= amount)
         {
             coinAmount -= amount;
-            coinText.text = coinAmount.ToString();//更新金币数量
-            return true;//消费成功
+            coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
+            return true;  //消费成功 Successful purchase
         }
-        return false;//否则消费失败
+        return false;  //否则消费失败 Failed purchase
     }
 
     //赚取金币
+    //Earn Coins
     public void EarnCoin(int amount)
     {
         this.coinAmount += amount;
-        coinText.text = coinAmount.ToString();//更新金币数量
+        coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
+    }
+
+    /// <summary>
+    /// Only Top gameobject can have network identity, thus need to have this function for children scripts
+    /// </summary>
+    /// <returns></returns>
+    public bool thisIsLocalPlayer()
+    {
+        return isLocalPlayer;
+    }
+
+    public bool thisIsSever()
+    {
+        return isServer;
     }
 }

@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using Mirror;
 
-public class IsometricPlayerMovementController : MonoBehaviour
+public class IsometricPlayerMovementController : NetworkBehaviour
 {
 
     public float movementSpeed = 1f;
@@ -15,11 +16,15 @@ public class IsometricPlayerMovementController : MonoBehaviour
 
     Rigidbody2D rbody;
     bool stopAction = false;
+
+    private Camera playerCamera;
+
     private void Awake()
     {
         rbody = GetComponent<Rigidbody2D>();
         isoRenderer = GetComponentInChildren<IsometricCharacterRenderer>();
         heroStatus = GetComponentInChildren<HeroStatus>();
+        playerCamera = GetComponentInChildren<Camera>();
         destination = rbody.position;
 
         agent = GetComponent<NavMeshAgent>();
@@ -31,18 +36,23 @@ public class IsometricPlayerMovementController : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!isLocalPlayer) return;
+        if (isoRenderer.isPlayingAttack()) return;
         float horizontalInput = 0;
         float verticalInput = 0;
-        Vector2 inputVector = new Vector2(0, 0);
-        Vector2 currentPos = rbody.position;
-        if (Input.GetKeyDown(KeyCode.Mouse0) && heroStatus.checkAlive())
+        
+        // edited
+        if (Input.GetKeyDown(KeyCode.Mouse0) && heroStatus.checkAlive() && !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
         {
             Vector2 mousePositionOnScreen = Input.mousePosition;
-            Vector2 mousePositionInGame = Camera.main.ScreenToWorldPoint(mousePositionOnScreen);
+            Vector2 mousePositionInGame = playerCamera.ScreenToWorldPoint(mousePositionOnScreen);
             destination = mousePositionInGame;
             agent.SetDestination(destination);
             Debug.Log("New destinaion: " + destination);
         }
+
+        Vector2 inputVector = new Vector2(0, 0);
+        Vector2 currentPos = rbody.position;
         inputVector = destination - currentPos;
 
         //Vector2 inputVector = new Vector2(horizontalInput, verticalInput);
@@ -52,13 +62,14 @@ public class IsometricPlayerMovementController : MonoBehaviour
         /* Debug.Log("Destination:");
          Debug.Log(IsometricCharacterRenderer.DirectionToIndex(movement, 8));*/
 
-         
-        if(!stopAction) isoRenderer.SetDirection(movement);
+        CmdSetDirection(movement);
         if (heroStatus.checkAlive()) rbody.MovePosition(newPos);
+
 
         //test attack
         if (Input.GetKeyDown(KeyCode.F))
         {
+            if(heroStatus.checkAlive())
             isoRenderer.Attack();
         }
 
@@ -67,5 +78,28 @@ public class IsometricPlayerMovementController : MonoBehaviour
             stopAction = true;
             isoRenderer.Dead();
         }
+
+        // test attack monster
+        if (Input.GetKeyDown(KeyCode.M))
+        {
+            CmdMockAttack();
+        }
+    }
+
+    private void CmdSetDirection(Vector2 direction)
+    {
+        if (!stopAction) isoRenderer.SetDirection(direction);
+    }
+
+    [Command]
+    private void CmdMockAttack()
+    {
+        GameObject[] monsters = GameObject.FindGameObjectsWithTag("Monster");
+        foreach (GameObject monster in monsters)
+        {
+            // Get player alive status.
+            monster.GetComponent<MonsterStatus>().CreateDamage(5);
+        }
+        Debug.Log("In mock attack");
     }
 }
