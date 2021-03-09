@@ -44,10 +44,15 @@ public class HeroStatus : NetworkBehaviour
         set { coinAmount = value; coinText.text = coinAmount.ToString(); }
     }
 
-    // add
-    public GameObject chatWindow;
+    // add: chat window control
+    private Canvas chatCanvas;
+    private CanvasGroup canvasGroup;
     public InputFieldController inputFieldController;
 
+    private void Awake() {
+        chatCanvas = GameObject.Find("ChatCanvas").GetComponent<Canvas>();
+        canvasGroup = chatCanvas.GetComponent<CanvasGroup>();
+    }
 
     void Start()
     {
@@ -58,7 +63,8 @@ public class HeroStatus : NetworkBehaviour
         Debug.Log(GetComponent<NetworkIdentity>().netId.ToString());
 
         //add
-        chatWindow.GetComponent<RectTransform>().localScale = new Vector2(0,0);
+        // chatWindow.GetComponent<RectTransform>().localScale = new Vector2(0,0);
+        canvasGroup.alpha = 0.0f;
 
     }
 
@@ -100,10 +106,17 @@ public class HeroStatus : NetworkBehaviour
             StatusBoard.Instance.DisplaySwitch();
         }
 
-        // add
+        // add: press C to show or hide chat window
         if (Input.GetKeyDown(KeyCode.C) && !inputFieldController.isEditingInputField) 
         {
-            chatWindow.GetComponent<RectTransform>().localScale = new Vector2(1,1);
+            // chatWindow.GetComponent<RectTransform>().localScale = new Vector2(1,1);
+            if(canvasGroup.alpha == 0.0f) {
+                canvasGroup.alpha = 1.0f;
+            }
+
+            else if (canvasGroup.alpha == 1.0f) {
+                canvasGroup.alpha = 0.0f;
+            }
         }
     }
 
