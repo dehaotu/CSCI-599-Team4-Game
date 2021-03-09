@@ -353,6 +353,57 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 165778231}
   m_CullTransparentMesh: 0
+--- !u!1 &174310632
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 174310634}
+  - component: {fileID: 174310633}
+  m_Layer: 0
+  m_Name: LobbyNetworkManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &174310633
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 174310632}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d443fc2a2ed9d574b8cca7b7eb787af2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Port: 27777
+  LobbyServerIP: 
+  NoDelay: 1
+  Interval: 10
+  FastResend: 2
+  CongestionWindow: 0
+  SendWindowSize: 4096
+  ReceiveWindowSize: 4096
+--- !u!4 &174310634
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 174310632}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_RootOrder: 5
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &222236575
 GameObject:
   m_ObjectHideFlags: 0
@@ -2021,6 +2072,7 @@ MonoBehaviour:
   playerListPanel: {fileID: 1438792311}
   nameInputField: {fileID: 1576756613}
   serverDisconnectPanel: {fileID: 663234745}
+  tinsNetworkRoomManager: {fileID: 174310633}
   networkRoomManager: {fileID: 1116063841}
   roomDiscovery: {fileID: 1107837460}
   playerInfoRowPrefab: {fileID: 6358321824382238178, guid: 243088d74d7958946837493baab73c0a,

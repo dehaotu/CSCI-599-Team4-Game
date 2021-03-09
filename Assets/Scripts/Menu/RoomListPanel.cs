@@ -23,5 +23,13 @@ public class RoomListPanel : MonoBehaviour
         roomRow.onClick.AddListener(() => {menuController.onClick_Lobby_RoomRow();});
     }
 
+    public void UpdateRoom(int numPlayers)
+    {
+        GameObject newRow = Instantiate(roomRowPrefab, this.transform);
+        Button roomRow = newRow.GetComponent<Button>();
+        roomRow.GetComponentInChildren<Text>().text = "Room     " + numPlayers.ToString() + "/" + NUM_PLAYERS.ToString();
+        roomRow.onClick.AddListener(() => {menuController.onClick_Lobby_RoomRow();});
+    }
+
     
 }

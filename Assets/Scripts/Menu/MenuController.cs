@@ -55,6 +55,7 @@ public class MenuController : MonoBehaviour
     public GameObject playerListPanel;
     public GameObject nameInputField;
     public GameObject serverDisconnectPanel;
+    public LobbyNetworkManager tinsNetworkRoomManager;
     public CustomRoomManager networkRoomManager;
     public CustomNetworkDiscovery roomDiscovery;
     public PlayerInfoRow playerInfoRowPrefab;
@@ -76,7 +77,7 @@ public class MenuController : MonoBehaviour
     {
         animator = new MenuAnimator(backGroundMap, cameraSpeedX, cameraSpeedY, period_rate);
 #if UNITY_SERVER
-        onClickDebugLobbyServer();
+        //onClickDebugLobbyServer();
 #endif
     }
 
@@ -137,6 +138,7 @@ public class MenuController : MonoBehaviour
     }
 
     public void onClickDebugLobbyServer() {
+        /*
         _setAllPlanelInactive();
         roomPanel.SetActive(true);
 
@@ -147,6 +149,9 @@ public class MenuController : MonoBehaviour
         roomDiscovery.AdvertiseServer();
         networkRoomManager.StartServer();
         flag_isHost = true;
+        */
+        Debug.Log("trying to connect...");
+        tinsNetworkRoomManager.ClientConnectLobby();
     }
 /************************************************************************************************
                                              LobbyPanel                                             
