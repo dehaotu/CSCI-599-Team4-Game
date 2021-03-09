@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using Mirror;
 
-// A client side script
-
 public class MonsterMovementController : NetworkBehaviour
 {
 
@@ -13,9 +11,15 @@ public class MonsterMovementController : NetworkBehaviour
 
     Rigidbody2D monster;
 
-    Vector2 mosterInitialPosition;
-    [SerializeField]
-    Collider2D monsterBaseCollider;
+    Vector2 monsterInitialPosition;
+    private Vector2 monsterInitialDirection = new Vector2(1, -1);  // Initial direction to SE
+    private float returnInitMinDist = 0.05f;
+
+    private float attackMinDist = 0.5f;
+
+    public int attackDamage;
+
+    [SerializeField] private Collider2D monsterBaseCollider;
 
     private void Awake()
     {
@@ -26,33 +30,103 @@ public class MonsterMovementController : NetworkBehaviour
 
     void Update()
     {
+        if (NoUpdate())
+        {
+            return;
+        }
+
+        // Get closestPlayer.
         GameObject closestPlayer = GetClosestAlivePlayer();
 
-        // Chase and attack nearest player.
-        Vector2 playerPosition = GetPlayerPosition(closestPlayer);
-        if (isServer && !monsterBaseCollider.bounds.Contains(playerPosition) && monsterStatus.IsAlive())
+        // Chase and attack closestPlayer.
+        Vector2 closestPlayerPosition = GetPlayerPosition(player: closestPlayer);
+        if (!monsterBaseCollider.bounds.Contains(point: closestPlayerPosition))
         {
-            // Go back to initial position and heal.
-            monsterStatus.AutoHeal();
+            MoveWithoutHate();
+        }
+        else if (monsterBaseCollider.bounds.Contains(point: closestPlayerPosition))
+        {
+            MoveWithHate(playerPosition: closestPlayerPosition);
+            AttackWithHate(player: closestPlayer, playerPosition: closestPlayerPosition);
+        }
+    }
 
-            Vector2 monsterPosition = monster.position;
-            Vector2 inputVector = Vector2.ClampMagnitude(mosterInitialPosition - monsterPosition, 1);
+    private bool NoUpdate()
+    {
+        // If it is not a server, no update.
+        if (!isServer)
+        {
+            return true;
+        }
+        // If the monster is not alive, no update.
+        if (!monsterStatus.IsAlive())
+        {
+            return true;
+        }
+        // If the monster is playing attack, no update.
+        if (isoRenderer.isPlayingAttack())
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private void MoveWithoutHate()
+    {
+        // Go back to initial position and heal.
+        monsterStatus.AutoHeal();
+
+        // If the monster is already in the initial position, stop update.
+        if (monster.position.Equals(monsterInitialPosition))
+        {
+            isoRenderer.SetDirection(monsterInitialDirection);
+            return;
+        }
+
+        // Move the monster to the initial position.
+        Vector2 monsterPosition = monster.position;
+
+        if ((monsterPosition - monsterInitialPosition).magnitude > returnInitMinDist)
+        {
+            // If the distance is larger than the returnInitMinDist, do moving.
+            Vector2 inputVector = Vector2.ClampMagnitude(monsterInitialPosition - monsterPosition, 1);
             Vector2 movement = inputVector * movementSpeed;
             Vector2 newMonsterPosition = monsterPosition + movement * Time.fixedDeltaTime;
             isoRenderer.SetDirection(movement);
             monster.MovePosition(newMonsterPosition);
         }
-        else if (isServer && monsterBaseCollider.bounds.Contains(playerPosition) && monsterStatus.IsAlive())
+        else
         {
-            // If the player is in the bound, chase player.
-            Vector2 monsterPosition = monster.position;
-            Vector2 inputVector = Vector2.ClampMagnitude(playerPosition - monsterPosition, 1);
-            Vector2 movement = inputVector * movementSpeed;
-            Vector2 newMonsterPosition = monsterPosition + movement * Time.fixedDeltaTime;
-            isoRenderer.SetDirection(movement);
+            // If the distance is smaller than the returnInitMinDist, do moving.
+            Vector2 newMonsterPosition = monsterInitialPosition;
             monster.MovePosition(newMonsterPosition);
         }
     }
+
+    private void MoveWithHate(Vector2 playerPosition)
+    {
+        // If the player is in the bound, chase player.
+        Vector2 monsterPosition = monster.position;
+        Vector2 inputVector = Vector2.ClampMagnitude(playerPosition - monsterPosition, 1);
+        Vector2 movement = inputVector * movementSpeed;
+        Vector2 newMonsterPosition = monsterPosition + movement * Time.fixedDeltaTime;
+        isoRenderer.SetDirection(movement);
+        monster.MovePosition(newMonsterPosition);
+    }
+
+    private void AttackWithHate(GameObject player, Vector2 playerPosition)
+    {
+        if ((playerPosition - monster.position).magnitude <= attackMinDist)
+        {
+            // Do attack action.
+            isoRenderer.Attack();
+
+            // -HP
+            player.GetComponent<HeroStatus>().TakeDamage(attackDamage);
+        }
+    }
+
+    // Utils
 
     public void SetMosterBaseCollider(Collider2D collider)
     {
@@ -61,9 +135,9 @@ public class MonsterMovementController : NetworkBehaviour
 
     public void SetInitialPosition(Vector2 position)
     {
-        mosterInitialPosition = position;
+        monsterInitialPosition = position;
         monster.position = position;
-        isoRenderer.SetDirection(new Vector2(1, -1)); // Set direction to SE
+        isoRenderer.SetDirection(monsterInitialDirection);
     }
 
     public GameObject GetClosestAlivePlayer()
