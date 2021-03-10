@@ -19,9 +19,6 @@ public class IsometricPlayerMovementController : NetworkBehaviour
 
     private Camera playerCamera;
 
-    GameObject targetObject;
-    bool isEnemyClose = false;
-
     private void Awake()
     {
         rbody = GetComponent<Rigidbody2D>();
@@ -71,11 +68,7 @@ public class IsometricPlayerMovementController : NetworkBehaviour
         //test attack
         if (Input.GetKeyDown(KeyCode.F))
         {
-            if (isEnemyClose)
-            {
-                isoRenderer.Attack();
-                targetObject.GetComponent<EnemyController>().TakeDamage(heroStatus.BasicAttackPoints);
-            }
+            isoRenderer.Attack();
         }
 
         if (heroStatus.currentHealth <= 0)
@@ -106,21 +99,5 @@ public class IsometricPlayerMovementController : NetworkBehaviour
             monster.GetComponent<MonsterStatus>().CreateDamage(5);
         }
         Debug.Log("In mock attack");
-    }
-
-    void OnCollisionEnter2D(Collision2D other)
-    {
-        if (other.gameObject.CompareTag("EnemyMinion"))
-        {
-            isoRenderer.SetDirection(Vector2.zero);
-            isEnemyClose = true;
-            targetObject = other.gameObject;
-        }
-    }
-
-    void OnCollisionExit2D(Collision2D other)
-    {
-        isEnemyClose = false;
-        targetObject = null;
     }
 }
