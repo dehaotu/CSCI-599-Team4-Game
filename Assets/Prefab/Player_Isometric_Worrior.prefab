@@ -19,7 +19,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!224 &4174260943803927014
 RectTransform:
   m_ObjectHideFlags: 0
@@ -1098,6 +1098,7 @@ MonoBehaviour:
   maxHealth: 100
   currentHealth: 0
   alive: 1
+  respawnCountDown: 0
   healthBar: {fileID: 4889866394101842248}
   basicAttackPoints: 10
   basicDefensePoints: 10
