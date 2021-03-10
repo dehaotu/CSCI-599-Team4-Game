@@ -68,14 +68,16 @@ public class IsometricPlayerMovementController : NetworkBehaviour
         CmdSetDirection(movement);
         if (heroStatus.checkAlive()) rbody.MovePosition(newPos);
 
-
         //test attack
         if (Input.GetKeyDown(KeyCode.F))
         {
-            if (isEnemyClose && heroStatus.checkAlive())
+            if (heroStatus.checkAlive())
             {
                 isoRenderer.Attack();
-                targetObject.GetComponent<EnemyController>().TakeDamage(heroStatus.BasicAttackPoints);
+                if (isEnemyClose)
+                {
+                    targetObject.GetComponent<EnemyController>().TakeDamage(heroStatus.BasicAttackPoints);
+                }
             }
         }
 
