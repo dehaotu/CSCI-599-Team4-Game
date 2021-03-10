@@ -6,7 +6,7 @@ using System.Text;
 /// <summary>
 ///存货类，背包类的基类
 /// </summary>
-public class Inventroy : MonoBehaviour {
+public class Inventory : MonoBehaviour {
 
     protected Slot[] slotArray;//存放物品槽的数组
 
@@ -52,7 +52,7 @@ public class Inventroy : MonoBehaviour {
     //根据Id存储物品
     public bool StoreItem(int id) 
     {
-       Item item = InventroyManager.Instance.GetItemById(id);
+       Item item = InventoryManager.Instance.GetItemById(id);
        return StoreItem(item);
     }
 

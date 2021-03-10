@@ -2348,7 +2348,7 @@ PrefabInstance:
     - target: {fileID: 4627367585883144233, guid: 3bb40cb3e3946574ca473c62ad53f9cd,
         type: 3}
       propertyPath: m_Name
-      value: InventroyManager
+      value: InventoryManager
       objectReference: {fileID: 0}
     - target: {fileID: 4627367585883144234, guid: 3bb40cb3e3946574ca473c62ad53f9cd,
         type: 3}

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 /// <summary>
 /// 角色面板类，控制角色面板的逻辑
 /// </summary>
-public class CharacterPanel : Inventroy
+public class CharacterPanel : Inventory
 {
     //单例模式
     private static CharacterPanel _instance;
@@ -37,7 +37,8 @@ public class CharacterPanel : Inventroy
     //更新角色属性显示
     private void UpdatePropertyText() 
     {
-        
+        attackPoints = 0;
+        defensePoints = 0;
         foreach (EquipmentSlot slot in slotArray)//遍历角色面板中的装备物品槽
         {
             if (slot.transform.childCount > 0)//找到有物品的物品槽，获取里面装备的属性值
@@ -55,13 +56,13 @@ public class CharacterPanel : Inventroy
                 }
             }
         }
-        attackPoints += player.BasicAttackPoints;
-        defensePoints += player.BasicDefensePoints;
+        attackPoints += player.OriginalAP;
+        defensePoints += player.OriginalDP;
         //if (!GetComponentInParent<HeroStatus>().thisIsSever() && GetComponentInParent<HeroStatus>().thisIsLocalPlayer()) CmdUpdateSB();
         string text = string.Format("Attack：{0}\nDefense：{1}", attackPoints, defensePoints);
         characterPropertyText.text = text;
 
-        // Update player attackpoints
+        // Update player attackpoints/defensepoints
         player.BasicAttackPoints = attackPoints;
         player.BasicDefensePoints = defensePoints;
     }

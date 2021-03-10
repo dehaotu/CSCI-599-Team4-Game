@@ -37,6 +37,10 @@ public class HeroStatus : NetworkBehaviour
     private int basicDefensePoints = 10;
     public int BasicDefensePoints{ get { return basicDefensePoints; } set { SetDefense(value); } }  //Basic Defense Points
 
+    private int originalAP = 10;
+    public int OriginalAP {get {return originalAP;}}
+    private int originalDP = 10;
+    public int OriginalDP {get {return originalDP;}}
 
     private Text coinText;  //Get gold amount from Coin GameObject
     [SyncVar]

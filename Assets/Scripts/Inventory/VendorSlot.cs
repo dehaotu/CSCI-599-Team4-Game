@@ -8,13 +8,13 @@ public class VendorSlot : Slot {
     {
         if (eventData.button == UnityEngine.EventSystems.PointerEventData.InputButton.Right)//在商贩那里点击右键直接购买物品
         {
-            if (transform.childCount > 0 && InventroyManager.Instance.IsPickedItem == false)//首先商贩得有物品,其次鼠标上没有物品
+            if (transform.childCount > 0 && InventoryManager.Instance.IsPickedItem == false)//首先商贩得有物品,其次鼠标上没有物品
             {
                 Item currentItem = transform.GetChild(0).GetComponent<ItemUI>().Item;//取得当前点击的要买的物品
                 transform.parent.parent.SendMessage("BuyItem",currentItem);
             }
         }
-        else if (eventData.button == UnityEngine.EventSystems.PointerEventData.InputButton.Left && InventroyManager.Instance.IsPickedItem == true)//在背包鼠标左键拖动售卖物品
+        else if (eventData.button == UnityEngine.EventSystems.PointerEventData.InputButton.Left && InventoryManager.Instance.IsPickedItem == true)//在背包鼠标左键拖动售卖物品
         {
             transform.parent.parent.SendMessage("SellItem");
         }
