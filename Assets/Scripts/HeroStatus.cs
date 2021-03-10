@@ -41,6 +41,7 @@ public class HeroStatus : NetworkBehaviour
 
     private Text coinText;  //Get gold amount from Coin GameObject
     [SyncVar]
+    private int coins;
     private int coinAmount = 100;  //Gold owned by the player, can be used to purchase items
     public int CoinAmount
     {
@@ -180,7 +181,6 @@ public class HeroStatus : NetworkBehaviour
         }
     }
 
-
     //消费金币
     //Use Coins
     public bool ConsumeCoin(int amount)
@@ -189,6 +189,7 @@ public class HeroStatus : NetworkBehaviour
         {
             coinAmount -= amount;
             coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
+            coins = coinAmount;
             return true;  //消费成功 Successful purchase
         }
         return false;  //否则消费失败 Failed purchase
@@ -200,6 +201,7 @@ public class HeroStatus : NetworkBehaviour
     {
         this.coinAmount += amount;
         coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
+        coins = coinAmount;
     }
 
     /// <summary>
