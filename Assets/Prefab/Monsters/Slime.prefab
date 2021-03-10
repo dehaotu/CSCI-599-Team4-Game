@@ -46,7 +46,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0.36949793}
   serializedVersion: 2
-  m_Radius: 0.2305021
+  m_Radius: 0.3
 --- !u!1 &3339481644051735610
 GameObject:
   m_ObjectHideFlags: 0
@@ -238,7 +238,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   movementSpeed: 0.8
-  attackDamage: 20
+  attackDamage: 2
   monsterBaseCollider: {fileID: 0}
 --- !u!114 &8207291274246736843
 MonoBehaviour:
@@ -273,7 +273,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sceneId: 0
   serverOnly: 0
-  m_AssetId: aceaf90ffcd43416ca4efd60516fa8f3
+  m_AssetId: 
   hasSpawned: 0
 --- !u!114 &-5154910720736266075
 MonoBehaviour:
@@ -450,7 +450,7 @@ PrefabInstance:
     - target: {fileID: 8291708735042793870, guid: 5399561a8388c493e863361c7299d3f8,
         type: 3}
       propertyPath: m_AssetId
-      value: aceaf90ffcd43416ca4efd60516fa8f3
+      value: 
       objectReference: {fileID: 0}
     - target: {fileID: 8343374186983150720, guid: 5399561a8388c493e863361c7299d3f8,
         type: 3}

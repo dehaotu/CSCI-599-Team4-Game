@@ -175,4 +175,10 @@ public class MonsterMovementController : NetworkBehaviour
         else
             return player.transform.position;
     }
+
+    public void TakeDamage(int damage)
+    {
+        monsterStatus.TakeDamage(damage: damage);
+        Debug.Log(damage);
+    }
 }

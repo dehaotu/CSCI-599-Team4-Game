@@ -21,6 +21,7 @@ public class IsometricPlayerMovementController : NetworkBehaviour
 
     GameObject targetObject;
     bool isEnemyClose = false;
+    bool isMonsterClose = false;
 
     private void Awake()
     {
@@ -80,6 +81,8 @@ public class IsometricPlayerMovementController : NetworkBehaviour
                 if (isEnemyClose)
                 {
                     targetObject.GetComponent<EnemyController>().TakeDamage(heroStatus.BasicAttackPoints);
+                } else if (isMonsterClose) {
+                    targetObject.GetComponent<MonsterMovementController>().TakeDamage(heroStatus.BasicAttackPoints);
                 }
             }
         }
@@ -89,29 +92,11 @@ public class IsometricPlayerMovementController : NetworkBehaviour
             stopAction = true;
             isoRenderer.Dead();
         }
-
-        // test attack monster
-        if (Input.GetKeyDown(KeyCode.M))
-        {
-            CmdMockAttack();
-        }
     }
 
     private void CmdSetDirection(Vector2 direction)
     {
         if (!stopAction) isoRenderer.SetDirection(direction);
-    }
-
-    [Command]
-    private void CmdMockAttack()
-    {
-        GameObject[] monsters = GameObject.FindGameObjectsWithTag("Monster");
-        foreach (GameObject monster in monsters)
-        {
-            // Get player alive status.
-            monster.GetComponent<MonsterStatus>().CreateDamage(5);
-        }
-        Debug.Log("In mock attack");
     }
 
     void OnCollisionEnter2D(Collision2D other)
@@ -121,12 +106,18 @@ public class IsometricPlayerMovementController : NetworkBehaviour
             isoRenderer.SetDirection(Vector2.zero);
             isEnemyClose = true;
             targetObject = other.gameObject;
+        } else if (other.gameObject.CompareTag("Monster"))
+        {
+            isoRenderer.SetDirection(Vector2.zero);
+            isMonsterClose = true;
+            targetObject = other.gameObject;
         }
     }
 
     void OnCollisionExit2D(Collision2D other)
     {
         isEnemyClose = false;
+        isMonsterClose = false;
         targetObject = null;
     }
 }
