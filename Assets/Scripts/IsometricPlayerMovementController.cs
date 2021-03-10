@@ -39,7 +39,10 @@ public class IsometricPlayerMovementController : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!isLocalPlayer) return;
+        if (!isLocalPlayer) {
+            GameObject.Find("Inventory Menu").GetComponent<CanvasGroup>().alpha = 0;
+            return;
+        }
         if (isoRenderer.isPlayingAttack()) return;
         float horizontalInput = 0;
         float verticalInput = 0;

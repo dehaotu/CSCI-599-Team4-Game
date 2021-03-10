@@ -34,7 +34,7 @@ public class Inventory : MonoBehaviour {
         {
             canvasGroupMy = GetComponent<CanvasGroup>();
         }
-        Hide();
+        //Hide();
 	}
 
     void Update() 

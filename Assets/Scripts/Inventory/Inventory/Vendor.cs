@@ -24,7 +24,7 @@ public class Vendor : Inventory {
         base.Start();
         InitShop();
         player = GameObject.FindWithTag("Player").GetComponent<HeroStatus>();
-        Hide();
+        //Hide();
     }
 
     //初始化商贩
@@ -42,24 +42,15 @@ public class Vendor : Inventory {
         bool isSusscess = player.ConsumeCoin(item.BuyPrice);//主角消耗金币购买物品
         if (isSusscess)
         {
-            Knapscak.Instance.StoreItem(item);
+            if (item.Type == Item.ItemType.Consumable) Knapscak.Instance.StoreItem(item);
+            else CharacterPanel.Instance.PutOn(item);
         }
     }
 
     //主角售卖物品
-    public void SellItem() 
+    public void SellItem(Item item) 
     {
-        int sellAmount = 1;//销售数量
-        if (Input.GetKey(KeyCode.LeftControl))//按住坐标Ctrl键物品一个一个的售卖，否则全部售卖
-        {
-            sellAmount = 1;
-        }
-        else
-        {
-            sellAmount = InventoryManager.Instance.PickedItem.Amount;
-        }
-        int coinAmount = InventoryManager.Instance.PickedItem.Item.SellPrice * sellAmount;//售卖所获得的金币总数
-        player.EarnCoin(coinAmount);//主角赚取到售卖物品的金币
-        InventoryManager.Instance.ReduceAmountItem(sellAmount);//鼠标上的物品减少或者销毁
+        player.EarnCoin(item.SellPrice);//主角赚取到售卖物品的金币
+        InventoryManager.Instance.ReduceAmountItem(1);//鼠标上的物品减少或者销毁
     }
 }

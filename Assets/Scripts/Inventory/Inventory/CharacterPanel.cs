@@ -31,7 +31,7 @@ public class CharacterPanel : Inventory
         characterPropertyText = transform.Find("CharacterPropertyPanel/Text").GetComponent<Text>();
         player = GameObject.FindWithTag("Player").GetComponent<HeroStatus>();
         UpdatePropertyText();//初始化显示角色属性值
-        Hide();
+        //Hide();
     }
 
     //更新角色属性显示
@@ -90,9 +90,7 @@ public class CharacterPanel : Inventory
             {
                 if (equipmentSlot.transform.childCount > 0)//判断角色面板中的物品槽合适的位置是否已经有了装备
                 {
-                    ItemUI currentItemUI = equipmentSlot.transform.GetChild(0).GetComponent<ItemUI>();
-                    exitItem = currentItemUI.Item;
-                    currentItemUI.SetItem(item, 1);
+                    Vendor.Instance.SellItem(item);
                 }
                 else
                 {
@@ -120,7 +118,7 @@ public class CharacterPanel : Inventory
     //脱掉装备功能（不需拖拽）
     public void PutOff(Item item) 
     {
-        Knapscak.Instance.StoreItem(item);//把角色面板上是物品替换到背包里面
+        Vendor.Instance.SellItem(item);
         UpdatePropertyText();//更新显示角色属性值
 
         //boardText = GameObject.Find("StatusBoardPanel/Text").GetComponent<Text>();
