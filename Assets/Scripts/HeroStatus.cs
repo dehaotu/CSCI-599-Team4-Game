@@ -21,6 +21,9 @@ public class HeroStatus : NetworkBehaviour
     [SyncVar]
     private bool alive = true;
     [SyncVar]
+    [SerializeField]
+    private float respawnCountDown;
+    [SyncVar]
     private HeroClass heroClass;
 
     //Basic Attributes：
@@ -118,6 +121,10 @@ public class HeroStatus : NetworkBehaviour
                 canvasGroup.alpha = 0.0f;
             }
         }
+
+        // show death screen
+        if (isLocalPlayer && !alive) { }
+
     }
 
     public bool checkAlive()
@@ -134,6 +141,11 @@ public class HeroStatus : NetworkBehaviour
         {
             alive = false;
         }
+    }
+
+    private void Respawn()
+    {
+        
     }
 
 
