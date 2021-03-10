@@ -44,9 +44,9 @@ CircleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0.4}
+  m_Offset: {x: 0, y: 0.36949793}
   serializedVersion: 2
-  m_Radius: 0.2
+  m_Radius: 0.2305021
 --- !u!1 &3339481644051735610
 GameObject:
   m_ObjectHideFlags: 0
@@ -75,7 +75,7 @@ Transform:
   m_GameObject: {fileID: 3339481644051735610}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0.2, z: 0}
-  m_LocalScale: {x: 0.7, y: 0.7, z: 0.5}
+  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_Children: []
   m_Father: {fileID: 3339481645408498932}
   m_RootOrder: 1
@@ -177,6 +177,7 @@ GameObject:
   - component: {fileID: -5487003430000364066}
   - component: {fileID: -5154910720736266075}
   - component: {fileID: 7072789602850029144}
+  - component: {fileID: 3498914612533037744}
   m_Layer: 0
   m_Name: Slime
   m_TagString: Monster
@@ -236,7 +237,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  movementSpeed: 1
+  movementSpeed: 0.8
   attackDamage: 20
   monsterBaseCollider: {fileID: 0}
 --- !u!114 &8207291274246736843
@@ -272,7 +273,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   sceneId: 0
   serverOnly: 0
-  m_AssetId: 
+  m_AssetId: aceaf90ffcd43416ca4efd60516fa8f3
   hasSpawned: 0
 --- !u!114 &-5154910720736266075
 MonoBehaviour:
@@ -308,6 +309,17 @@ MonoBehaviour:
   localPositionSensitivity: 0.01
   localRotationSensitivity: 0.01
   localScaleSensitivity: 0.01
+--- !u!210 &3498914612533037744
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3339481645408498929}
+  m_Enabled: 1
+  m_SortingLayerID: -211649221
+  m_SortingLayer: -1
+  m_SortingOrder: 10
 --- !u!1001 &1778482885621662871
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -403,7 +415,7 @@ PrefabInstance:
     - target: {fileID: 1953416547368098545, guid: 5399561a8388c493e863361c7299d3f8,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.7999878
+      value: 0.662
       objectReference: {fileID: 0}
     - target: {fileID: 1953416547368098545, guid: 5399561a8388c493e863361c7299d3f8,
         type: 3}
@@ -420,6 +432,16 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6043237009751293838, guid: 5399561a8388c493e863361c7299d3f8,
+        type: 3}
+      propertyPath: m_SortingOrder
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6043237009751293838, guid: 5399561a8388c493e863361c7299d3f8,
+        type: 3}
+      propertyPath: m_SortingLayerID
+      value: -211649221
+      objectReference: {fileID: 0}
     - target: {fileID: 6863040765265715118, guid: 5399561a8388c493e863361c7299d3f8,
         type: 3}
       propertyPath: m_Name
@@ -428,7 +450,7 @@ PrefabInstance:
     - target: {fileID: 8291708735042793870, guid: 5399561a8388c493e863361c7299d3f8,
         type: 3}
       propertyPath: m_AssetId
-      value: 
+      value: aceaf90ffcd43416ca4efd60516fa8f3
       objectReference: {fileID: 0}
     - target: {fileID: 8343374186983150720, guid: 5399561a8388c493e863361c7299d3f8,
         type: 3}
