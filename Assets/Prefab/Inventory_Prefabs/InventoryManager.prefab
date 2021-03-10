@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4627367585883144234}
   - component: {fileID: 4627367585883144235}
   m_Layer: 0
-  m_Name: InventroyManager
+  m_Name: InventoryManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

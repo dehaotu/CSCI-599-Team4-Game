@@ -4,7 +4,7 @@ using UnityEngine.UI;
 /// <summary>
 /// 角色面板类，控制角色面板的逻辑
 /// </summary>
-public class CharacterPanel : Inventroy
+public class CharacterPanel : Inventory
 {
     //单例模式
     private static CharacterPanel _instance;

@@ -6,15 +6,15 @@ using UnityEngine.UI;
 /// <summary>
 /// 存货总管理类
 /// </summary>
-public class InventroyManager : MonoBehaviour {
+public class InventoryManager : MonoBehaviour {
     //单例模式
-    private static InventroyManager _instance;
-    public static InventroyManager Instance 
+    private static InventoryManager _instance;
+    public static InventoryManager Instance 
     {
         get {
             if (_instance == null)
             {
-                _instance = GameObject.Find("InventroyManager").GetComponent<InventroyManager>();
+                _instance = GameObject.Find("InventoryManager").GetComponent<InventoryManager>();
             }
            return _instance;
         }

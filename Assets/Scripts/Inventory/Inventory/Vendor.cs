@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Vendor : Inventroy {
+public class Vendor : Inventory {
 
     //单例模式
     private static Vendor _instance;
@@ -56,10 +56,10 @@ public class Vendor : Inventroy {
         }
         else
         {
-            sellAmount = InventroyManager.Instance.PickedItem.Amount;
+            sellAmount = InventoryManager.Instance.PickedItem.Amount;
         }
-        int coinAmount = InventroyManager.Instance.PickedItem.Item.SellPrice * sellAmount;//售卖所获得的金币总数
+        int coinAmount = InventoryManager.Instance.PickedItem.Item.SellPrice * sellAmount;//售卖所获得的金币总数
         player.EarnCoin(coinAmount);//主角赚取到售卖物品的金币
-        InventroyManager.Instance.ReduceAmountItem(sellAmount);//鼠标上的物品减少或者销毁
+        InventoryManager.Instance.ReduceAmountItem(sellAmount);//鼠标上的物品减少或者销毁
     }
 }

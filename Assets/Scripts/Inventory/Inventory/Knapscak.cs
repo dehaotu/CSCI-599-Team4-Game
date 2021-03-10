@@ -1,9 +1,9 @@
 ﻿using UnityEngine;
 using System.Collections;
 /// <summary>
-/// 背包类，继承自 存货类Inventroy
+/// 背包类，继承自 存货类Inventory
 /// </summary>
-public class Knapscak : Inventroy {
+public class Knapscak : Inventory {
     //单例模式
     private static Knapscak _instance;
 

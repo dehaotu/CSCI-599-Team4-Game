@@ -54,7 +54,7 @@ public class Slot : MonoBehaviour,IPointerEnterHandler,IPointerExitHandler,IPoin
         if (this.transform.childCount > 0)
         {
             string toolTipText = this.transform.GetChild(0).GetComponent<ItemUI>().Item.GetToolTipText();
-            InventroyManager.Instance.ShowToolTip(toolTipText);//显示提示框
+            InventoryManager.Instance.ShowToolTip(toolTipText);//显示提示框
         }
     }
     //接口实现的方法，鼠标离开时触发
@@ -62,7 +62,7 @@ public class Slot : MonoBehaviour,IPointerEnterHandler,IPointerExitHandler,IPoin
     {
         if (this.transform.childCount > 0)
         {
-            InventroyManager.Instance.HideToolTip();//隐藏提示框
+            InventoryManager.Instance.HideToolTip();//隐藏提示框
         }
     }
 
@@ -70,7 +70,7 @@ public class Slot : MonoBehaviour,IPointerEnterHandler,IPointerExitHandler,IPoin
     {
         if (eventData.button == PointerEventData.InputButton.Right)//鼠标右键点击直接实现穿戴，不经过拖拽
         {
-            if (transform.childCount > 0 && InventroyManager.Instance.IsPickedItem == false)//需要穿戴的物品得有，并且鼠标上要没有物品，否则就发生：当鼠标上有物品，在其他物品上点击鼠标右键也能穿上这种情况。
+            if (transform.childCount > 0 && InventoryManager.Instance.IsPickedItem == false)//需要穿戴的物品得有，并且鼠标上要没有物品，否则就发生：当鼠标上有物品，在其他物品上点击鼠标右键也能穿上这种情况。
             {
                 ItemUI currentItemUI = transform.GetChild(0).GetComponent<ItemUI>();
                 if (currentItemUI.Item is Equipment || currentItemUI.Item is Weapon)//只有装备和物品才可以穿戴
@@ -80,7 +80,7 @@ public class Slot : MonoBehaviour,IPointerEnterHandler,IPointerExitHandler,IPoin
                     if (currentItemUI.Amount <= 0)//物品槽中的物品没有了
                     {
                         DestroyImmediate(currentItemUI.gameObject);//立即销毁物品槽中的物品
-                        InventroyManager.Instance.HideToolTip();//隐藏该物品的提示框
+                        InventoryManager.Instance.HideToolTip();//隐藏该物品的提示框
                     }
                     CharacterPanel.Instance.PutOn(currentItem);//直接穿戴
                 }
@@ -108,12 +108,12 @@ public class Slot : MonoBehaviour,IPointerEnterHandler,IPointerExitHandler,IPoin
         if (transform.childCount > 0) //二：自身不是空
         {
             ItemUI currentItem = transform.GetChild(0).GetComponent<ItemUI>();//取得当前的物品
-            if (InventroyManager.Instance.IsPickedItem == false)///2.pickedItem == null。如果当前没有选中任何物品，即当前鼠标上没有物品
+            if (InventoryManager.Instance.IsPickedItem == false)///2.pickedItem == null。如果当前没有选中任何物品，即当前鼠标上没有物品
             {
                 if (Input.GetKey(KeyCode.LeftControl))////①按下Ctrl键，取得当前物品槽中物品的一半
                 {
                     int amountPicked = (currentItem.Amount + 1) / 2;//如果物品为偶数就拾取刚好一般，如果为奇数就拾取一半多一个
-                    InventroyManager.Instance.PickUpItem(currentItem.Item, amountPicked);
+                    InventoryManager.Instance.PickUpItem(currentItem.Item, amountPicked);
                     int amountRemained = currentItem.Amount - amountPicked;//拾取后剩余的物品个数
                     if (amountRemained<=0)//如果物品槽中没有剩余的物品了，就销毁ItemUI
                     {
@@ -126,9 +126,9 @@ public class Slot : MonoBehaviour,IPointerEnterHandler,IPointerExitHandler,IPoin
                 }
                 else      ////②没有按下Ctrl键，把当前物品槽里面的物品放到鼠标上
                 {
-                    //InventroyManager.Instance.PickedItem.SetItemUI(currentItem);//把当前物品槽里的物品复制给PickedItem（跟随鼠标移动）
-                    //InventroyManager.Instance.IsPickedItem = true;//注释的这两句合并为下面的一句
-                    InventroyManager.Instance.PickUpItem(currentItem.Item, currentItem.Amount);
+                    //InventoryManager.Instance.PickedItem.SetItemUI(currentItem);//把当前物品槽里的物品复制给PickedItem（跟随鼠标移动）
+                    //InventoryManager.Instance.IsPickedItem = true;//注释的这两句合并为下面的一句
+                    InventoryManager.Instance.PickUpItem(currentItem.Item, currentItem.Amount);
                     Destroy(currentItem.gameObject);//复制完之后销毁当前物品槽中的物品
                 }
             }
@@ -141,14 +141,14 @@ public class Slot : MonoBehaviour,IPointerEnterHandler,IPointerExitHandler,IPoin
                                  ///////a.可以完全放下
                                  ///////b.只能放下其中一部分
                 ////②自身的id != pickedItem.id，pickedItem跟当前物品交换
-                if (currentItem.Item.ID == InventroyManager.Instance.PickedItem.Item.ID)
+                if (currentItem.Item.ID == InventoryManager.Instance.PickedItem.Item.ID)
                 {
                     if (Input.GetKey(KeyCode.LeftControl))
                     {
                         if (currentItem.Item.Capacity > currentItem.Amount)//如果物品槽里的物品容量大于当前物品数量，那就说明物品槽里还能再放
                         {
                             currentItem.AddItemAmount();//增加物品槽中物品数量
-                            InventroyManager.Instance.ReduceAmountItem();//让鼠标上的物品减掉一个(默认移除一个)
+                            InventoryManager.Instance.ReduceAmountItem();//让鼠标上的物品减掉一个(默认移除一个)
                         }
                         else//如果物品槽里的物品容量小于当前物品数量，那就说明物品槽里不能再放了
                         {
@@ -160,15 +160,15 @@ public class Slot : MonoBehaviour,IPointerEnterHandler,IPointerExitHandler,IPoin
                         if (currentItem.Item.Capacity > currentItem.Amount)//如果物品槽里的物品容量大于当前物品数量，那就说明物品槽里还能再放
                         {
                             int itemRemain = currentItem.Item.Capacity - currentItem.Amount;//物品槽还可以再放的数量
-                            if (itemRemain >= InventroyManager.Instance.PickedItem.Amount)//如果物品槽还可以再放的数量大于等于鼠标上的数量，                                那就可以完全放下
+                            if (itemRemain >= InventoryManager.Instance.PickedItem.Amount)//如果物品槽还可以再放的数量大于等于鼠标上的数量，                                那就可以完全放下
                             {
-                                currentItem.AddItemAmount(InventroyManager.Instance.PickedItem.Amount);
-                                InventroyManager.Instance.ReduceAmountItem(itemRemain);
+                                currentItem.AddItemAmount(InventoryManager.Instance.PickedItem.Amount);
+                                InventoryManager.Instance.ReduceAmountItem(itemRemain);
                             }
                             else//只能放下其中一部分
                             {
                                 currentItem.AddItemAmount(itemRemain);
-                                InventroyManager.Instance.PickedItem.RemoveItemAmount(itemRemain);
+                                InventoryManager.Instance.PickedItem.RemoveItemAmount(itemRemain);
                             }
                         }
                         else//如果物品槽里的物品容量小于当前物品数量，那就说明物品槽里不能再放了
@@ -180,15 +180,15 @@ public class Slot : MonoBehaviour,IPointerEnterHandler,IPointerExitHandler,IPoin
                 else//②自身的id != pickedItem.id，pickedItem跟当前物品交换
                 {
                     //保存当前鼠标捡起物品，用于和物品槽中的物品交换
-                    Item pickedItemTemp = InventroyManager.Instance.PickedItem.Item;
-                    int pickedItemAmountTemp = InventroyManager.Instance.PickedItem.Amount;
+                    Item pickedItemTemp = InventoryManager.Instance.PickedItem.Item;
+                    int pickedItemAmountTemp = InventoryManager.Instance.PickedItem.Amount;
 
                     //保存当前物品槽中的物品，用于和鼠标上的物品交换
                     Item currentItemTemp = currentItem.Item;
                     int currentItemAmountTemp = currentItem.Amount;
                     //两者交换
                     currentItem.SetItem(pickedItemTemp, pickedItemAmountTemp);//把当前鼠标上的物品放入物品槽
-                    InventroyManager.Instance.PickedItem.SetItem(currentItemTemp, currentItemAmountTemp);//把当前物品槽中的物品放在鼠标上
+                    InventoryManager.Instance.PickedItem.SetItem(currentItemTemp, currentItemAmountTemp);//把当前物品槽中的物品放在鼠标上
                 }
             }
         }
@@ -198,20 +198,20 @@ public class Slot : MonoBehaviour,IPointerEnterHandler,IPointerExitHandler,IPoin
                 ////①按下Ctrl键，放置当前鼠标上的物品的一个
                 ////②没有按下Ctrl键，放置当前鼠标上物品的所有
             ///2.pickedItem==null(即IsPickedItem == false)，不做任何处理
-            if (InventroyManager.Instance.IsPickedItem == true)
+            if (InventoryManager.Instance.IsPickedItem == true)
             {
                 if (Input.GetKey(KeyCode.LeftControl))
                 {
-                    this.StoreItem(InventroyManager.Instance.PickedItem.Item);
-                    InventroyManager.Instance.ReduceAmountItem();
+                    this.StoreItem(InventoryManager.Instance.PickedItem.Item);
+                    InventoryManager.Instance.ReduceAmountItem();
                 }
                 else//②没有按下Ctrl键，放置当前鼠标上物品的所有
                 {
-                    for(int i = 0 ; i<InventroyManager.Instance.PickedItem.Amount ; i++)
+                    for(int i = 0 ; i<InventoryManager.Instance.PickedItem.Amount ; i++)
                     {
-                        this.StoreItem(InventroyManager.Instance.PickedItem.Item);
+                        this.StoreItem(InventoryManager.Instance.PickedItem.Item);
                     }
-                    InventroyManager.Instance.ReduceAmountItem(InventroyManager.Instance.PickedItem.Amount);
+                    InventoryManager.Instance.ReduceAmountItem(InventoryManager.Instance.PickedItem.Amount);
                 }
             }
             else
