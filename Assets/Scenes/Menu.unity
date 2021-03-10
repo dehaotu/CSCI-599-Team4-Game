@@ -335,7 +335,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_Sprite: {fileID: 21300000, guid: a0783a9e077a049cd91ab9234e003c5e, type: 3}
+  m_Sprite: {fileID: 21300000, guid: a785cfc51aa804240bc92f0675c6a486, type: 3}
   m_Type: 0
   m_PreserveAspect: 0
   m_FillCenter: 1
@@ -1743,6 +1743,7 @@ MonoBehaviour:
   ActiveDiscoveryInterval: 3
   networkRoomManager: {fileID: 1116063841}
   roomListPanel: {fileID: 271566536}
+  roomServerIP: 52.183.4.114
 --- !u!4 &1107837461
 Transform:
   m_ObjectHideFlags: 0
@@ -1811,7 +1812,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   dontDestroyOnLoad: 1
   runInBackground: 1
-  autoStartServerBuild: 1
+  autoStartServerBuild: 0
   showDebugMessages: 0
   serverTickRate: 30
   serverBatching: 0
@@ -1819,7 +1820,7 @@ MonoBehaviour:
   offlineScene: 
   onlineScene: 
   transport: {fileID: 1116063840}
-  networkAddress: localhost
+  networkAddress: 52.183.4.114
   maxConnections: 4
   disconnectInactiveConnections: 0
   disconnectInactiveTimeout: 60
@@ -1828,13 +1829,19 @@ MonoBehaviour:
     type: 3}
   autoCreatePlayer: 0
   playerSpawnMethod: 1
-  spawnPrefabs: []
+  spawnPrefabs:
+  - {fileID: 3339481645408498929, guid: 0bddd2eb7998b4842b1be0f9e4ee2640, type: 3}
+  - {fileID: 7394611567786144978, guid: d73bebf838f3d3640a7384b019b7b254, type: 3}
+  - {fileID: 3339481645408498929, guid: aceaf90ffcd43416ca4efd60516fa8f3, type: 3}
+  - {fileID: 3339481645408498929, guid: 354d229f6349b4ccaae26ad4fc7c63bc, type: 3}
+  - {fileID: 3339481645408498929, guid: d4ce88886c93c48f293623b8b0f0a7e7, type: 3}
+  - {fileID: 3339481645408498929, guid: a848293fd4252474ba068439d49d2c14, type: 3}
   showRoomGUI: 0
   minPlayers: 1
   roomPlayerPrefab: {fileID: 1257700833802494063, guid: d73367814be36b34e9812a10338ef602,
     type: 3}
   RoomScene: Assets/Scenes/Menu.unity
-  GameplayScene: Assets/Scenes/DT-TestScene.unity
+  GameplayScene: Assets/Scenes/TestScene.unity
   _allPlayersReady: 0
   roomSlots: []
   clientIndex: 0

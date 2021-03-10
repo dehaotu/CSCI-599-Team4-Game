@@ -24,7 +24,6 @@ public class MonsterBase3Controller : MonsterBaseController
 
     public override void Start()
     {
-
         base.Start();
     }
 
@@ -36,21 +35,25 @@ public class MonsterBase3Controller : MonsterBaseController
 
     public override void InstantiateMonsters()
     {
+
         monster1 = Instantiate(monster1Prefab);
-        monster1.GetComponent<MonsterMovementController>().SetInitialPosition(position: centralPosition + monster1RelativePosition);
-        monster1.GetComponent<MonsterMovementController>().SetMosterBaseCollider(collider: monsterBaseCollider);
+        var monster1Controller = monster1.GetComponent<MonsterMovementController>();
+        monster1Controller.SetInitialPosition(position: centralPosition + monster1RelativePosition);
+        monster1Controller.SetMosterBaseCollider(collider: monsterBaseCollider);
         monster1Status = monster1.GetComponent<MonsterStatus>();
         NetworkServer.Spawn(monster1);
 
         monster2 = Instantiate(monster2Prefab);
-        monster2.GetComponent<MonsterMovementController>().SetInitialPosition(position: centralPosition + monster2RelativePosition);
-        monster2.GetComponent<MonsterMovementController>().SetMosterBaseCollider(collider: monsterBaseCollider);
+        var monster2Controller = monster2.GetComponent<MonsterMovementController>();
+        monster2Controller.SetInitialPosition(position: centralPosition + monster2RelativePosition);
+        monster2Controller.SetMosterBaseCollider(collider: monsterBaseCollider);
         monster2Status = monster2.GetComponent<MonsterStatus>();
         NetworkServer.Spawn(monster2);
 
         monster3 = Instantiate(monster3Prefab);
-        monster3.GetComponent<MonsterMovementController>().SetInitialPosition(position: centralPosition + monster3RelativePosition);
-        monster3.GetComponent<MonsterMovementController>().SetMosterBaseCollider(collider: monsterBaseCollider);
+        var monster3Controller = monster3.GetComponent<MonsterMovementController>();
+        monster3Controller.SetInitialPosition(position: centralPosition + monster3RelativePosition);
+        monster3Controller.SetMosterBaseCollider(collider: monsterBaseCollider);
         monster3Status = monster3.GetComponent<MonsterStatus>();
         NetworkServer.Spawn(monster3);
     }

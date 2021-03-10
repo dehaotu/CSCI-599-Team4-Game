@@ -28,11 +28,11 @@ public class HeroStatus : NetworkBehaviour
     [SerializeField]
     [SyncVar(hook = nameof(SetAttack))]
     private int basicAttackPoints = 10;
-    public int BasicAttackPoints { get { return basicAttackPoints; } set { CmdSetAttack(value); } }  //Basic Attack Points
+    public int BasicAttackPoints { get { return basicAttackPoints; } set { SetAttack(value); } }  //Basic Attack Points
     [SerializeField]
     [SyncVar(hook = nameof(SetDefense))]
     private int basicDefensePoints = 10;
-    public int BasicDefensePoints{ get { return basicDefensePoints; } set { CmdSetDefense(value); } }  //Basic Defense Points
+    public int BasicDefensePoints{ get { return basicDefensePoints; } set { SetDefense(value); } }  //Basic Defense Points
 
 
     private Text coinText;  //Get gold amount from Coin GameObject
@@ -44,6 +44,16 @@ public class HeroStatus : NetworkBehaviour
         set { coinAmount = value; coinText.text = coinAmount.ToString(); }
     }
 
+    // add: chat window control
+    private Canvas chatCanvas;
+    private CanvasGroup canvasGroup;
+    public InputFieldController inputFieldController;
+
+    private void Awake() {
+        chatCanvas = GameObject.Find("ChatCanvas").GetComponent<Canvas>();
+        canvasGroup = chatCanvas.GetComponent<CanvasGroup>();
+    }
+
     void Start()
     {
         currentHealth = maxHealth;
@@ -51,6 +61,11 @@ public class HeroStatus : NetworkBehaviour
         coinText = GameObject.Find("Coin").GetComponentInChildren<Text>();
         coinText.text = coinAmount.ToString();
         Debug.Log(GetComponent<NetworkIdentity>().netId.ToString());
+
+        //add
+        // chatWindow.GetComponent<RectTransform>().localScale = new Vector2(0,0);
+        canvasGroup.alpha = 0.0f;
+
     }
 
     private void FixedUpdate()
@@ -68,27 +83,40 @@ public class HeroStatus : NetworkBehaviour
 
         //按下B键控制背包的显示和隐藏
         //Bag
-        if (Input.GetKeyDown(KeyCode.B))
+        if (Input.GetKeyDown(KeyCode.B) && !inputFieldController.isEditingInputField)
         {
             Knapscak.Instance.DisplaySwitch();
         }
         //按下V键控制角色面板的显示和隐藏
         //Character Panel
-        if (Input.GetKeyDown(KeyCode.V))
+        if (Input.GetKeyDown(KeyCode.V) && !inputFieldController.isEditingInputField)
         {
             CharacterPanel.Instance.DisplaySwitch();
         }
         //按下N键商店小贩面板的显示和隐藏
         //Hide Shop Panel
-        if (Input.GetKeyDown(KeyCode.N))
+        if (Input.GetKeyDown(KeyCode.N) && !inputFieldController.isEditingInputField)
         {
             Vendor.Instance.DisplaySwitch();
         }
         //按下S键状态面板的显示和隐藏
         //Status Board
-        if (Input.GetKeyDown(KeyCode.S))
+        if (Input.GetKeyDown(KeyCode.S) && !inputFieldController.isEditingInputField)
         {
             StatusBoard.Instance.DisplaySwitch();
+        }
+
+        // add: press C to show or hide chat window
+        if (Input.GetKeyDown(KeyCode.C) && !inputFieldController.isEditingInputField) 
+        {
+            // chatWindow.GetComponent<RectTransform>().localScale = new Vector2(1,1);
+            if(canvasGroup.alpha == 0.0f) {
+                canvasGroup.alpha = 1.0f;
+            }
+
+            else if (canvasGroup.alpha == 1.0f) {
+                canvasGroup.alpha = 0.0f;
+            }
         }
     }
 
@@ -97,9 +125,10 @@ public class HeroStatus : NetworkBehaviour
         return alive;
     }
 
-    [Command]
-    public void CmdTakeDamage(int damage)
+
+    public void TakeDamage(int damage)
     {
+        if (!this.isServer) return;
         currentHealth -= damage;
         if (currentHealth <= 0)
         {
@@ -108,16 +137,14 @@ public class HeroStatus : NetworkBehaviour
     }
 
 
-    [Command]
-    public void CmdSetAttack(int value)
+    public void SetAttack(int value)
     {
-        basicAttackPoints = value;
+        if(isServer) basicAttackPoints = value;
     }
 
-    [Command]
-    public void CmdSetDefense(int value)
+    public void SetDefense(int value)
     {
-        basicDefensePoints = value;
+        if (isServer) basicDefensePoints = value;
     }
 
     public void SetAttack(int oldAttack, int newAttack)

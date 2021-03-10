@@ -10,6 +10,7 @@ TagManager:
   - PlayerMinion
   - EnemyMinion
   - Confiner
+  - PlayerTower
   - Monster
   layers:
   - Default

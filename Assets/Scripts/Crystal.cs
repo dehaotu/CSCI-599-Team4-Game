@@ -7,7 +7,7 @@ public class Crystal : NetworkBehaviour
 {
     
     public int maxCrystalHealth = 100;
-   
+    [SyncVar]
     public int currentCrystalHealth = 100;
     public HealthBar CrystalHealthBar;
 
@@ -19,7 +19,7 @@ public class Crystal : NetworkBehaviour
 
     // add
     private string shootTag = "Player";
-    private Transform shootTarget;
+    private GameObject shootTarget;
 
     // Start is called before the first frame update
     void Start()
@@ -46,17 +46,8 @@ public class Crystal : NetworkBehaviour
         {
             return;
         }
-        //For testing
-        /*if (Input.GetKey(KeyCode.R))
-        {
-            TakeDamage(10);
-        }*/
-        /* if (Vector2.Distance(transform.position, player.transform.position) <= firingRange)
-         {
-             shoot();
-         }*/
+
         if (timeBtShots <= 0.0f && player.GetComponent<HeroStatus>().checkAlive())
-        // if (timeBtShots <= 0.0f)
         {
             Shoot();
             timeBtShots = startTimeBtShots;
@@ -83,7 +74,7 @@ public class Crystal : NetworkBehaviour
 
         if (shortestDistance <= firingRange && nearestTarget != null)
         {
-            shootTarget = nearestTarget.transform;
+            shootTarget = nearestTarget;
         }
         else
         {
@@ -121,7 +112,7 @@ public class Crystal : NetworkBehaviour
 
     public void TakeDamage(int damage)
     {
-        currentCrystalHealth -= damage;
+        if(isServer) currentCrystalHealth -= damage;
         CrystalHealthBar.SetHealth(currentCrystalHealth);
     }
 }

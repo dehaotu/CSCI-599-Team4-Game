@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Net;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.Assertions;
@@ -74,6 +75,9 @@ public class MenuController : MonoBehaviour
     void Start()
     {
         animator = new MenuAnimator(backGroundMap, cameraSpeedX, cameraSpeedY, period_rate);
+#if UNITY_SERVER
+        onClickDebugLobbyServer();
+#endif
     }
 
     // Update is called once per frame
@@ -132,17 +136,28 @@ public class MenuController : MonoBehaviour
         Application.Quit();
     }
 
-    public void onClickDebugLobbyServer() {}
+    public void onClickDebugLobbyServer() {
+        _setAllPlanelInactive();
+        roomPanel.SetActive(true);
+
+        //hide all buttons in roomPanel
+        roomPanel.transform.Find("Room_BackButton").gameObject.SetActive(false);
+        roomPanel.transform.Find("Room_ReadyButton").gameObject.SetActive(false);
+
+        roomDiscovery.AdvertiseServer();
+        networkRoomManager.StartServer();
+        flag_isHost = true;
+    }
 /************************************************************************************************
                                              LobbyPanel                                             
 ************************************************************************************************/
     public void onClick_Lobby_NewRoomButton()
     {
-        _setAllPlanelInactive();
-        roomPanel.SetActive(true);
-        roomDiscovery.AdvertiseServer();
-        networkRoomManager.StartHost();
-        flag_isHost = true;
+        //_setAllPlanelInactive();
+        //roomPanel.SetActive(true);
+        //roomDiscovery.AdvertiseServer();
+        //networkRoomManager.StartHost();
+        //flag_isHost = true;
     }
 
     public void onClick_Lobby_BackButton()

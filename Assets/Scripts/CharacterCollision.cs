@@ -13,7 +13,7 @@ public class CharacterCollision : MonoBehaviour
     {
         if (collision.gameObject.tag == "Bullet")
         {
-            heroStatus.CmdTakeDamage(20);
+            heroStatus.TakeDamage(20);
         }
     }
 }

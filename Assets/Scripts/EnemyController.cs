@@ -7,6 +7,7 @@ using Mirror;
 
 public class EnemyController : NetworkBehaviour
 {
+    [SyncVar]
     public int currentHealthPoints = 0;
     public int maxHealthPoints = 30;
     public float movementSpeed = 1f;
@@ -41,7 +42,7 @@ public class EnemyController : NetworkBehaviour
         timer = 0f;
         currentHealthPoints = maxHealthPoints;
         healthBar.SetMaxHealth(maxHealthPoints);
-        NetworkServer.Spawn(this.gameObject);
+        //NetworkServer.Spawn(this.gameObject);
         Debug.Log(gameObject.GetComponentInChildren<Text>().text);
     }
 
@@ -75,12 +76,14 @@ public class EnemyController : NetworkBehaviour
         Vector2 newPos = currentPos + movement * Time.fixedDeltaTime;
         if (!stopAction) isoRenderer.SetDirection(movement);
         rbody.MovePosition(newPos);
-        CmdSyncPos(gameObject.transform.position);
+        /*CmdSyncPos(gameObject.transform.position);*/
     }
 
     // Update is called once per frame
     void Update()
     {
+        
+
         string[] findTags = gameObject.tag.Equals("EnemyMinion") ? new string[]{ "Player", "PlayerMinion" } : new string[]{ "EnemyMinion" };
         GameObject findObject = FindNearestObjectByTags(findTags);
         timer += Time.deltaTime;
@@ -103,7 +106,7 @@ public class EnemyController : NetworkBehaviour
                     isoRenderer.SetDirection(Vector2.zero);
                     if (targetObject.tag.Equals("Player"))
                     {
-                        targetObject.GetComponent<HeroStatus>().CmdTakeDamage(basicAttackPoints);
+                        targetObject.GetComponent<HeroStatus>().TakeDamage(basicAttackPoints);
                     } else if (targetObject.tag.Equals("PlayerMinion") || targetObject.tag.Equals("EnemyMinion"))
                     {
                         targetObject.GetComponent<EnemyController>().TakeDamage(basicAttackPoints);
@@ -140,9 +143,9 @@ public class EnemyController : NetworkBehaviour
     {
         return alive;
     }
-
+/*
     [Command]
-    protected void CmdSyncPos(Vector2 localPosition)
+    public void CmdSyncPos(Vector2 localPosition)
     {
         RpcSyncPos(localPosition);
     }
@@ -155,7 +158,7 @@ public class EnemyController : NetworkBehaviour
             transform.localPosition = localPosition;
         }
     }
-
+*/
     public void TakeDamage(int damage)
     {
         currentHealthPoints -= damage;
