@@ -23,6 +23,8 @@
         "mp":10,
         "sprite": "Sprites/Items/mp"
     },
+
+
 	{
         "id":3,
         "name": "Armor",
@@ -35,18 +37,55 @@
 		"defensePoints":10,
 		"equipType":"Chest"
     },
-	{
+    {
         "id":4,
+        "name": "Helmet",
+        "type": "Equipment",
+        "description": "add defense",
+        "capacity": 20,
+        "buyPrice": 20,
+        "sellPrice": 10,
+        "sprite": "Sprites/Items/helmets",
+        "defensePoints":10,
+        "equipType":"Head"
+    },
+    {
+        "id":5,
+        "name": "Boots",
+        "type": "Equipment",
+        "description": "boots cats boots cats~",
+        "capacity": 20,
+        "buyPrice": 20,
+        "sellPrice": 10,
+        "sprite": "Sprites/Items/boots",
+        "defensePoints":10,
+        "equipType":"Boots"
+    },
+
+
+	{
+        "id":6,
         "name": "Axe",
         "type": "Weapon",
-        "quality": "Legendary",
-        "description": "add attack",
+        "description": "An axe, add attack point, what else?",
         "capacity": 10,
         "buyPrice": 40,
         "sellPrice": 30,
         "sprite": "Sprites/Items/axe",
 		"attackPoints":30,
 		"weaponType":"MainHand"
+    },
+    {
+        "id":7,
+        "name": "Bow without arrow",
+        "type": "Weapon",
+        "description": "Apparently this is a bow, it can add your attack point.",
+        "capacity": 20,
+        "buyPrice": 30,
+        "sellPrice": 15,
+        "sprite": "Sprites/Items/b_t_01",
+        "attackPoints":20,
+        "weaponType":"OffHand"
     }
 
 

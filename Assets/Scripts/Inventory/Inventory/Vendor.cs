@@ -30,7 +30,7 @@ public class Vendor : Inventory {
     //初始化商贩
     private void InitShop() 
     {
-        for(int i = 1; i < 5; i++)
+        for(int i = 1; i < 8; i++)
         {
             StoreItem(i);
         }
