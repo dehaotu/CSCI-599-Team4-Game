@@ -46,7 +46,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0.4}
   serializedVersion: 2
-  m_Radius: 0.2
+  m_Radius: 0.3
 --- !u!1 &3339481644051735610
 GameObject:
   m_ObjectHideFlags: 0
@@ -238,7 +238,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   movementSpeed: 1
-  attackDamage: 30
+  attackDamage: 3
   monsterBaseCollider: {fileID: 0}
 --- !u!114 &8207291274246736843
 MonoBehaviour:
@@ -254,8 +254,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  maxHP: 100
-  currHP: 100
+  maxHP: 50
+  currHP: 50
   autoHealPerFrame: 1
   alive: 1
   healthBar: {fileID: 666465647865370971}

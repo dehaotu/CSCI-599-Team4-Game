@@ -44,9 +44,9 @@ CircleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0.2}
+  m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 0.3
+  m_Radius: 0.7
 --- !u!1 &3339481644051735610
 GameObject:
   m_ObjectHideFlags: 0
@@ -237,8 +237,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   movementSpeed: 1
-  monsterInitialDirection: {x: 1, y: 1}
-  attackDamage: 80
+  attackDamage: 8
   monsterBaseCollider: {fileID: 0}
 --- !u!114 &8207291274246736843
 MonoBehaviour:
@@ -254,8 +253,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  maxHP: 200
-  currHP: 200
+  maxHP: 50
+  currHP: 50
   autoHealPerFrame: 1
   alive: 1
   healthBar: {fileID: 931492558059662320}
@@ -459,7 +458,7 @@ PrefabInstance:
     - target: {fileID: 6863040765265715118, guid: 5399561a8388c493e863361c7299d3f8,
         type: 3}
       propertyPath: m_Name
-      value: MonsterStatusCanvas
+      value: StatusCanvas
       objectReference: {fileID: 0}
     - target: {fileID: 8291708735042793870, guid: 5399561a8388c493e863361c7299d3f8,
         type: 3}
