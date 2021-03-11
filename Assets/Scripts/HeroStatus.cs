@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using Mirror;
+using System;
 
 public enum HeroClass : byte
 {
@@ -44,15 +45,22 @@ public class HeroStatus : NetworkBehaviour
         set { coinAmount = value; coinText.text = coinAmount.ToString(); }
     }
 
-    // add: chat window control
-    private Canvas chatCanvas;
-    private CanvasGroup canvasGroup;
-    public InputFieldController inputFieldController;
+    /* --- Start Chat Control --- */
+    public static event Action<HeroStatus, string> OnMessage;
 
-    private void Awake() {
-        chatCanvas = GameObject.Find("ChatCanvas").GetComponent<Canvas>();
-        canvasGroup = chatCanvas.GetComponent<CanvasGroup>();
+    [Command]
+    public void CmdSend(string message)
+    {
+        if (message.Trim() != "")
+            RpcReceive(message.Trim());
     }
+
+    [ClientRpc]
+    public void RpcReceive(string message)
+    {
+        OnMessage?.Invoke(this, message);
+    }
+    /* --- End Chat control --- */
 
     void Start()
     {
@@ -61,11 +69,6 @@ public class HeroStatus : NetworkBehaviour
         coinText = GameObject.Find("Coin").GetComponentInChildren<Text>();
         coinText.text = coinAmount.ToString();
         Debug.Log(GetComponent<NetworkIdentity>().netId.ToString());
-
-        //add
-        // chatWindow.GetComponent<RectTransform>().localScale = new Vector2(0,0);
-        canvasGroup.alpha = 0.0f;
-
     }
 
     private void FixedUpdate()
@@ -83,40 +86,27 @@ public class HeroStatus : NetworkBehaviour
 
         //按下B键控制背包的显示和隐藏
         //Bag
-        if (Input.GetKeyDown(KeyCode.B) && !inputFieldController.isEditingInputField)
+        if (Input.GetKeyDown(KeyCode.B) && !ChatWindow.isEditingInputField)
         {
             Knapscak.Instance.DisplaySwitch();
         }
         //按下V键控制角色面板的显示和隐藏
         //Character Panel
-        if (Input.GetKeyDown(KeyCode.V) && !inputFieldController.isEditingInputField)
+        if (Input.GetKeyDown(KeyCode.V) && !ChatWindow.isEditingInputField)
         {
             CharacterPanel.Instance.DisplaySwitch();
         }
         //按下N键商店小贩面板的显示和隐藏
         //Hide Shop Panel
-        if (Input.GetKeyDown(KeyCode.N) && !inputFieldController.isEditingInputField)
+        if (Input.GetKeyDown(KeyCode.N) && !ChatWindow.isEditingInputField)
         {
             Vendor.Instance.DisplaySwitch();
         }
         //按下S键状态面板的显示和隐藏
         //Status Board
-        if (Input.GetKeyDown(KeyCode.S) && !inputFieldController.isEditingInputField)
+        if (Input.GetKeyDown(KeyCode.S) && !ChatWindow.isEditingInputField)
         {
             StatusBoard.Instance.DisplaySwitch();
-        }
-
-        // add: press C to show or hide chat window
-        if (Input.GetKeyDown(KeyCode.C) && !inputFieldController.isEditingInputField) 
-        {
-            // chatWindow.GetComponent<RectTransform>().localScale = new Vector2(1,1);
-            if(canvasGroup.alpha == 0.0f) {
-                canvasGroup.alpha = 1.0f;
-            }
-
-            else if (canvasGroup.alpha == 1.0f) {
-                canvasGroup.alpha = 0.0f;
-            }
         }
     }
 
