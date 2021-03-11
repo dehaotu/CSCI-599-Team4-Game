@@ -106,7 +106,7 @@ AudioSource:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 4682618361071027984}
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: c4c68d010c6ef4d6da3d1ea766376388, type: 3}
@@ -2638,15 +2638,15 @@ PrefabInstance:
     m_RemovedComponents:
     - {fileID: 376900993, guid: 210fd878e98a60e4f94d2b5e50528613, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: 210fd878e98a60e4f94d2b5e50528613, type: 3}
---- !u!224 &6518395086133787426 stripped
-RectTransform:
-  m_CorrespondingSourceObject: {fileID: 6518395085725960206, guid: 210fd878e98a60e4f94d2b5e50528613,
-    type: 3}
-  m_PrefabInstance: {fileID: 419361580}
-  m_PrefabAsset: {fileID: 0}
 --- !u!224 &243924655 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 376900995, guid: 210fd878e98a60e4f94d2b5e50528613,
+    type: 3}
+  m_PrefabInstance: {fileID: 419361580}
+  m_PrefabAsset: {fileID: 0}
+--- !u!224 &6518395086133787426 stripped
+RectTransform:
+  m_CorrespondingSourceObject: {fileID: 6518395085725960206, guid: 210fd878e98a60e4f94d2b5e50528613,
     type: 3}
   m_PrefabInstance: {fileID: 419361580}
   m_PrefabAsset: {fileID: 0}
@@ -2799,9 +2799,9 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: afab85d1cd80b3d45b51a366c2c0573a, type: 3}
---- !u!1 &4682618361071027984 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 4682618359780161614, guid: afab85d1cd80b3d45b51a366c2c0573a,
+--- !u!20 &4682618361071027996 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 4682618359780161602, guid: afab85d1cd80b3d45b51a366c2c0573a,
     type: 3}
   m_PrefabInstance: {fileID: 1329037150}
   m_PrefabAsset: {fileID: 0}
@@ -2811,9 +2811,9 @@ Transform:
     type: 3}
   m_PrefabInstance: {fileID: 1329037150}
   m_PrefabAsset: {fileID: 0}
---- !u!20 &4682618361071027996 stripped
-Camera:
-  m_CorrespondingSourceObject: {fileID: 4682618359780161602, guid: afab85d1cd80b3d45b51a366c2c0573a,
+--- !u!1 &4682618361071027984 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 4682618359780161614, guid: afab85d1cd80b3d45b51a366c2c0573a,
     type: 3}
   m_PrefabInstance: {fileID: 1329037150}
   m_PrefabAsset: {fileID: 0}
