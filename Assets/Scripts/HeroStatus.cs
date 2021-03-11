@@ -116,26 +116,10 @@ public class HeroStatus : NetworkBehaviour
         {
             StatusBoard.Instance.DisplaySwitch();
         }
-<<<<<<< HEAD
-=======
-
-        // add: press C to show or hide chat window
-        if (Input.GetKeyDown(KeyCode.C) && !inputFieldController.isEditingInputField) 
-        {
-            // chatWindow.GetComponent<RectTransform>().localScale = new Vector2(1,1);
-            if(canvasGroup.alpha == 0.0f) {
-                canvasGroup.alpha = 1.0f;
-            }
-
-            else if (canvasGroup.alpha == 1.0f) {
-                canvasGroup.alpha = 0.0f;
-            }
-        }
 
         // show death screen
         if (isLocalPlayer && !alive) { }
 
->>>>>>> 02cf0e4b45e5a40059aa103a6cfe6465767f1a9f
     }
 
     public bool checkAlive()
