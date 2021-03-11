@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UI;
 using Mirror;
 using System;
@@ -24,6 +25,8 @@ public class HeroStatus : NetworkBehaviour
     [SyncVar]
     [SerializeField]
     private float respawnCountDown;
+    private bool respawning = false; // true when respawning
+    public float respawnTime = 2f;
     [SyncVar]
     private HeroClass heroClass;
 
@@ -56,6 +59,10 @@ public class HeroStatus : NetworkBehaviour
     /* --- Start Chat Control --- */
     public static event Action<HeroStatus, string> OnMessage;
 
+    private Rigidbody2D rb;
+    private NavMeshAgent agent;
+    
+
     [Command]
     public void CmdSend(string message)
     {
@@ -77,6 +84,7 @@ public class HeroStatus : NetworkBehaviour
         coinText = GameObject.Find("Coin").GetComponentInChildren<Text>();
         coinText.text = coinAmount.ToString();
         Debug.Log(GetComponent<NetworkIdentity>().netId.ToString());
+        agent = gameObject.GetComponent<NavMeshAgent>();
     }
 
     private void FixedUpdate()
@@ -86,12 +94,6 @@ public class HeroStatus : NetworkBehaviour
 
     void Update()
     {
-        //For testing
-        /*if (Input.GetKeyDown(KeyCode.Space))
-        {
-            TakeDamage(10);
-        }*/
-
         //按下B键控制背包的显示和隐藏
         //Bag
         if (Input.GetKeyDown(KeyCode.B) && !ChatWindow.isEditingInputField)
@@ -118,15 +120,29 @@ public class HeroStatus : NetworkBehaviour
         }
 
         // show death screen
-        if (isLocalPlayer && !alive) { }
-
+        if (!alive && !respawning)
+        {
+            respawning = true;
+            respawnCountDown = respawnTime;
+            CanvasGroup deathCanvs = transform.Find("DeathCanvas").GetComponent<CanvasGroup>();
+            deathCanvs.alpha = 1;
+            deathCanvs.blocksRaycasts = true;
+        } else if (!alive && respawning && respawnCountDown > 0)
+        {
+            respawnCountDown -= Time.deltaTime;
+        } else if (!alive && respawning && respawnCountDown <= 0 && isServer)
+        {
+            respawning = false;
+            RpcRespawn();
+            agent.enabled = false;
+        }
+        
     }
 
     public bool checkAlive()
     {
         return alive;
     }
-
 
     public void TakeDamage(int damage)
     {
@@ -138,9 +154,24 @@ public class HeroStatus : NetworkBehaviour
         }
     }
 
-    private void Respawn()
+    [ClientRpc]
+    private void RpcRespawn()
     {
-        
+        GameObject[] sapwnPoints = GameObject.FindGameObjectsWithTag("PlayerSpawns");
+        GameObject chosenSpawn = sapwnPoints[UnityEngine.Random.Range(0, sapwnPoints.Length)];
+        if (isServer)
+        {
+            CanvasGroup deathCanvs = transform.Find("DeathCanvas").GetComponent<CanvasGroup>();
+            deathCanvs.alpha = 0;
+            deathCanvs.blocksRaycasts = false;
+            transform.position = chosenSpawn.transform.position;
+            agent.enabled = true;
+            alive = true;
+            currentHealth = maxHealth;
+            Debug.Log("teleported");
+            Debug.Log(chosenSpawn.name);
+            Debug.Log(chosenSpawn.transform.position);
+        }
     }
 
 
@@ -167,7 +198,6 @@ public class HeroStatus : NetworkBehaviour
                 StatusBoard.Instance.UpdatePlayerAttribute(text);
             }
         }
-        
     }
 
     public void SetDefense(int oldDefense, int newDefense)
