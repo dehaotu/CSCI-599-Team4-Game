@@ -116,6 +116,7 @@ public class IsometricPlayerMovementController : NetworkBehaviour
 
     void OnCollisionEnter2D(Collision2D other)
     {
+        if (!isLocalPlayer) return;
         if (other.gameObject.CompareTag("EnemyMinion"))
         {
             isoRenderer.SetDirection(Vector2.zero);

@@ -111,7 +111,7 @@ AudioSource:
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 8300000, guid: c4c68d010c6ef4d6da3d1ea766376388, type: 3}
   m_PlayOnAwake: 1
-  m_Volume: 0.19
+  m_Volume: 0.021
   m_Pitch: 1
   Loop: 1
   Mute: 0
@@ -1132,7 +1132,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   showPing: 1
   showRoundTripTime: 1
-  position: {x: 100, y: 100}
+  position: {x: 50, y: 500}
   fontSize: 24
   textColor: {r: 0.9716981, g: 0.022917405, b: 0.022917405, a: 0.3137255}
   format: 'RTT: {0}ms'
@@ -1270,7 +1270,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 376900992, guid: 210fd878e98a60e4f94d2b5e50528613, type: 3}
       propertyPath: m_Alpha
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 376900993, guid: 210fd878e98a60e4f94d2b5e50528613, type: 3}
       propertyPath: m_Color.a
@@ -1348,6 +1348,26 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 94.0001
+      objectReference: {fileID: 0}
+    - target: {fileID: 2624523275362056751, guid: 210fd878e98a60e4f94d2b5e50528613,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2624523275362056751, guid: 210fd878e98a60e4f94d2b5e50528613,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2624523275362056751, guid: 210fd878e98a60e4f94d2b5e50528613,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2624523275362056751, guid: 210fd878e98a60e4f94d2b5e50528613,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2874453964720650295, guid: 210fd878e98a60e4f94d2b5e50528613,
         type: 3}
