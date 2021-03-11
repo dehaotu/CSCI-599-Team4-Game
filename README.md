@@ -1,18 +1,18 @@
 # CSCI-599-Team4-Game
 
-### Store part(Yijing):
+### Store part:
 
 #### Parts
 
 Gold
 
-Bag Panels
+Bag
 
 Character + Hero status
 
 Store + Items + Item description
 
-Status board (***TODO***)
+Status board 
 
 #### Show and hide panel
 
@@ -26,7 +26,13 @@ S - Status board
 
 #### Operating
 
-RightClick - Buy, Equip/Take off
+RightClick - Buy, Sell
 
-LeftClick - Pick Item (First click would pick item, second click on store would sell item/second click outside all panels would throw away item)
+Update: 
+-Bag only for HP/MP
+-Equipment will be automatically put on after purchased by right click
+-Duplicate equipment purchase will be automatically sold
+-Right click on equipment can sell it
+
+
 

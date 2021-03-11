@@ -22,6 +22,9 @@ public class HeroStatus : NetworkBehaviour
     [SyncVar]
     private bool alive = true;
     [SyncVar]
+    [SerializeField]
+    private float respawnCountDown;
+    [SyncVar]
     private HeroClass heroClass;
 
     //Basic Attributes：
@@ -35,9 +38,14 @@ public class HeroStatus : NetworkBehaviour
     private int basicDefensePoints = 10;
     public int BasicDefensePoints{ get { return basicDefensePoints; } set { SetDefense(value); } }  //Basic Defense Points
 
+    private int originalAP = 10;
+    public int OriginalAP {get {return originalAP;}}
+    private int originalDP = 10;
+    public int OriginalDP {get {return originalDP;}}
 
     private Text coinText;  //Get gold amount from Coin GameObject
     [SyncVar]
+    private int coins;
     private int coinAmount = 100;  //Gold owned by the player, can be used to purchase items
     public int CoinAmount
     {
@@ -108,6 +116,26 @@ public class HeroStatus : NetworkBehaviour
         {
             StatusBoard.Instance.DisplaySwitch();
         }
+<<<<<<< HEAD
+=======
+
+        // add: press C to show or hide chat window
+        if (Input.GetKeyDown(KeyCode.C) && !inputFieldController.isEditingInputField) 
+        {
+            // chatWindow.GetComponent<RectTransform>().localScale = new Vector2(1,1);
+            if(canvasGroup.alpha == 0.0f) {
+                canvasGroup.alpha = 1.0f;
+            }
+
+            else if (canvasGroup.alpha == 1.0f) {
+                canvasGroup.alpha = 0.0f;
+            }
+        }
+
+        // show death screen
+        if (isLocalPlayer && !alive) { }
+
+>>>>>>> 02cf0e4b45e5a40059aa103a6cfe6465767f1a9f
     }
 
     public bool checkAlive()
@@ -124,6 +152,11 @@ public class HeroStatus : NetworkBehaviour
         {
             alive = false;
         }
+    }
+
+    private void Respawn()
+    {
+        
     }
 
 
@@ -166,7 +199,6 @@ public class HeroStatus : NetworkBehaviour
         }
     }
 
-
     //消费金币
     //Use Coins
     public bool ConsumeCoin(int amount)
@@ -175,6 +207,7 @@ public class HeroStatus : NetworkBehaviour
         {
             coinAmount -= amount;
             coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
+            coins = coinAmount;
             return true;  //消费成功 Successful purchase
         }
         return false;  //否则消费失败 Failed purchase
@@ -186,6 +219,7 @@ public class HeroStatus : NetworkBehaviour
     {
         this.coinAmount += amount;
         coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
+        coins = coinAmount;
     }
 
     /// <summary>

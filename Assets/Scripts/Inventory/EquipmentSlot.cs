@@ -16,13 +16,13 @@ public class EquipmentSlot :Slot
     {
         if (eventData.button == PointerEventData.InputButton.Right)//鼠标右键点击直接实现脱掉，不经过拖拽
         {
-            if (transform.childCount > 0 && InventroyManager.Instance.IsPickedItem == false)//需要脱掉的物品得有，并且鼠标上要没有物品，否则就发生：当鼠标上有物品，在其他物品上点击鼠标右键也能脱掉这种情况。
+            if (transform.childCount > 0 && InventoryManager.Instance.IsPickedItem == false)//需要脱掉的物品得有，并且鼠标上要没有物品，否则就发生：当鼠标上有物品，在其他物品上点击鼠标右键也能脱掉这种情况。
             {
                 ItemUI currentItemUI = transform.GetChild(0).GetComponent<ItemUI>();
                 Item item = currentItemUI.Item;//临时保存物品信息，防止下面一销毁就没了
                 DestroyImmediate(currentItemUI.gameObject);//立即销毁物品槽中的物品
                 transform.parent.SendMessage("PutOff", item);//脱掉物品放入背包里（发送消息方式）
-                InventroyManager.Instance.HideToolTip();//隐藏该物品的提示框
+                InventoryManager.Instance.HideToolTip();//隐藏该物品的提示框
             }
         }
         if (eventData.button != PointerEventData.InputButton.Left) return;  //只有鼠标左键能够点击物品拖动
@@ -34,9 +34,9 @@ public class EquipmentSlot :Slot
                         //1.当前装备槽有装备
                        //2.当前装备槽无装备（不做任何处理）
         bool isUpdataProperty = false;//是否需要更新角色属性
-        if (InventroyManager.Instance.IsPickedItem == true)//一：鼠标上有物品
+        if (InventoryManager.Instance.IsPickedItem == true)//一：鼠标上有物品
         {
-            ItemUI pickedItemUI = InventroyManager.Instance.PickedItem;//鼠标上的物品
+            ItemUI pickedItemUI = InventoryManager.Instance.PickedItem;//鼠标上的物品
             if (transform.childCount > 0)//1.当前装备槽有装备
             {
                 ItemUI currentItemUI = transform.GetChild(0).GetComponent<ItemUI>();//当前物品槽中的物品
@@ -51,7 +51,7 @@ public class EquipmentSlot :Slot
                 if (IsRightItem(pickedItemUI.Item))//如果鼠标上的物品是否适合放在该位置，那就把该物品放入角色面板，并且鼠标上的物品减少一个，否则不做处理
                 {
                     this.StoreItem(pickedItemUI.Item);
-                    InventroyManager.Instance.ReduceAmountItem(1);
+                    InventoryManager.Instance.ReduceAmountItem(1);
                     isUpdataProperty = true;//需要更新角色属性
                 }
             }
@@ -61,7 +61,7 @@ public class EquipmentSlot :Slot
             if (transform.childCount>0) //1.当前装备槽有装备，把装备去到鼠标上，销毁物品槽中的物品
             {
                 ItemUI currentItemUI = transform.GetChild(0).GetComponent<ItemUI>();
-                InventroyManager.Instance.PickUpItem(currentItemUI.Item, currentItemUI.Amount);
+                InventoryManager.Instance.PickUpItem(currentItemUI.Item, currentItemUI.Amount);
                 Destroy(currentItemUI.gameObject);
                 isUpdataProperty = true;//需要更新角色属性
             } //2.当前装备槽无装备（不做任何处理）
