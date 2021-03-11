@@ -2,8 +2,8 @@
 using System.Collections.Generic;
 using System;
 using System.IO;
-
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using kcp2k;
 using Mirror;
 
@@ -256,6 +256,37 @@ public class MsgReadySignal : LobbyMsgBase
         });
     }
 }
+
+// Server tells the client to connect to the game server
+public class MsgGameStartSignal : LobbyMsgBase
+{
+    string GameServerIP;
+    int GameServerPort;
+
+    public MsgGameStartSignal(string GameServerIP, int GameServerPort)
+    {
+        this.GameServerIP = GameServerIP;
+        this.GameServerPort = GameServerPort;
+    }
+
+    override public ArraySegment<byte> Serialize()
+    {
+        return LobbyMsgHelper.GenerateMsg((writer) => {
+            writer.Write((byte)LobbyPacketHeader.StartGame);
+            writer.Write(GameServerIP);
+            writer.Write(GameServerPort);
+        });
+    }
+
+    public static MsgGameStartSignal Desserialize(ArraySegment<byte> data) 
+    {
+        return LobbyMsgHelper.InterpretMsg<MsgGameStartSignal>(data, (reader) => {
+            string ip = reader.ReadString();
+            int port = reader.ReadInt32();
+            return  new MsgGameStartSignal(ip, port);       
+        });
+    } 
+}
 /************************************************************************************************************************
                                                     LobbyNetworkManager
 ************************************************************************************************************************/
@@ -285,6 +316,7 @@ public class LobbyNetworkManager : MonoBehaviour
 
     //reference
     public MenuController menuController;
+    public RoomListPanel roomListPanel;
 
     //variables
     KcpServer server;
@@ -292,11 +324,16 @@ public class LobbyNetworkManager : MonoBehaviour
 
     Dictionary<int, Player> connIdToPlayer;     //for server only.
     List<Room> roomList;
-    Room currRoom;       //for client only. This is null if client is not in any room, else it is the client's current room.
+    public Room currRoom;       //for client only. This is null if client is not in any room, else it is the client's current room.
+
+
+    //public static LobbyNetworkManager selfReference;
 
     // Call this when the LobbyNetworkManager is being loaded into the scene
     void Awake()
     {
+        //selfReference = this;
+        DontDestroyOnLoad(transform.gameObject);
         connIdToPlayer = new Dictionary<int, Player>();
         roomList = new List<Room>();
 
@@ -342,6 +379,7 @@ public class LobbyNetworkManager : MonoBehaviour
 
     public void ClientConnectLobby()
     {
+        Debug.Log("Debug IP: " + LobbyServerIP);
         client.Connect(
             LobbyServerIP, 
             Port,
@@ -441,6 +479,17 @@ public class LobbyNetworkManager : MonoBehaviour
     {
         connIdToPlayer[connectionId].isReady = !connIdToPlayer[connectionId].isReady;
 
+        MsgRoomUpdate roomUpdateMsg = new MsgRoomUpdate();
+        roomUpdateMsg.RoomName = roomList[0].RoomName;
+        roomUpdateMsg.playerList = new List<Player>(roomList[0].PlayerList);
+
+        List<int> connList = new List<int>();
+        foreach (Player p in roomList[0].PlayerList)
+        {
+            connList.Add(p.connectionId);
+        }
+        MultiCast(roomUpdateMsg, connList.ToArray());
+
         //To be changed! We assume there is only one room in the room for now. Server needs to know what room the player is in.
         bool allReady = true;
         foreach (Player player in roomList[0].PlayerList)
@@ -451,6 +500,8 @@ public class LobbyNetworkManager : MonoBehaviour
         if (allReady)
         {
             Debug.Log("All player ready. Game Start");
+            MsgGameStartSignal gameStartSignal = new MsgGameStartSignal("52.183.4.114", 7777);
+            MultiCast(gameStartSignal, connList.ToArray());
         }
     }
 
@@ -474,7 +525,6 @@ public class LobbyNetworkManager : MonoBehaviour
     // Invoked when a client connects to the lobby server. Send player information immediately.
     void OnClientConnected()
     {
-
         MsgPlayerInfoUpdate msg = new MsgPlayerInfoUpdate(menuController.myName);
         client.Send(msg.Serialize(), KcpChannel.Reliable);
     }
@@ -498,6 +548,9 @@ public class LobbyNetworkManager : MonoBehaviour
             case LobbyPacketHeader.RoomUpdate:
                 HandleRoomUpdate(MsgRoomUpdate.Desserialize(message));
                 break;
+            case LobbyPacketHeader.StartGame:
+                HandleGameStartSignal(MsgGameStartSignal.Desserialize(message));
+                break;
         }
     }
 
@@ -517,6 +570,7 @@ public class LobbyNetworkManager : MonoBehaviour
         {
             Debug.Log(roomList[0].RoomName + "\t\t" + roomList[0].numPlayers);
         }
+        roomListPanel.UpdateRoom(roomList[0].numPlayers);
     }
 
     // Defines what to do when client receives MsgJoinRoomResponse packet.
@@ -547,15 +601,39 @@ public class LobbyNetworkManager : MonoBehaviour
         }
     }
 
+    void HandleGameStartSignal(MsgGameStartSignal packet)
+    {  
+        SceneManager.sceneLoaded += (scene, mode) => {
+            if (scene.name == "TestScene")
+            {
+                // to be changed. Now we assume the both lobby server and game server are in the same vm instance
+                GameObject networkManagerObj = GameObject.Find("NetworkManager");
+
+                if (networkManagerObj != null)
+                    Debug.Log("networkManagerObj found");
+                else
+                    Debug.Log("networkManagerObj NOT FOUND!!!");
+                NetworkManager networkManager = networkManagerObj.GetComponent<NetworkManager>();
+                networkManager.networkAddress = LobbyServerIP;
+                Debug.Log("Now the networkManager's networkAddress is " + LobbyServerIP );
+                networkManager.StartClient();
+                Debug.Log("Called startclient()");
+            }
+        };
+
+        SceneManager.LoadScene("TestScene");
+
+    }
+
     // Send the joinRoom message to server.
-    void JoinRoom(String roomUUID)
+    public void JoinRoom(String roomUUID)
     {
         MsgJoinRoomRequest msg = new MsgJoinRoomRequest();
         client.Send(msg.Serialize(), KcpChannel.Reliable);
     }
 
     // Send the player's ready state to the server.
-    void sendReadySignal()
+    public void sendReadySignal()
     {
         MsgReadySignal msg = new MsgReadySignal();
         client.Send(msg.Serialize(), KcpChannel.Reliable);

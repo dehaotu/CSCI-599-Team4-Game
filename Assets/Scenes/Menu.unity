@@ -383,7 +383,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Port: 27777
-  LobbyServerIP: 
+  LobbyServerIP: 52.183.4.114
   NoDelay: 1
   Interval: 10
   FastResend: 2
@@ -391,6 +391,7 @@ MonoBehaviour:
   SendWindowSize: 4096
   ReceiveWindowSize: 4096
   menuController: {fileID: 1280086874}
+  roomListPanel: {fileID: 271566536}
 --- !u!4 &174310634
 Transform:
   m_ObjectHideFlags: 0
@@ -403,7 +404,7 @@ Transform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 0}
-  m_RootOrder: 5
+  m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &222236575
 GameObject:
@@ -653,7 +654,7 @@ MonoBehaviour:
   roomRowPrefab: {fileID: 4839204102250086037, guid: d5cda8e0fb3bc1146be1bef8cbd27a19,
     type: 3}
   menuController: {fileID: 1280086874}
-  networkDiscovery: {fileID: 1107837460}
+  networkDiscovery: {fileID: 0}
 --- !u!1 &285227372
 GameObject:
   m_ObjectHideFlags: 0
@@ -1761,151 +1762,6 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1007365389}
   m_CullTransparentMesh: 0
---- !u!1 &1107837459
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1107837461}
-  - component: {fileID: 1107837460}
-  m_Layer: 0
-  m_Name: RoomDiscovery
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1107837460
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1107837459}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 46b4f4a5909b92f4cb08ad4ffdfaa464, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  secretHandshake: 2841817410472120932
-  serverBroadcastListenPort: 47777
-  ActiveDiscoveryInterval: 3
-  networkRoomManager: {fileID: 1116063841}
-  roomListPanel: {fileID: 271566536}
-  roomServerIP: localhost
---- !u!4 &1107837461
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1107837459}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1117.5684, y: 802.9417, z: -148.57285}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 4
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &1116063839
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1116063842}
-  - component: {fileID: 1116063841}
-  - component: {fileID: 1116063840}
-  m_Layer: 0
-  m_Name: NetworkRoomManager
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!114 &1116063840
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1116063839}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6b0fecffa3f624585964b0d0eb21b18e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Port: 7777
-  NoDelay: 1
-  Interval: 10
-  FastResend: 2
-  CongestionWindow: 0
-  SendWindowSize: 4096
-  ReceiveWindowSize: 4096
-  debugLog: 0
-  statisticsGUI: 0
-  statisticsLog: 0
---- !u!114 &1116063841
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1116063839}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: bd22e678ccbfcdb40b8708037675be7b, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  dontDestroyOnLoad: 1
-  runInBackground: 1
-  autoStartServerBuild: 0
-  showDebugMessages: 0
-  serverTickRate: 30
-  serverBatching: 0
-  serverBatchInterval: 0
-  offlineScene: 
-  onlineScene: 
-  transport: {fileID: 1116063840}
-  networkAddress: localhost
-  maxConnections: 4
-  disconnectInactiveConnections: 0
-  disconnectInactiveTimeout: 60
-  authenticator: {fileID: 0}
-  playerPrefab: {fileID: 7891559232094816211, guid: db6b82463efddea4daed46e1edd710d7,
-    type: 3}
-  autoCreatePlayer: 0
-  playerSpawnMethod: 1
-  spawnPrefabs: []
-  showRoomGUI: 0
-  minPlayers: 1
-  roomPlayerPrefab: {fileID: 1257700833802494063, guid: d73367814be36b34e9812a10338ef602,
-    type: 3}
-  RoomScene: Assets/Scenes/Menu.unity
-  GameplayScene: Assets/Scenes/TestScene.unity
-  _allPlayersReady: 0
-  roomSlots: []
-  clientIndex: 0
-  menuController: {fileID: 1280086874}
---- !u!4 &1116063842
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1116063839}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1193.0895, y: 792.1555, z: -121.4546}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_Children: []
-  m_Father: {fileID: 0}
-  m_RootOrder: 3
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1230970027
 GameObject:
   m_ObjectHideFlags: 0
@@ -2073,9 +1929,9 @@ MonoBehaviour:
   playerListPanel: {fileID: 1438792311}
   nameInputField: {fileID: 1576756613}
   serverDisconnectPanel: {fileID: 663234745}
-  tinsNetworkRoomManager: {fileID: 174310633}
-  networkRoomManager: {fileID: 1116063841}
-  roomDiscovery: {fileID: 1107837460}
+  lobbyNetworkManager: {fileID: 174310633}
+  networkRoomManager: {fileID: 0}
+  roomDiscovery: {fileID: 0}
   playerInfoRowPrefab: {fileID: 6358321824382238178, guid: 243088d74d7958946837493baab73c0a,
     type: 3}
   cameraSpeedX: 0.4

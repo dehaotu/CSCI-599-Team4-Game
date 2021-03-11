@@ -55,7 +55,7 @@ public class MenuController : MonoBehaviour
     public GameObject playerListPanel;
     public GameObject nameInputField;
     public GameObject serverDisconnectPanel;
-    public LobbyNetworkManager tinsNetworkRoomManager;
+    public LobbyNetworkManager lobbyNetworkManager;
     public CustomRoomManager networkRoomManager;
     public CustomNetworkDiscovery roomDiscovery;
     public PlayerInfoRow playerInfoRowPrefab;
@@ -90,19 +90,21 @@ public class MenuController : MonoBehaviour
 
     private void _updateRoom()
     {
+        if (lobbyNetworkManager.currRoom == null)
+            return;
+
         foreach (Transform child in playerListPanel.transform)
         {
             Destroy(child.gameObject);
         }
         
-        for (int i = 0; i < networkRoomManager.roomSlots.Count; i++)
+        for (int i = 0; i < lobbyNetworkManager.currRoom.PlayerList.Count; i++)
         {
-            NetworkRoomPlayer roomPlayer = networkRoomManager.roomSlots[i];
-            CustomRoomPlayer customRoomPlayer = roomPlayer.GetComponent<CustomRoomPlayer>();
+            Player roomPlayer = lobbyNetworkManager.currRoom.PlayerList[i];
             GameObject playerRowObj = Instantiate(playerInfoRowPrefab.gameObject, Vector3.zero, Quaternion.identity, playerListPanel.transform);
             PlayerInfoRow playerRow = playerRowObj.GetComponent<PlayerInfoRow>();
-            playerRow.setPlayerNameText(customRoomPlayer.playerName);
-            playerRow.setReadyText(customRoomPlayer.readyToBegin);
+            playerRow.setPlayerNameText(roomPlayer.Name);
+            playerRow.setReadyText(roomPlayer.isReady);
             RectTransform tf = playerRowObj.GetComponent<RectTransform>();
             tf.localPosition  = new Vector3(0, GUI_ROOMPANEL_HEIGH - i * (tf.rect.height + GUI_ROOMPANEL_PLAYERINFOROW_GAP), 0);
         }
@@ -126,8 +128,8 @@ public class MenuController : MonoBehaviour
     {
         _setAllPlanelInactive();
         lobbyPanel.SetActive(true);
-
-        roomDiscovery.StartDiscovery();
+        lobbyNetworkManager.ClientConnectLobby();
+        //roomDiscovery.StartDiscovery();
     }
 
     public void onClickSettingButton() {}
@@ -151,7 +153,7 @@ public class MenuController : MonoBehaviour
         flag_isHost = true;
         */
         Debug.Log("trying to connect...");
-        tinsNetworkRoomManager.ClientConnectLobby();
+        //tinsNetworkRoomManager.ClientConnectLobby();
     }
 /************************************************************************************************
                                              LobbyPanel                                             
@@ -167,17 +169,18 @@ public class MenuController : MonoBehaviour
 
     public void onClick_Lobby_BackButton()
     {
-        _setAllPlanelInactive();
-        mainMenuPanel.SetActive(true);
+        //_setAllPlanelInactive();
+        //mainMenuPanel.SetActive(true);
 
-        roomDiscovery.StartDiscovery();
+        //roomDiscovery.StartDiscovery();
     }
 
     public void onClick_Lobby_RoomRow()
     {
         _setAllPlanelInactive();
-        networkRoomManager.StartClient();
-        roomDiscovery.StopDiscovery();
+        //networkRoomManager.StartClient();
+        //roomDiscovery.StopDiscovery();
+        lobbyNetworkManager.JoinRoom("");
         flag_isHost = false;
         roomPanel.SetActive(true);
     }
@@ -186,6 +189,7 @@ public class MenuController : MonoBehaviour
 ************************************************************************************************/
     public void onClick_Room_BackButton()
     {
+        /*
         _setAllPlanelInactive();
         lobbyPanel.SetActive(true);
         if (flag_isHost)
@@ -196,11 +200,12 @@ public class MenuController : MonoBehaviour
         {
             flag_client_actively_disconnect = true;
             networkRoomManager.StopClient();
-        }
+        }*/
     }
 
     public void onClick_Room_ReadyButton()
     {
+        /*
         foreach (NetworkRoomPlayer roomPlayer in networkRoomManager.roomSlots)
         {
             // If a roomPlayer represents the this computer's client, roomPlayer.isLocalPlayer is true.
@@ -208,7 +213,8 @@ public class MenuController : MonoBehaviour
             {
                 roomPlayer.CmdChangeReadyState(!roomPlayer.readyToBegin);
             }
-        }
+        }*/
+        lobbyNetworkManager.sendReadySignal();
     }
 /************************************************************************************************
                                              ServerDisconnectPanel                                             
