@@ -5,7 +5,7 @@ using Mirror;
 
 public class Crystal : NetworkBehaviour
 {
-    
+
     public int maxCrystalHealth = 100;
     [SyncVar]
     public int currentCrystalHealth = 100;
@@ -95,26 +95,29 @@ public class Crystal : NetworkBehaviour
         if (bullet != null)
         {
             bullet.LocateTarget(shootTarget);
+
+            // Tower shooting audio
+            bullet.GetComponent<AudioSource>().Play();
         }
 
         Debug.Log("shoot");
     }
-/*    public void shoot()
-    {
-        if (timeBtShots <= 0 && player.GetComponent<HeroStatus>().checkAlive())
+    /*    public void shoot()
         {
-            GameObject bullet = Instantiate(CrystalBulletPrefab, transform.position, Quaternion.identity);
-            timeBtShots = startTimeBtShots;
-        }
-        else
-        {
-            timeBtShots -= Time.deltaTime;
-        }
-    }*/
+            if (timeBtShots <= 0 && player.GetComponent<HeroStatus>().checkAlive())
+            {
+                GameObject bullet = Instantiate(CrystalBulletPrefab, transform.position, Quaternion.identity);
+                timeBtShots = startTimeBtShots;
+            }
+            else
+            {
+                timeBtShots -= Time.deltaTime;
+            }
+        }*/
 
     public void TakeDamage(int damage)
     {
-        if(isServer) currentCrystalHealth -= damage;
+        if (isServer) currentCrystalHealth -= damage;
         CrystalHealthBar.SetHealth(currentCrystalHealth);
     }
 }

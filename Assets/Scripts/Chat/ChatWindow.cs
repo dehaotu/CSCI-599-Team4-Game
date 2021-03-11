@@ -6,26 +6,45 @@ using UnityEngine.UI;
 
 public class ChatWindow : MonoBehaviour
 {
-    static readonly ILogger logger = LogFactory.GetLogger(typeof(ChatWindow));
-
     public InputField chatMessage;
     public Text chatHistory;
     public Scrollbar scrollbar;
+    public static bool isEditingInputField;
+    private CanvasGroup canvasGroup;
 
     public void Awake()
     {
-        ChatPlayer.OnMessage += OnPlayerMessage;
+        HeroStatus.OnMessage += OnPlayerMessage;
+        canvasGroup = gameObject.GetComponentInParent<Canvas>().GetComponent<CanvasGroup>();
     }
 
-    void OnPlayerMessage(ChatPlayer player, string message)
-    {
-        // string prettyMessage = player.isLocalPlayer ?
-        //     $"<color=red>{player.playerName}: </color> {message}" :
-        //     $"<color=blue>{player.playerName}: </color> {message}";
-        // AppendMessage(prettyMessage);
+    private void Start() {
+        canvasGroup.alpha = 0.0f;
+    }
 
-        AppendMessage(message);
-        logger.Log(message);
+    private void Update() {
+        isEditingInputField = chatMessage.GetComponentInChildren<InputField>().isFocused;
+        // Debug.Log(isEditingInputField);
+        if (!isEditingInputField) {
+            if (Input.GetKeyDown(KeyCode.C)) 
+            {
+                if(canvasGroup.alpha == 0.0f) {
+                    canvasGroup.alpha = 1.0f;
+                }
+                else if (canvasGroup.alpha == 1.0f) {
+                    canvasGroup.alpha = 0.0f;
+                }
+            }
+        }
+    }
+
+    void OnPlayerMessage(HeroStatus player, string message)
+    {
+        string prettyMessage = player.isLocalPlayer ?
+            $"<color=red>{player.netId}: </color> {message}" :
+            $"<color=blue>{player.netId}: </color> {message}";
+        AppendMessage(prettyMessage);
+        // Debug.Log(message);
     }
 
     public void OnSend()
@@ -34,7 +53,7 @@ public class ChatWindow : MonoBehaviour
             return;
 
         // get our player
-        ChatPlayer player = NetworkClient.connection.identity.GetComponent<ChatPlayer>();
+        HeroStatus player = NetworkClient.connection.identity.GetComponent<HeroStatus>();
 
         // send a message
         player.CmdSend(chatMessage.text.Trim());

@@ -4,7 +4,7 @@ using UnityEngine.UI;
 /// <summary>
 /// 角色面板类，控制角色面板的逻辑
 /// </summary>
-public class CharacterPanel : Inventroy
+public class CharacterPanel : Inventory
 {
     //单例模式
     private static CharacterPanel _instance;
@@ -31,13 +31,14 @@ public class CharacterPanel : Inventroy
         characterPropertyText = transform.Find("CharacterPropertyPanel/Text").GetComponent<Text>();
         player = GameObject.FindWithTag("Player").GetComponent<HeroStatus>();
         UpdatePropertyText();//初始化显示角色属性值
-        Hide();
+        //Hide();
     }
 
     //更新角色属性显示
     private void UpdatePropertyText() 
     {
-        
+        attackPoints = 0;
+        defensePoints = 0;
         foreach (EquipmentSlot slot in slotArray)//遍历角色面板中的装备物品槽
         {
             if (slot.transform.childCount > 0)//找到有物品的物品槽，获取里面装备的属性值
@@ -55,13 +56,13 @@ public class CharacterPanel : Inventroy
                 }
             }
         }
-        attackPoints += player.BasicAttackPoints;
-        defensePoints += player.BasicDefensePoints;
+        attackPoints += player.OriginalAP;
+        defensePoints += player.OriginalDP;
         //if (!GetComponentInParent<HeroStatus>().thisIsSever() && GetComponentInParent<HeroStatus>().thisIsLocalPlayer()) CmdUpdateSB();
         string text = string.Format("Attack：{0}\nDefense：{1}", attackPoints, defensePoints);
         characterPropertyText.text = text;
 
-        // Update player attackpoints
+        // Update player attackpoints/defensepoints
         player.BasicAttackPoints = attackPoints;
         player.BasicDefensePoints = defensePoints;
     }
@@ -89,9 +90,7 @@ public class CharacterPanel : Inventroy
             {
                 if (equipmentSlot.transform.childCount > 0)//判断角色面板中的物品槽合适的位置是否已经有了装备
                 {
-                    ItemUI currentItemUI = equipmentSlot.transform.GetChild(0).GetComponent<ItemUI>();
-                    exitItem = currentItemUI.Item;
-                    currentItemUI.SetItem(item, 1);
+                    Vendor.Instance.SellItem(item);
                 }
                 else
                 {
@@ -119,7 +118,7 @@ public class CharacterPanel : Inventroy
     //脱掉装备功能（不需拖拽）
     public void PutOff(Item item) 
     {
-        Knapscak.Instance.StoreItem(item);//把角色面板上是物品替换到背包里面
+        Vendor.Instance.SellItem(item);
         UpdatePropertyText();//更新显示角色属性值
 
         //boardText = GameObject.Find("StatusBoardPanel/Text").GetComponent<Text>();
