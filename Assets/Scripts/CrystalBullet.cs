@@ -8,7 +8,7 @@ public class CrystalBullet : MonoBehaviour
     public float speed = 6.0f;
     public float verticalOffset = 0.7f;
     //public GameObject bulletPrefabs;
-/*    private Transform player;*/
+    /*    private Transform player;*/
     // private Vector2 target;
 
     //add
