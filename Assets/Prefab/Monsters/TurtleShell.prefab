@@ -254,8 +254,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  maxHP: 100
-  currHP: 100
+  maxHP: 50
+  currHP: 50
   autoHealPerFrame: 1
   alive: 1
   healthBar: {fileID: 666465647865370971}
