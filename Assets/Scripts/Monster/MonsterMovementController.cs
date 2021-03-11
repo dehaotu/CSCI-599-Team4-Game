@@ -12,7 +12,7 @@ public class MonsterMovementController : NetworkBehaviour
     Rigidbody2D monster;
 
     Vector2 monsterInitialPosition;
-    public Vector2 monsterInitialDirection;// Initial direction to SE
+    private Vector2 monsterInitialDirection = new Vector2(1, -1);  // Initial direction to SE
     private float returnInitMinDist = 0.05f;
 
     private float attackMinDist = 0.5f;
@@ -26,7 +26,7 @@ public class MonsterMovementController : NetworkBehaviour
         monster = GetComponent<Rigidbody2D>();
         isoRenderer = GetComponentInChildren<IsometricCharacterRenderer>();
         monsterStatus = GetComponentInChildren<MonsterStatus>();
-        
+
     }
 
     void Update()
@@ -174,5 +174,11 @@ public class MonsterMovementController : NetworkBehaviour
             return Vector3.positiveInfinity;
         else
             return player.transform.position;
+    }
+
+    public void TakeDamage(int damage)
+    {
+        monsterStatus.TakeDamage(damage: damage);
+        Debug.Log(damage);
     }
 }
