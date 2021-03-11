@@ -458,7 +458,7 @@ PrefabInstance:
     - target: {fileID: 6863040765265715118, guid: 5399561a8388c493e863361c7299d3f8,
         type: 3}
       propertyPath: m_Name
-      value: MonsterStatusCanvas
+      value: StatusCanvas
       objectReference: {fileID: 0}
     - target: {fileID: 8291708735042793870, guid: 5399561a8388c493e863361c7299d3f8,
         type: 3}
