@@ -753,6 +753,7 @@ MonoBehaviour:
   maxHealth: 100
   currentHealth: 0
   alive: 1
+  respawnCountDown: 0
   healthBar: {fileID: 4889866394101842248}
   basicAttackPoints: 10
   basicDefensePoints: 10
@@ -2188,10 +2189,30 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6518395084293449074, guid: 210fd878e98a60e4f94d2b5e50528613,
+        type: 3}
+      propertyPath: m_Alpha
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6518395085549494237, guid: 210fd878e98a60e4f94d2b5e50528613,
+        type: 3}
+      propertyPath: m_Alpha
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6518395085709171518, guid: 210fd878e98a60e4f94d2b5e50528613,
+        type: 3}
+      propertyPath: m_Alpha
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 6518395085725960202, guid: 210fd878e98a60e4f94d2b5e50528613,
         type: 3}
       propertyPath: m_Name
       value: Inventory Menu
+      objectReference: {fileID: 0}
+    - target: {fileID: 6518395085725960202, guid: 210fd878e98a60e4f94d2b5e50528613,
+        type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6518395085725960206, guid: 210fd878e98a60e4f94d2b5e50528613,
         type: 3}
@@ -2348,7 +2369,7 @@ PrefabInstance:
     - target: {fileID: 4627367585883144233, guid: 3bb40cb3e3946574ca473c62ad53f9cd,
         type: 3}
       propertyPath: m_Name
-      value: InventroyManager
+      value: InventoryManager
       objectReference: {fileID: 0}
     - target: {fileID: 4627367585883144234, guid: 3bb40cb3e3946574ca473c62ad53f9cd,
         type: 3}

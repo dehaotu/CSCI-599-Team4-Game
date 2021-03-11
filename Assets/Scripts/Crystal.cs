@@ -21,6 +21,8 @@ public class Crystal : NetworkBehaviour
     private string shootTag = "Player";
     private GameObject shootTarget;
 
+    public bool isAlly;
+
     // Start is called before the first frame update
     void Start()
     {
@@ -69,6 +71,7 @@ public class Crystal : NetworkBehaviour
             {
                 shortestDistance = distance;
                 nearestTarget = target;
+                if (isAlly && target.tag.Equals("Player")) nearestTarget = null; // ally towers shouldn't attack players
             }
         }
 
@@ -108,7 +111,6 @@ public class Crystal : NetworkBehaviour
                 timeBtShots -= Time.deltaTime;
             }
         }*/
-
 
     public void TakeDamage(int damage)
     {

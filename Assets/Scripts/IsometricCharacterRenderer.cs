@@ -34,6 +34,7 @@ public class IsometricCharacterRenderer : MonoBehaviour
             //if we are basically standing still, we'll use the Static states
             //we won't be able to calculate a direction if the user isn't pressing one, anyway!
             directionArray = staticDirections;
+            lastDirection = DirectionToIndex(direction, 8);
         }
         else
         {
@@ -47,6 +48,14 @@ public class IsometricCharacterRenderer : MonoBehaviour
         //tell the animator to play the requested state
         animator.Play(directionArray[lastDirection]);
 
+    }
+
+    public void SetStaticDirection(int ind)
+    {
+        // force to set a static direction
+
+        lastDirection = ind;
+        animator.Play(staticDirections[ind]);
     }
 
     //helper functions

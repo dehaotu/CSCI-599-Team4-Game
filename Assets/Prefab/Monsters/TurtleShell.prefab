@@ -177,6 +177,7 @@ GameObject:
   - component: {fileID: -5487003430000364066}
   - component: {fileID: -5154910720736266075}
   - component: {fileID: 7072789602850029144}
+  - component: {fileID: 3506755441127735777}
   m_Layer: 0
   m_Name: TurtleShell
   m_TagString: Monster
@@ -308,6 +309,17 @@ MonoBehaviour:
   localPositionSensitivity: 0.01
   localRotationSensitivity: 0.01
   localScaleSensitivity: 0.01
+--- !u!210 &3506755441127735777
+SortingGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3339481645408498929}
+  m_Enabled: 1
+  m_SortingLayerID: -211649221
+  m_SortingLayer: -1
+  m_SortingOrder: 9
 --- !u!1001 &7696349063511767652
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -419,6 +431,16 @@ PrefabInstance:
         type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6043237009751293838, guid: 5399561a8388c493e863361c7299d3f8,
+        type: 3}
+      propertyPath: m_SortingOrder
+      value: 100
+      objectReference: {fileID: 0}
+    - target: {fileID: 6043237009751293838, guid: 5399561a8388c493e863361c7299d3f8,
+        type: 3}
+      propertyPath: m_SortingLayerID
+      value: -211649221
       objectReference: {fileID: 0}
     - target: {fileID: 6863040765265715118, guid: 5399561a8388c493e863361c7299d3f8,
         type: 3}
