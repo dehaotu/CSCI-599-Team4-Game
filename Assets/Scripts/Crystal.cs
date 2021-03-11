@@ -95,6 +95,9 @@ public class Crystal : NetworkBehaviour
         if (bullet != null)
         {
             bullet.LocateTarget(shootTarget);
+
+            // Tower shooting audio
+            bullet.GetComponent<AudioSource>().Play();
         }
 
         Debug.Log("shoot");

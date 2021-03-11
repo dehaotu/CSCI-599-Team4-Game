@@ -4,6 +4,9 @@ using UnityEngine;
 
 public class IsometricCharacterRenderer : MonoBehaviour
 {
+    //public AudioClip soundToPlay;
+    //public AudioSource audio;
+    //public bool alreadyPlayed = false;
 
     public static readonly string[] staticDirections = { "Static N", "Static NW", "Static W", "Static SW", "Static S", "Static SE", "Static E", "Static NE" };
     public static readonly string[] runDirections = { "Run N", "Run NW", "Run W", "Run SW", "Run S", "Run SE", "Run E", "Run NE" };
@@ -105,6 +108,11 @@ public class IsometricCharacterRenderer : MonoBehaviour
     public void Attack()
     {
         animator.Play(attackDirections[lastDirection]);
+
+        // attack audio
+        AudioSource audioSource = gameObject.GetComponent<AudioSource>();
+        AudioSource.PlayClipAtPoint(audioSource.clip, transform.position);
+
         attackID++;
         attackID %= 100;
     }
@@ -125,5 +133,15 @@ public class IsometricCharacterRenderer : MonoBehaviour
     public void Dead()
     {
         animator.Play(deadDirections[lastDirection]);
+
+        // death audio
+        //audio = gameObject.GetComponent<AudioSource>();
+
+        //if (!alreadyPlayed) {
+        //    audio.PlayOneShot(soundToPlay);
+        //    alreadyPlayed = true;
+        //}
+
+        //AudioSource.PlayClipAtPoint(audioSource.clip, transform.position);
     }
 }
