@@ -43,7 +43,7 @@ public class EnemyController : NetworkBehaviour
         currentHealthPoints = maxHealthPoints;
         healthBar.SetMaxHealth(maxHealthPoints);
         //NetworkServer.Spawn(this.gameObject);
-        Debug.Log(gameObject.GetComponentInChildren<Text>().text);
+        //Debug.Log(gameObject.GetComponentInChildren<Text>().text);
     }
 
     private GameObject FindNearestObjectByTags(string[] tags)
@@ -82,8 +82,6 @@ public class EnemyController : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        
-
         string[] findTags = gameObject.tag.Equals("EnemyMinion") ? new string[]{ "Player", "PlayerMinion" } : new string[]{ "EnemyMinion" };
         GameObject findObject = FindNearestObjectByTags(findTags);
         timer += Time.deltaTime;
@@ -106,10 +104,14 @@ public class EnemyController : NetworkBehaviour
                     isoRenderer.SetDirection(Vector2.zero);
                     if (targetObject.tag.Equals("Player"))
                     {
+                        if (!targetObject.GetComponent<HeroStatus>().checkAlive()) return; //only attack when player is still alive
                         targetObject.GetComponent<HeroStatus>().TakeDamage(basicAttackPoints);
+                        isoRenderer.Attack();
                     } else if (targetObject.tag.Equals("PlayerMinion") || targetObject.tag.Equals("EnemyMinion"))
                     {
+                        if (!targetObject.GetComponent<EnemyController>().checkAlive()) return;
                         targetObject.GetComponent<EnemyController>().TakeDamage(basicAttackPoints);
+                        isoRenderer.Attack();
                     }
                 }
             } else

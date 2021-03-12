@@ -534,7 +534,7 @@ GameObject:
   - component: {fileID: 1350781915653539785}
   - component: {fileID: 2565944103420053378}
   - component: {fileID: 5188282867423157825}
-  - component: {fileID: 6448088133173124616}
+  - component: {fileID: 6267616349058744225}
   m_Layer: 0
   m_Name: ChatWindow
   m_TagString: Untagged
@@ -615,7 +615,7 @@ MonoBehaviour:
   chatMessage: {fileID: 3341413042444875296}
   chatHistory: {fileID: 8834474899603549786}
   scrollbar: {fileID: 2773942534558167973}
---- !u!114 &6448088133173124616
+--- !u!114 &6267616349058744225
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -624,11 +624,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 5761046771520249725}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: eaa2ef3205f214216a810a9a686379af, type: 3}
+  m_Script: {fileID: 11500000, guid: 9b91ecbcc199f4492b9a91e820070131, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  chatInputField: {fileID: 5670146367344456336}
-  isEditingInputField: 0
+  sceneId: 0
+  serverOnly: 0
+  m_AssetId: 
+  hasSpawned: 0
 --- !u!1 &5997630969189042279
 GameObject:
   m_ObjectHideFlags: 0

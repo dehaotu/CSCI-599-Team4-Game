@@ -19,6 +19,10 @@ public class IsometricPlayerMovementController : NetworkBehaviour
 
     private Camera playerCamera;
 
+    GameObject targetObject;
+    bool isEnemyClose = false;
+    bool isMonsterClose = false;
+
     private void Awake()
     {
         rbody = GetComponent<Rigidbody2D>();
@@ -36,7 +40,10 @@ public class IsometricPlayerMovementController : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!isLocalPlayer) return;
+        if (!isLocalPlayer) {
+            GameObject.Find("Inventory Menu").GetComponent<CanvasGroup>().alpha = 0;
+            return;
+        }
         if (isoRenderer.isPlayingAttack()) return;
         float horizontalInput = 0;
         float verticalInput = 0;
@@ -65,24 +72,25 @@ public class IsometricPlayerMovementController : NetworkBehaviour
         CmdSetDirection(movement);
         if (heroStatus.checkAlive()) rbody.MovePosition(newPos);
 
-
         //test attack
         if (Input.GetKeyDown(KeyCode.F))
         {
-            if(heroStatus.checkAlive())
-            isoRenderer.Attack();
+            if (heroStatus.checkAlive())
+            {
+                isoRenderer.Attack();
+                if (isEnemyClose)
+                {
+                    targetObject.GetComponent<EnemyController>().TakeDamage(heroStatus.BasicAttackPoints);
+                } else if (isMonsterClose) {
+                    targetObject.GetComponent<MonsterMovementController>().TakeDamage(heroStatus.BasicAttackPoints);
+                }
+            }
         }
 
         if (heroStatus.currentHealth <= 0)
         {
             stopAction = true;
             isoRenderer.Dead();
-        }
-
-        // test attack monster
-        if (Input.GetKeyDown(KeyCode.M))
-        {
-            CmdMockAttack();
         }
     }
 
@@ -91,15 +99,26 @@ public class IsometricPlayerMovementController : NetworkBehaviour
         if (!stopAction) isoRenderer.SetDirection(direction);
     }
 
-    [Command]
-    private void CmdMockAttack()
+    void OnCollisionEnter2D(Collision2D other)
     {
-        GameObject[] monsters = GameObject.FindGameObjectsWithTag("Monster");
-        foreach (GameObject monster in monsters)
+        if (!isLocalPlayer) return;
+        if (other.gameObject.CompareTag("EnemyMinion"))
         {
-            // Get player alive status.
-            monster.GetComponent<MonsterStatus>().CreateDamage(5);
+            isoRenderer.SetDirection(Vector2.zero);
+            isEnemyClose = true;
+            targetObject = other.gameObject;
+        } else if (other.gameObject.CompareTag("Monster"))
+        {
+            isoRenderer.SetDirection(Vector2.zero);
+            isMonsterClose = true;
+            targetObject = other.gameObject;
         }
-        Debug.Log("In mock attack");
+    }
+
+    void OnCollisionExit2D(Collision2D other)
+    {
+        isEnemyClose = false;
+        isMonsterClose = false;
+        targetObject = null;
     }
 }
