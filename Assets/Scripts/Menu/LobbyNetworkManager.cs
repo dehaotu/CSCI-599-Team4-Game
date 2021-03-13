@@ -605,7 +605,7 @@ public class LobbyNetworkManager : MonoBehaviour
         SceneManager.sceneLoaded += (scene, mode) => {
             if (scene.name == "PreTestScene")
             {
-                //System.Threading.Thread.Sleep(UnityEngine.Random.Range(500, 2000));
+                System.Threading.Thread.Sleep(UnityEngine.Random.Range(500, 2000));
                 // to be changed. Now we assume the both lobby server and game server are in the same vm instance
                 GameObject networkManagerObj = GameObject.Find("NetworkRoomManager");
 

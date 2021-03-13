@@ -41,7 +41,7 @@ public class IsometricPlayerMovementController : NetworkBehaviour
     void Update()
     {
         if (!isLocalPlayer) {
-            GameObject.Find("Inventory Menu").GetComponent<CanvasGroup>().alpha = 0;
+            //GameObject.Find("Inventory Menu").GetComponent<CanvasGroup>().alpha = 0;
             return;
         }
         if (isoRenderer.isPlayingAttack()) return;
