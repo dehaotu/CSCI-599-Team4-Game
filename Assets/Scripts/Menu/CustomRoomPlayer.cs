@@ -34,7 +34,6 @@ public class CustomRoomPlayer : NetworkRoomPlayer
     /// <para>Useful for saving object data in persistant storage</para>
     /// </summary>
     public override void OnStopServer() { 
-        Debug.Log("Debug: CustomRoomPlayer.OnStopServer");
         base.OnStopServer();
     }
 
@@ -43,7 +42,6 @@ public class CustomRoomPlayer : NetworkRoomPlayer
     /// <para>Objects on the host have this function called, as there is a local client on the host. The values of SyncVars on object are guaranteed to be initialized correctly with the latest state from the server when this function is called on the client.</para>
     /// </summary>
     public override void OnStartClient() { 
-        Debug.Log("Debug: CustomRoomPlayer.OnStartClient");
         base.OnStartClient();
     }
 
@@ -52,7 +50,6 @@ public class CustomRoomPlayer : NetworkRoomPlayer
     /// <para>This can be used as a hook to invoke effects or do client specific cleanup.</para>
     /// </summary>
     public override void OnStopClient() {
-        Debug.Log("Debug: CustomRoomPlayer.OnStopClient");
         base.OnStopClient();
     }
 
@@ -61,8 +58,9 @@ public class CustomRoomPlayer : NetworkRoomPlayer
     /// <para>This happens after OnStartClient(), as it is triggered by an ownership message from the server. This is an appropriate place to activate components or functionality that should only be active for the local player, such as cameras and input.</para>
     /// </summary>
     public override void OnStartLocalPlayer() {
-        Debug.Log("Debug: CustomRoomPlayer.OnStartLocalPlayer");
         base.OnStartLocalPlayer();
+        System.Threading.Thread.Sleep(UnityEngine.Random.Range(1000, 3000));
+        CmdChangeReadyState(true);
     }
 
     /// <summary>
@@ -71,7 +69,6 @@ public class CustomRoomPlayer : NetworkRoomPlayer
     /// <para>When <see cref="NetworkIdentity.AssignClientAuthority"/> is called on the server, this will be called on the client that owns the object. When an object is spawned with <see cref="NetworkServer.Spawn">NetworkServer.Spawn</see> with a NetworkConnection parameter included, this will be called on the client that owns the object.</para>
     /// </summary>
     public override void OnStartAuthority() { 
-        Debug.Log("Debug: CustomRoomPlayer.OnStartAuthority");
         base.OnStartAuthority();
     }
 
@@ -80,7 +77,6 @@ public class CustomRoomPlayer : NetworkRoomPlayer
     /// <para>When NetworkIdentity.RemoveClientAuthority is called on the server, this will be called on the client that owns the object.</para>
     /// </summary>
     public override void OnStopAuthority() { 
-        Debug.Log("Debug: CustomRoomPlayer.OnStopAuthority");
         base.OnStopAuthority();
     }
 
@@ -101,7 +97,6 @@ public class CustomRoomPlayer : NetworkRoomPlayer
     /// This is a hook that is invoked on all player objects when exiting the room.
     /// </summary>
     public override void OnClientExitRoom() { 
-        Debug.Log("Debug: CustomRoomPlayer.OnClientExitRoom");
         base.OnClientExitRoom();
     }
 
@@ -115,7 +110,6 @@ public class CustomRoomPlayer : NetworkRoomPlayer
     /// <param name="oldIndex">The old index value</param>
     /// <param name="newIndex">The new index value</param>
     public override void IndexChanged(int oldIndex, int newIndex) {
-        Debug.Log("Debug: CustomRoomPlayer.IndexChanged");
         base.IndexChanged(oldIndex, newIndex);
     }
 
@@ -125,7 +119,6 @@ public class CustomRoomPlayer : NetworkRoomPlayer
     /// </summary>
     /// <param name="readyState">Whether the player is ready or not.</param>
     public override void ReadyStateChanged(bool oldReadyState, bool readyState) { 
-        Debug.Log("Debug: CustomRoomPlayer.ReadyStateChanged");
         base.ReadyStateChanged(oldReadyState, readyState);
     }
 

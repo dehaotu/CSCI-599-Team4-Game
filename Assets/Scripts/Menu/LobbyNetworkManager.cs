@@ -333,7 +333,6 @@ public class LobbyNetworkManager : MonoBehaviour
     void Awake()
     {
         //selfReference = this;
-        DontDestroyOnLoad(transform.gameObject);
         connIdToPlayer = new Dictionary<int, Player>();
         roomList = new List<Room>();
 
@@ -602,27 +601,26 @@ public class LobbyNetworkManager : MonoBehaviour
     }
 
     void HandleGameStartSignal(MsgGameStartSignal packet)
-    {  
+    {
         SceneManager.sceneLoaded += (scene, mode) => {
-            if (scene.name == "TestScene")
+            if (scene.name == "PreTestScene")
             {
+                //System.Threading.Thread.Sleep(UnityEngine.Random.Range(500, 2000));
                 // to be changed. Now we assume the both lobby server and game server are in the same vm instance
-                GameObject networkManagerObj = GameObject.Find("NetworkManager");
+                GameObject networkManagerObj = GameObject.Find("NetworkRoomManager");
 
                 if (networkManagerObj != null)
                     Debug.Log("networkManagerObj found");
                 else
                     Debug.Log("networkManagerObj NOT FOUND!!!");
-                NetworkManager networkManager = networkManagerObj.GetComponent<NetworkManager>();
+                NetworkRoomManager networkManager = networkManagerObj.GetComponent<NetworkRoomManager>();
                 networkManager.networkAddress = LobbyServerIP;
-                Debug.Log("Now the networkManager's networkAddress is " + LobbyServerIP );
+                Debug.Log("Now the networkManager's networkAddress is " + LobbyServerIP);
                 networkManager.StartClient();
                 Debug.Log("Called startclient()");
             }
         };
-
-        SceneManager.LoadScene("TestScene");
-
+        SceneManager.LoadScene("PreTestScene");
     }
 
     // Send the joinRoom message to server.
