@@ -322,6 +322,7 @@ public class LobbyNetworkManager : MonoBehaviour
     KcpServer server;
     KcpClient client;
 
+    GameConfiguration config;
     Dictionary<int, Player> connIdToPlayer;     //for server only.
     List<Room> roomList;
     public Room currRoom;       //for client only. This is null if client is not in any room, else it is the client's current room.
@@ -332,7 +333,7 @@ public class LobbyNetworkManager : MonoBehaviour
     // Call this when the LobbyNetworkManager is being loaded into the scene
     void Awake()
     {
-        //selfReference = this;
+        config = GameConfiguration.Instance;
         connIdToPlayer = new Dictionary<int, Player>();
         roomList = new List<Room>();
 
@@ -524,7 +525,7 @@ public class LobbyNetworkManager : MonoBehaviour
     // Invoked when a client connects to the lobby server. Send player information immediately.
     void OnClientConnected()
     {
-        MsgPlayerInfoUpdate msg = new MsgPlayerInfoUpdate(menuController.myName);
+        MsgPlayerInfoUpdate msg = new MsgPlayerInfoUpdate(config.myName);
         client.Send(msg.Serialize(), KcpChannel.Reliable);
     }
 

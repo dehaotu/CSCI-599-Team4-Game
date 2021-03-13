@@ -39,11 +39,11 @@ class MenuAnimator
 }
 
 /*
-MenuController consists of a menu animator, and different Button handlers.
+MenuController consists of a menu animator, and different GUI handlers.
+This is class is only responsible for Menu's GUI, for network part please see LobbyNetworkManager.
 */
 public class MenuController : MonoBehaviour
 {
-    private bool flag_isHost = false;    // Flag used for menu's state changing logic. true = host, false = client
     private bool flag_client_actively_disconnect = false;   // Set this flag if user actively discconect from server so error message will not be shown
     private MenuAnimator animator;  // Used to move the map in the background
 
@@ -55,15 +55,14 @@ public class MenuController : MonoBehaviour
     public GameObject playerListPanel;
     public GameObject nameInputField;
     public GameObject serverDisconnectPanel;
+    public GameConfiguration gameConfiguration;
     public LobbyNetworkManager lobbyNetworkManager;
-    public CustomRoomManager networkRoomManager;
-    public CustomNetworkDiscovery roomDiscovery;
     public PlayerInfoRow playerInfoRowPrefab;
 
     private int GUI_ROOMPANEL_HEIGH = 100;      // The height of the room panel to start appending playerinfo row
     private int GUI_ROOMPANEL_PLAYERINFOROW_GAP = 5;    // The gap between playerinfo row
     
-    public string myName {set; get;}    // The name of the playe who controls this computer
+    //public string myName {set; get;}    // The name of the playe who controls this computer
     public float cameraSpeedX = 0.4f;
     public float cameraSpeedY = 0.2f;
     public float period_rate = 0.5f; // How fast the camera to complete one back and forth
@@ -116,8 +115,8 @@ public class MenuController : MonoBehaviour
     public void onClick_LoginPanel_Confirm()
     {
         InputField inputField = nameInputField.GetComponent<InputField>();
-        myName = inputField.text;
-        Debug.Log("Debug: set name to " + myName);
+        gameConfiguration.myName = inputField.text;
+        Debug.Log("Debug: set name to " + gameConfiguration.myName);
         loginPanel.SetActive(false);
         mainMenuPanel.SetActive(true);
     }
@@ -181,7 +180,7 @@ public class MenuController : MonoBehaviour
         //networkRoomManager.StartClient();
         //roomDiscovery.StopDiscovery();
         lobbyNetworkManager.JoinRoom("");
-        flag_isHost = false;
+        //flag_isHost = false;
         roomPanel.SetActive(true);
     }
 /************************************************************************************************

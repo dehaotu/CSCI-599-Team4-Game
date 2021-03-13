@@ -13,7 +13,6 @@ public class RoomListPanel : MonoBehaviour
 
     public GameObject roomRowPrefab;
     public MenuController menuController;
-    public CustomNetworkDiscovery networkDiscovery;
 
     public void UpdateRoom(IPEndPoint idAddress, int numPlayers)
     {
