@@ -13,6 +13,7 @@ TagManager:
   - PlayerTower
   - Monster
   - PlayerSpawns
+  - EnemyTower
   layers:
   - Default
   - TransparentFX
