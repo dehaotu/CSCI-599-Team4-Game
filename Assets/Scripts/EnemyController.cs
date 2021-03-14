@@ -82,9 +82,7 @@ public class EnemyController : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        
-
-        string[] findTags = gameObject.tag.Equals("EnemyMinion") ? new string[]{ "Player", "PlayerMinion" } : new string[]{ "EnemyMinion" };
+        string[] findTags = gameObject.tag.Equals("EnemyMinion") ? new string[]{ "Player", "PlayerMinion", "PlayerTower" } : new string[]{ "EnemyMinion", "EnemyTower" };
         GameObject findObject = FindNearestObjectByTags(findTags);
         timer += Time.deltaTime;
 
@@ -111,6 +109,12 @@ public class EnemyController : NetworkBehaviour
                     {
                         targetObject.GetComponent<EnemyController>().TakeDamage(basicAttackPoints);
                     }
+                    else if (targetObject.tag.Equals("PlayerTower") || targetObject.tag.Equals("EnemyTower"))
+                    {
+                        if (!targetObject.GetComponent<Crystal>().checkAlive()) return;
+                        targetObject.GetComponent<Crystal>().TakeDamage(basicAttackPoints);
+                        isoRenderer.Attack();
+                    }
                 }
             } else
             {
@@ -121,12 +125,12 @@ public class EnemyController : NetworkBehaviour
 
     void OnCollisionEnter2D(Collision2D other)
     {
-        if ((other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("PlayerMinion")) && gameObject.tag.Equals("EnemyMinion"))
+        if (gameObject.tag.Equals("EnemyMinion") && (other.gameObject.CompareTag("Player") || other.gameObject.CompareTag("PlayerMinion") || other.gameObject.CompareTag("PlayerTower")))
         {
             isoRenderer.SetDirection(Vector2.zero);
             isPlayerClose = true;
             targetObject = other.gameObject;
-        } else if (gameObject.tag.Equals("PlayerMinion") && other.gameObject.CompareTag("EnemyMinion"))
+        } else if (gameObject.tag.Equals("PlayerMinion") && (other.gameObject.CompareTag("EnemyMinion") || other.gameObject.CompareTag("EnemyTower")))
         {
             isoRenderer.SetDirection(Vector2.zero);
             isPlayerClose = true;

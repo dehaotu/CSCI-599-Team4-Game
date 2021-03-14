@@ -21,10 +21,17 @@ public class Crystal : NetworkBehaviour
     private string shootTag = "Player";
     private GameObject shootTarget;
 
-    // Start is called before the first frame update
+    public bool isAlly;
+
+    [SerializeField]
+    [SyncVar]
+    private bool alive = true;
+
     void Start()
     {
         timeBtShots = startTimeBtShots;
+        currentCrystalHealth = maxCrystalHealth;
+        CrystalHealthBar.SetMaxHealth(maxCrystalHealth);
         InvokeRepeating("UpdateTarget", 0.0f, 0.5f); // invoke UpdateTarget() every 0.5 seconds starts from 0 second
     }
 
@@ -96,23 +103,19 @@ public class Crystal : NetworkBehaviour
 
         Debug.Log("shoot");
     }
-/*    public void shoot()
-    {
-        if (timeBtShots <= 0 && player.GetComponent<HeroStatus>().checkAlive())
-        {
-            GameObject bullet = Instantiate(CrystalBulletPrefab, transform.position, Quaternion.identity);
-            timeBtShots = startTimeBtShots;
-        }
-        else
-        {
-            timeBtShots -= Time.deltaTime;
-        }
-    }*/
 
+    public bool checkAlive()
+    {
+        return alive;
+    }
 
     public void TakeDamage(int damage)
     {
-        if(isServer) currentCrystalHealth -= damage;
+        currentCrystalHealth -= damage;
         CrystalHealthBar.SetHealth(currentCrystalHealth);
+        if (currentCrystalHealth <= 0)
+        {
+            alive = false;
+        }
     }
 }

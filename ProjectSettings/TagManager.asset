@@ -12,6 +12,8 @@ TagManager:
   - Confiner
   - PlayerTower
   - Monster
+  - PlayerSpawns
+  - EnemyTower
   layers:
   - Default
   - TransparentFX
