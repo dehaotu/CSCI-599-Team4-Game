@@ -1,6 +1,8 @@
 ﻿using UnityEngine;
+using UnityEngine.AI;
 using UnityEngine.UI;
 using Mirror;
+using System;
 
 public enum HeroClass : byte
 {
@@ -21,6 +23,11 @@ public class HeroStatus : NetworkBehaviour
     [SyncVar]
     private bool alive = true;
     [SyncVar]
+    [SerializeField]
+    private float respawnCountDown;
+    private bool respawning = false; // true when respawning
+    public float respawnTime = 2f;
+    [SyncVar]
     private HeroClass heroClass;
 
     //Basic Attributes：
@@ -34,9 +41,14 @@ public class HeroStatus : NetworkBehaviour
     private int basicDefensePoints = 10;
     public int BasicDefensePoints{ get { return basicDefensePoints; } set { SetDefense(value); } }  //Basic Defense Points
 
+    private int originalAP = 10;
+    public int OriginalAP {get {return originalAP;}}
+    private int originalDP = 10;
+    public int OriginalDP {get {return originalDP;}}
 
     private Text coinText;  //Get gold amount from Coin GameObject
     [SyncVar]
+    private int coins;
     private int coinAmount = 100;  //Gold owned by the player, can be used to purchase items
     public int CoinAmount
     {
@@ -44,15 +56,26 @@ public class HeroStatus : NetworkBehaviour
         set { coinAmount = value; coinText.text = coinAmount.ToString(); }
     }
 
-    // add: chat window control
-    private Canvas chatCanvas;
-    private CanvasGroup canvasGroup;
-    public InputFieldController inputFieldController;
+    /* --- Start Chat Control --- */
+    public static event Action<HeroStatus, string> OnMessage;
 
-    private void Awake() {
-        chatCanvas = GameObject.Find("ChatCanvas").GetComponent<Canvas>();
-        canvasGroup = chatCanvas.GetComponent<CanvasGroup>();
+    private Rigidbody2D rb;
+    private NavMeshAgent agent;
+    
+
+    [Command]
+    public void CmdSend(string message)
+    {
+        if (message.Trim() != "")
+            RpcReceive(message.Trim());
     }
+
+    [ClientRpc]
+    public void RpcReceive(string message)
+    {
+        OnMessage?.Invoke(this, message);
+    }
+    /* --- End Chat control --- */
 
     void Start()
     {
@@ -61,11 +84,7 @@ public class HeroStatus : NetworkBehaviour
         coinText = GameObject.Find("Coin").GetComponentInChildren<Text>();
         coinText.text = coinAmount.ToString();
         Debug.Log(GetComponent<NetworkIdentity>().netId.ToString());
-
-        //add
-        // chatWindow.GetComponent<RectTransform>().localScale = new Vector2(0,0);
-        canvasGroup.alpha = 0.0f;
-
+        agent = gameObject.GetComponent<NavMeshAgent>();
     }
 
     private void FixedUpdate()
@@ -75,56 +94,55 @@ public class HeroStatus : NetworkBehaviour
 
     void Update()
     {
-        //For testing
-        /*if (Input.GetKeyDown(KeyCode.Space))
-        {
-            TakeDamage(10);
-        }*/
-
         //按下B键控制背包的显示和隐藏
         //Bag
-        if (Input.GetKeyDown(KeyCode.B) && !inputFieldController.isEditingInputField)
+        if (Input.GetKeyDown(KeyCode.B) && !ChatWindow.isEditingInputField)
         {
             Knapscak.Instance.DisplaySwitch();
         }
         //按下V键控制角色面板的显示和隐藏
         //Character Panel
-        if (Input.GetKeyDown(KeyCode.V) && !inputFieldController.isEditingInputField)
+        if (Input.GetKeyDown(KeyCode.V) && !ChatWindow.isEditingInputField)
         {
             CharacterPanel.Instance.DisplaySwitch();
         }
         //按下N键商店小贩面板的显示和隐藏
         //Hide Shop Panel
-        if (Input.GetKeyDown(KeyCode.N) && !inputFieldController.isEditingInputField)
+        if (Input.GetKeyDown(KeyCode.N) && !ChatWindow.isEditingInputField)
         {
             Vendor.Instance.DisplaySwitch();
         }
         //按下S键状态面板的显示和隐藏
         //Status Board
-        if (Input.GetKeyDown(KeyCode.S) && !inputFieldController.isEditingInputField)
+        if (Input.GetKeyDown(KeyCode.S) && !ChatWindow.isEditingInputField)
         {
             StatusBoard.Instance.DisplaySwitch();
         }
 
-        // add: press C to show or hide chat window
-        if (Input.GetKeyDown(KeyCode.C) && !inputFieldController.isEditingInputField) 
+        // show death screen
+        if (!alive && !respawning)
         {
-            // chatWindow.GetComponent<RectTransform>().localScale = new Vector2(1,1);
-            if(canvasGroup.alpha == 0.0f) {
-                canvasGroup.alpha = 1.0f;
-            }
-
-            else if (canvasGroup.alpha == 1.0f) {
-                canvasGroup.alpha = 0.0f;
-            }
+            respawning = true;
+            respawnCountDown = respawnTime;
+            CanvasGroup deathCanvs = transform.Find("DeathCanvas").GetComponent<CanvasGroup>();
+            deathCanvs.alpha = 1;
+            deathCanvs.blocksRaycasts = true;
+        } else if (!alive && respawning && respawnCountDown > 0)
+        {
+            respawnCountDown -= Time.deltaTime;
+        } else if (!alive && respawning && respawnCountDown <= 0 && isServer)
+        {
+            respawning = false;
+            RpcRespawn();
+            agent.enabled = false;
         }
+        
     }
 
     public bool checkAlive()
     {
         return alive;
     }
-
 
     public void TakeDamage(int damage)
     {
@@ -133,6 +151,26 @@ public class HeroStatus : NetworkBehaviour
         if (currentHealth <= 0)
         {
             alive = false;
+        }
+    }
+
+    [ClientRpc]
+    private void RpcRespawn()
+    {
+        GameObject[] sapwnPoints = GameObject.FindGameObjectsWithTag("PlayerSpawns");
+        GameObject chosenSpawn = sapwnPoints[UnityEngine.Random.Range(0, sapwnPoints.Length)];
+        if (isServer)
+        {
+            CanvasGroup deathCanvs = transform.Find("DeathCanvas").GetComponent<CanvasGroup>();
+            deathCanvs.alpha = 0;
+            deathCanvs.blocksRaycasts = false;
+            transform.position = chosenSpawn.transform.position;
+            agent.enabled = true;
+            alive = true;
+            currentHealth = maxHealth;
+            Debug.Log("teleported");
+            Debug.Log(chosenSpawn.name);
+            Debug.Log(chosenSpawn.transform.position);
         }
     }
 
@@ -160,7 +198,6 @@ public class HeroStatus : NetworkBehaviour
                 StatusBoard.Instance.UpdatePlayerAttribute(text);
             }
         }
-        
     }
 
     public void SetDefense(int oldDefense, int newDefense)
@@ -176,7 +213,6 @@ public class HeroStatus : NetworkBehaviour
         }
     }
 
-
     //消费金币
     //Use Coins
     public bool ConsumeCoin(int amount)
@@ -185,6 +221,7 @@ public class HeroStatus : NetworkBehaviour
         {
             coinAmount -= amount;
             coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
+            coins = coinAmount;
             return true;  //消费成功 Successful purchase
         }
         return false;  //否则消费失败 Failed purchase
@@ -196,6 +233,7 @@ public class HeroStatus : NetworkBehaviour
     {
         this.coinAmount += amount;
         coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
+        coins = coinAmount;
     }
 
     /// <summary>

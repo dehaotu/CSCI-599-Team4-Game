@@ -21,6 +21,7 @@ public class IsometricPlayerMovementController : NetworkBehaviour
 
     GameObject targetObject;
     bool isEnemyClose = false;
+    bool isMonsterClose = false;
 
     private void Awake()
     {
@@ -39,11 +40,21 @@ public class IsometricPlayerMovementController : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!isLocalPlayer) return;
+
+        if (!isLocalPlayer) {
+            GameObject.Find("Inventory Menu").GetComponent<CanvasGroup>().alpha = 0;
+            return;
+        }
         if (isoRenderer.isPlayingAttack()) return;
         float horizontalInput = 0;
         float verticalInput = 0;
-        
+
+        /*if (heroStatus.checkAlive())
+        {
+            agent.isStopped = false;
+        }
+        else agent.isStopped = true;*/
+
         // edited
         if (Input.GetKeyDown(KeyCode.Mouse0) && heroStatus.checkAlive() && !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
         {
@@ -51,7 +62,6 @@ public class IsometricPlayerMovementController : NetworkBehaviour
             Vector2 mousePositionInGame = playerCamera.ScreenToWorldPoint(mousePositionOnScreen);
             destination = mousePositionInGame;
             agent.SetDestination(destination);
-            Debug.Log("New destinaion: " + destination);
         }
 
         Vector2 inputVector = new Vector2(0, 0);
@@ -66,8 +76,10 @@ public class IsometricPlayerMovementController : NetworkBehaviour
          Debug.Log(IsometricCharacterRenderer.DirectionToIndex(movement, 8));*/
 
         CmdSetDirection(movement);
-        if (heroStatus.checkAlive()) rbody.MovePosition(newPos);
-
+        if (heroStatus.checkAlive())
+        {
+            rbody.MovePosition(newPos);
+        }
         //test attack
         if (Input.GetKeyDown(KeyCode.F))
         {
@@ -77,20 +89,19 @@ public class IsometricPlayerMovementController : NetworkBehaviour
                 if (isEnemyClose)
                 {
                     targetObject.GetComponent<EnemyController>().TakeDamage(heroStatus.BasicAttackPoints);
+                } else if (isMonsterClose) {
+                    targetObject.GetComponent<MonsterMovementController>().TakeDamage(heroStatus.BasicAttackPoints);
                 }
             }
         }
 
-        if (heroStatus.currentHealth <= 0)
+        if (!heroStatus.checkAlive())
         {
             stopAction = true;
             isoRenderer.Dead();
-        }
-
-        // test attack monster
-        if (Input.GetKeyDown(KeyCode.M))
+        } else
         {
-            CmdMockAttack();
+            stopAction = false;
         }
     }
 
@@ -99,24 +110,18 @@ public class IsometricPlayerMovementController : NetworkBehaviour
         if (!stopAction) isoRenderer.SetDirection(direction);
     }
 
-    [Command]
-    private void CmdMockAttack()
-    {
-        GameObject[] monsters = GameObject.FindGameObjectsWithTag("Monster");
-        foreach (GameObject monster in monsters)
-        {
-            // Get player alive status.
-            monster.GetComponent<MonsterStatus>().CreateDamage(5);
-        }
-        Debug.Log("In mock attack");
-    }
-
     void OnCollisionEnter2D(Collision2D other)
     {
+        if (!isLocalPlayer) return;
         if (other.gameObject.CompareTag("EnemyMinion"))
         {
             isoRenderer.SetDirection(Vector2.zero);
             isEnemyClose = true;
+            targetObject = other.gameObject;
+        } else if (other.gameObject.CompareTag("Monster"))
+        {
+            isoRenderer.SetDirection(Vector2.zero);
+            isMonsterClose = true;
             targetObject = other.gameObject;
         }
     }
@@ -124,6 +129,7 @@ public class IsometricPlayerMovementController : NetworkBehaviour
     void OnCollisionExit2D(Collision2D other)
     {
         isEnemyClose = false;
+        isMonsterClose = false;
         targetObject = null;
     }
 }

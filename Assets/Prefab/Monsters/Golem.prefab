@@ -44,9 +44,9 @@ CircleCollider2D:
   m_IsTrigger: 0
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0.2}
+  m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 0.3
+  m_Radius: 0.7
 --- !u!1 &3339481644051735610
 GameObject:
   m_ObjectHideFlags: 0
@@ -116,9 +116,9 @@ SpriteRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
-  m_SortingOrder: 5
+  m_SortingLayerID: -211649221
+  m_SortingLayer: -1
+  m_SortingOrder: 8
   m_Sprite: {fileID: -5027509340213622084, guid: cf7982375c103494abbb6d947898f1ec,
     type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
@@ -237,7 +237,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   movementSpeed: 1
-  attackDamage: 100
+  attackDamage: 8
   monsterBaseCollider: {fileID: 0}
 --- !u!114 &8207291274246736843
 MonoBehaviour:
@@ -253,8 +253,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  maxHP: 200
-  currHP: 200
+  maxHP: 50
+  currHP: 50
   autoHealPerFrame: 1
   alive: 1
   healthBar: {fileID: 931492558059662320}
@@ -315,6 +315,11 @@ PrefabInstance:
   m_Modification:
     m_TransformParent: {fileID: 3339481645408498932}
     m_Modifications:
+    - target: {fileID: 1390186075177702764, guid: 5399561a8388c493e863361c7299d3f8,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0.000022888184
+      objectReference: {fileID: 0}
     - target: {fileID: 1953416547368098545, guid: 5399561a8388c493e863361c7299d3f8,
         type: 3}
       propertyPath: m_Pivot.x
@@ -353,7 +358,7 @@ PrefabInstance:
     - target: {fileID: 1953416547368098545, guid: 5399561a8388c493e863361c7299d3f8,
         type: 3}
       propertyPath: m_SizeDelta.x
-      value: 83.1543
+      value: 161.74173
       objectReference: {fileID: 0}
     - target: {fileID: 1953416547368098545, guid: 5399561a8388c493e863361c7299d3f8,
         type: 3}
@@ -398,12 +403,12 @@ PrefabInstance:
     - target: {fileID: 1953416547368098545, guid: 5399561a8388c493e863361c7299d3f8,
         type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: 0
+      value: -0.014
       objectReference: {fileID: 0}
     - target: {fileID: 1953416547368098545, guid: 5399561a8388c493e863361c7299d3f8,
         type: 3}
       propertyPath: m_AnchoredPosition.y
-      value: 0.7999878
+      value: 0.803
       objectReference: {fileID: 0}
     - target: {fileID: 1953416547368098545, guid: 5399561a8388c493e863361c7299d3f8,
         type: 3}
@@ -420,10 +425,40 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3064565580190605757, guid: 5399561a8388c493e863361c7299d3f8,
+        type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3064565580190605757, guid: 5399561a8388c493e863361c7299d3f8,
+        type: 3}
+      propertyPath: m_AnchorMin.x
+      value: 0.5
+      objectReference: {fileID: 0}
+    - target: {fileID: 3064565580190605757, guid: 5399561a8388c493e863361c7299d3f8,
+        type: 3}
+      propertyPath: m_SizeDelta.x
+      value: 128.70802
+      objectReference: {fileID: 0}
+    - target: {fileID: 3064565580190605757, guid: 5399561a8388c493e863361c7299d3f8,
+        type: 3}
+      propertyPath: m_SizeDelta.y
+      value: 7.7195053
+      objectReference: {fileID: 0}
+    - target: {fileID: 3064565580190605757, guid: 5399561a8388c493e863361c7299d3f8,
+        type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 0.0000009536743
+      objectReference: {fileID: 0}
+    - target: {fileID: 3064565580190605757, guid: 5399561a8388c493e863361c7299d3f8,
+        type: 3}
+      propertyPath: m_AnchoredPosition.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6863040765265715118, guid: 5399561a8388c493e863361c7299d3f8,
         type: 3}
       propertyPath: m_Name
-      value: MonsterStatusCanvas
+      value: StatusCanvas
       objectReference: {fileID: 0}
     - target: {fileID: 8291708735042793870, guid: 5399561a8388c493e863361c7299d3f8,
         type: 3}

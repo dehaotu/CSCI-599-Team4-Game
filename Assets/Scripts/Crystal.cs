@@ -5,7 +5,7 @@ using Mirror;
 
 public class Crystal : NetworkBehaviour
 {
-    
+
     public int maxCrystalHealth = 100;
     [SyncVar]
     public int currentCrystalHealth = 100;
@@ -54,7 +54,7 @@ public class Crystal : NetworkBehaviour
             return;
         }
 
-        if (timeBtShots <= 0.0f && player.GetComponent<HeroStatus>().checkAlive())
+        if (timeBtShots <= 0.0f && player.GetComponent<HeroStatus>().checkAlive() && currentCrystalHealth > 0)
         {
             Shoot();
             timeBtShots = startTimeBtShots;
@@ -76,6 +76,7 @@ public class Crystal : NetworkBehaviour
             {
                 shortestDistance = distance;
                 nearestTarget = target;
+                if (isAlly && target.tag.Equals("Player")) nearestTarget = null; // ally towers shouldn't attack players
             }
         }
 
@@ -89,7 +90,6 @@ public class Crystal : NetworkBehaviour
         }
     }
 
-
     private void Shoot()
     {
         // "object casting": create a temporary gameObject for Instantiate object
@@ -99,6 +99,9 @@ public class Crystal : NetworkBehaviour
         if (bullet != null)
         {
             bullet.LocateTarget(shootTarget);
+
+            // Tower shooting audio
+            bullet.GetComponent<AudioSource>().Play();
         }
 
         Debug.Log("shoot");

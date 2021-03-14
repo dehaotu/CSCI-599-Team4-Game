@@ -26,6 +26,7 @@ public class MonsterMovementController : NetworkBehaviour
         monster = GetComponent<Rigidbody2D>();
         isoRenderer = GetComponentInChildren<IsometricCharacterRenderer>();
         monsterStatus = GetComponentInChildren<MonsterStatus>();
+
     }
 
     void Update()
@@ -173,5 +174,11 @@ public class MonsterMovementController : NetworkBehaviour
             return Vector3.positiveInfinity;
         else
             return player.transform.position;
+    }
+
+    public void TakeDamage(int damage)
+    {
+        monsterStatus.TakeDamage(damage: damage);
+        Debug.Log(damage);
     }
 }

@@ -4,9 +4,12 @@ using UnityEngine;
 
 public class IsometricCharacterRenderer : MonoBehaviour
 {
+    //public AudioClip soundToPlay;
+    //public AudioSource audio;
+    //public bool alreadyPlayed = false;
 
     public static readonly string[] staticDirections = { "Static N", "Static NW", "Static W", "Static SW", "Static S", "Static SE", "Static E", "Static NE" };
-    public static readonly string[] runDirections = {"Run N", "Run NW", "Run W", "Run SW", "Run S", "Run SE", "Run E", "Run NE"};
+    public static readonly string[] runDirections = { "Run N", "Run NW", "Run W", "Run SW", "Run S", "Run SE", "Run E", "Run NE" };
     public static readonly string[] deadDirections = { "Dead N", "Dead NW", "Dead W", "Dead SW", "Dead S", "Dead SE", "Dead E", "Dead NE" };
     public static readonly string[] attackDirections = { "Attack N", "Attack NW", "Attack W", "Attack SW", "Attack S", "Attack SE", "Attack E", "Attack NE" };
 
@@ -22,7 +25,8 @@ public class IsometricCharacterRenderer : MonoBehaviour
         animator = GetComponent<Animator>();
     }
 
-    public void SetDirection(Vector2 direction){
+    public void SetDirection(Vector2 direction)
+    {
 
         //use the Run states by default
         string[] directionArray = null;
@@ -33,6 +37,7 @@ public class IsometricCharacterRenderer : MonoBehaviour
             //if we are basically standing still, we'll use the Static states
             //we won't be able to calculate a direction if the user isn't pressing one, anyway!
             directionArray = staticDirections;
+            lastDirection = DirectionToIndex(direction, 8);
         }
         else
         {
@@ -45,14 +50,23 @@ public class IsometricCharacterRenderer : MonoBehaviour
 
         //tell the animator to play the requested state
         animator.Play(directionArray[lastDirection]);
-        
+
+    }
+
+    public void SetStaticDirection(int ind)
+    {
+        // force to set a static direction
+
+        lastDirection = ind;
+        animator.Play(staticDirections[ind]);
     }
 
     //helper functions
 
     //this function converts a Vector2 direction to an index to a slice around a circle
     //this goes in a counter-clockwise direction.
-    public static int DirectionToIndex(Vector2 dir, int sliceCount){
+    public static int DirectionToIndex(Vector2 dir, int sliceCount)
+    {
         //get the normalized direction
         Vector2 normDir = dir.normalized;
         //calculate how many degrees one slice is
@@ -66,7 +80,8 @@ public class IsometricCharacterRenderer : MonoBehaviour
         //add the halfslice offset
         angle += halfstep;
         //if angle is negative, then let's make it positive by adding 360 to wrap it around.
-        if (angle < 0){
+        if (angle < 0)
+        {
             angle += 360;
         }
         //calculate the amount of steps required to reach this angle
@@ -93,6 +108,11 @@ public class IsometricCharacterRenderer : MonoBehaviour
     public void Attack()
     {
         animator.Play(attackDirections[lastDirection]);
+
+        // attack audio
+        AudioSource audioSource = gameObject.GetComponent<AudioSource>();
+        if(audioSource != null) AudioSource.PlayClipAtPoint(audioSource.clip, transform.position);
+
         attackID++;
         attackID %= 100;
     }
@@ -113,5 +133,15 @@ public class IsometricCharacterRenderer : MonoBehaviour
     public void Dead()
     {
         animator.Play(deadDirections[lastDirection]);
+
+        // death audio
+        //audio = gameObject.GetComponent<AudioSource>();
+
+        //if (!alreadyPlayed) {
+        //    audio.PlayOneShot(soundToPlay);
+        //    alreadyPlayed = true;
+        //}
+
+        //AudioSource.PlayClipAtPoint(audioSource.clip, transform.position);
     }
 }

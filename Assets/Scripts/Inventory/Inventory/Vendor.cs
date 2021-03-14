@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Vendor : Inventroy {
+public class Vendor : Inventory {
 
     //单例模式
     private static Vendor _instance;
@@ -30,7 +30,7 @@ public class Vendor : Inventroy {
     //初始化商贩
     private void InitShop() 
     {
-        for(int i = 1; i < 5; i++)
+        for(int i = 1; i < 8; i++)
         {
             StoreItem(i);
         }
@@ -42,24 +42,15 @@ public class Vendor : Inventroy {
         bool isSusscess = player.ConsumeCoin(item.BuyPrice);//主角消耗金币购买物品
         if (isSusscess)
         {
-            Knapscak.Instance.StoreItem(item);
+            if (item.Type == Item.ItemType.Consumable) Knapscak.Instance.StoreItem(item);
+            else CharacterPanel.Instance.PutOn(item);
         }
     }
 
     //主角售卖物品
-    public void SellItem() 
+    public void SellItem(Item item) 
     {
-        int sellAmount = 1;//销售数量
-        if (Input.GetKey(KeyCode.LeftControl))//按住坐标Ctrl键物品一个一个的售卖，否则全部售卖
-        {
-            sellAmount = 1;
-        }
-        else
-        {
-            sellAmount = InventroyManager.Instance.PickedItem.Amount;
-        }
-        int coinAmount = InventroyManager.Instance.PickedItem.Item.SellPrice * sellAmount;//售卖所获得的金币总数
-        player.EarnCoin(coinAmount);//主角赚取到售卖物品的金币
-        InventroyManager.Instance.ReduceAmountItem(sellAmount);//鼠标上的物品减少或者销毁
+        player.EarnCoin(item.SellPrice);//主角赚取到售卖物品的金币
+        InventoryManager.Instance.ReduceAmountItem(1);//鼠标上的物品减少或者销毁
     }
 }

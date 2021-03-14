@@ -56,9 +56,9 @@ MonoBehaviour:
   monster3Prefab: {fileID: 3339481645408498929, guid: 354d229f6349b4ccaae26ad4fc7c63bc,
     type: 3}
   centralPosition: {x: -9, y: 7.5}
-  monster1RelativePosition: {x: 0.75, y: -0.5}
-  monster2RelativePosition: {x: -0.75, y: -0.5}
-  monster3RelativePosition: {x: 0, y: 0.75}
+  monster1RelativePosition: {x: 0.35, y: -0.4}
+  monster2RelativePosition: {x: -0.35, y: -0.4}
+  monster3RelativePosition: {x: 0, y: 0.2}
 --- !u!60 &2147647881534218794
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -84,11 +84,14 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: 2.915113, y: -1.1464076}
-      - {x: 2.8599281, y: 0.44767475}
-      - {x: -0.482419, y: 1.3679934}
-      - {x: -3.2261753, y: 0.29005957}
-      - {x: -2.4624543, y: -1.4503813}
+    - - {x: -0.9259844, y: -1.0329876}
+      - {x: 0.15966988, y: -1.0445924}
+      - {x: 0.250628, y: -0.9961901}
+      - {x: 0.9252038, y: 0.47495604}
+      - {x: 0.53114796, y: 0.7328739}
+      - {x: -0.59422684, y: 0.72724915}
+      - {x: -1.2698812, y: 0.1475501}
+      - {x: -1.2922215, y: 0.08557224}
 --- !u!114 &2147647881534218793
 MonoBehaviour:
   m_ObjectHideFlags: 0
