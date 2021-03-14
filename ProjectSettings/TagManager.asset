@@ -12,6 +12,7 @@ TagManager:
   - Confiner
   - PlayerTower
   - Monster
+  - PlayerSpawns
   layers:
   - Default
   - TransparentFX

@@ -111,7 +111,7 @@ public class IsometricCharacterRenderer : MonoBehaviour
 
         // attack audio
         AudioSource audioSource = gameObject.GetComponent<AudioSource>();
-        AudioSource.PlayClipAtPoint(audioSource.clip, transform.position);
+        if(audioSource != null) AudioSource.PlayClipAtPoint(audioSource.clip, transform.position);
 
         attackID++;
         attackID %= 100;
