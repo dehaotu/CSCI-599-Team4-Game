@@ -49,7 +49,7 @@ public class Crystal : NetworkBehaviour
             return;
         }
 
-        if (timeBtShots <= 0.0f && player.GetComponent<HeroStatus>().checkAlive())
+        if (timeBtShots <= 0.0f && player.GetComponent<HeroStatus>().checkAlive() && currentCrystalHealth > 0)
         {
             Shoot();
             timeBtShots = startTimeBtShots;
