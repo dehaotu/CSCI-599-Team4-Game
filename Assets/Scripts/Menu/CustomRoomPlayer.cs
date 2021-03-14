@@ -59,7 +59,7 @@ public class CustomRoomPlayer : NetworkRoomPlayer
     /// </summary>
     public override void OnStartLocalPlayer() {
         base.OnStartLocalPlayer();
-        System.Threading.Thread.Sleep(UnityEngine.Random.Range(1000, 3000));
+        System.Threading.Thread.Sleep(UnityEngine.Random.Range(2000, 5000));
         CmdChangeReadyState(true);
     }
 

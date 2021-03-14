@@ -6,295 +6,337 @@ using UnityEngine;
 using UnityEngine.SceneManagement;
 using kcp2k;
 using Mirror;
+using Lobby;
 
 /************************************************************************************************************************
-                                                        enums for packet header
+                                                    Lobby Support Class
 ************************************************************************************************************************/
-enum LobbyPacketHeader: byte
+namespace Lobby
 {
-    PlayerInfoUpdate,
-    LobbyInfoUpdate,
-    CreateRoomRequest,
-    CreateRoomResponse,
-    JoinRoomRequest,
-    JoinRoomResponse,
-    RoomUpdate,
-    ReadySignal,
-    StartGame
-}
-/************************************************************************************************************************
-                                                        Player Management class
-************************************************************************************************************************/
-public class Player
-{
-    public string Name {set; get;}
-    public bool isInRoom {set; get;}
-    public bool isReady {set; get;}
-    public int connectionId {set; get;}
-
-    // Use this when constructing packets.
-    public Player(string Name) {
-        this.Name = Name;
-        this.isInRoom = false;
-        this.isReady = false;
-        this.connectionId = connectionId;
+    public enum LobbyPacketHeader : byte
+    {
+        PlayerInfoUpdate,
+        LobbyInfoUpdate,
+        CreateRoomRequest,
+        CreateRoomResponse,
+        JoinRoomRequest,
+        JoinRoomResponse,
+        LeaveRoomSignal,
+        RoomUpdate,
+        ReadySignal,
+        StartGame
     }
 
-    // Use this when a new player connects to the server. 
-    public Player(string Name, int connectionId) : this(Name)
+    public enum ErrorType: byte
     {
-        this.connectionId = connectionId;
+        None,
+        LobbyTimeout,
+        RoomFull,
+        RoomNotExist,
+        InternalError
     }
-}
 
-public class Room
-{
-    public string uuid;
-    public string RoomName {set; get;}
-    public int numPlayers {set; get;}
-    public List<Player> PlayerList;
+    #region LobbyDataClass
+    public class Player
+    {
+        public string uuid { get; }
+        public string Name { set; get; }
+        public bool IsReady { set; get; }
+        public int ConnectionId { set; get; }
+        public Room CurrRoom { set; get; }
 
-    public void AquireUUID() 
-    {
-        if (uuid != null)
-            uuid = Guid.NewGuid().ToString();
-    }
-}
-/************************************************************************************************************************
-                                                            Packets
-************************************************************************************************************************/
-// The LobbyMsgHelper are code generators for the below LobbyMsg classes to construct and interpret byte messages.
-public static class LobbyMsgHelper
-{
-    // Given a function that defines what to write into the packet, this converts the packet into a byte array.
-    // the BinaryWriter can only write primitive type such as int, string, bool.
-    public static ArraySegment<byte> GenerateMsg(Action<BinaryWriter> writingFunction)
-    {
-        using (MemoryStream m = new MemoryStream())
+        public Player(string uuid = null, int connectionId = -1, string name = "UnnamedPlayer",
+                      bool isReady = false, Room currRoom = null)
         {
-            using (BinaryWriter writer = new BinaryWriter(m))
-            {
-                writingFunction.Invoke(writer);;
-            } 
-            return new ArraySegment<byte>(m.ToArray());
-        }  
+            this.uuid = (uuid == null) ? Guid.NewGuid().ToString() : uuid;
+            this.ConnectionId = connectionId;
+            this.Name = name;
+            this.IsReady = isReady;
+            this.CurrRoom = currRoom;
+        }
     }
 
-    // Given a function that defines what to read, this constructs the packet back from a byte array.
-    public static T InterpretMsg<T>(ArraySegment<byte> data, Func<BinaryReader, T> readingFunction) where T: class
+    public class Room
     {
-        using (MemoryStream m = new MemoryStream(data.Array)) 
+        public string uuid { get; }
+        public string RoomName { set; get; }
+        public int NumPlayers { set; get; }
+        public List<Player> PlayerList;
+
+        public Room(string uuid = null, string roomName = "Room", int numPlayers = 0, List<Player> playerList = null)
         {
-            m.Seek(2, SeekOrigin.Begin);    //skip 2 bytes, because the first byte is Kcp header, the second byte is LobbyPacketHeader.
-            using (BinaryReader reader = new BinaryReader(m))
+            this.uuid = (uuid == null) ? Guid.NewGuid().ToString() : uuid;
+            this.RoomName = roomName;
+            this.NumPlayers = numPlayers;
+            this.PlayerList = (playerList == null) ? new List<Player>() : new List<Player>(playerList);
+        }
+    }
+    #endregion
+
+    #region Packets
+    // The LobbyMsgHelper are code generators for the below LobbyMsg classes to construct and interpret byte messages.
+    public static class LobbyMsgHelper
+    {
+        // Given a function that defines what to write into the packet, this converts the packet into a byte array.
+        // the BinaryWriter can only write primitive type such as int, string, bool.
+        public static ArraySegment<byte> GenerateMsg(Action<BinaryWriter> writingFunction)
+        {
+            using (MemoryStream m = new MemoryStream())
             {
-                return readingFunction.Invoke(reader);
+                using (BinaryWriter writer = new BinaryWriter(m))
+                {
+                    writingFunction.Invoke(writer);
+                }
+                return new ArraySegment<byte>(m.ToArray());
             }
-        }   
-    }
-}
+        }
 
-// All LobbyMessage must be able to be serialized. Deserialize is optional because some message are just signals 
-// and contains no information.
-abstract public class LobbyMsgBase
-{
-    abstract public ArraySegment<byte> Serialize();
-    public static LobbyMsgBase Desserialize(ArraySegment<byte> data) {
-        Log.Error("Calling LobbyMsgBase's Desserialize!");
-        return null;
-    }
-}
-
-// All players need to send this update immediately when they connect to the Lobby server in order to 
-// register their information such as their name.
-public class MsgPlayerInfoUpdate : LobbyMsgBase
-{
-    public string Name {set; get;}
-
-    public MsgPlayerInfoUpdate(string Name) { this.Name = Name; }
-
-    override public ArraySegment<byte> Serialize()
-    {
-        return LobbyMsgHelper.GenerateMsg((writer) => {
-            writer.Write((byte)LobbyPacketHeader.PlayerInfoUpdate);
-            writer.Write(Name);
-        });
-       
-    }
-
-    public static MsgPlayerInfoUpdate Desserialize(ArraySegment<byte> data) {
-        return LobbyMsgHelper.InterpretMsg<MsgPlayerInfoUpdate>(data, (reader) => {
-            return new MsgPlayerInfoUpdate(reader.ReadString());
-        });
-    }
-}
-
-// Server will boardcast this message to all players when there is any changes in the lobby (such as new game server 
-// available/ numPlayer of a game server changes/ game server is down...) It also sends this message to player who 
-// just join the lobby server.
-public class MsgLobbyInfoUpdate : LobbyMsgBase
-{
-    public List<Room> roomList;
-
-    override public ArraySegment<byte> Serialize()
-    {
-        return LobbyMsgHelper.GenerateMsg((writer) => {
-            writer.Write((byte)LobbyPacketHeader.LobbyInfoUpdate);
-            writer.Write(roomList.Count);
-            foreach (Room room in roomList)
+        // Given a function that defines what to read, this constructs the packet back from a byte array.
+        public static T InterpretMsg<T>(ArraySegment<byte> data, Func<BinaryReader, T> readingFunction) where T : class
+        {
+            using (MemoryStream m = new MemoryStream(data.Array))
             {
-                writer.Write(room.RoomName);
-                writer.Write(room.PlayerList.Count);
+                m.Seek(2, SeekOrigin.Begin);    //skip 2 bytes, because the first byte is Kcp header, the second byte is LobbyPacketHeader.
+                using (BinaryReader reader = new BinaryReader(m))
+                {
+                    return readingFunction.Invoke(reader);
+                }
             }
-        });
+        }
     }
 
-    public static MsgLobbyInfoUpdate Desserialize(ArraySegment<byte> data) {
-        return LobbyMsgHelper.InterpretMsg<MsgLobbyInfoUpdate>(data, (reader) => {
-            MsgLobbyInfoUpdate result = new MsgLobbyInfoUpdate();
-            int roomListLength = reader.ReadInt32();
-            result.roomList = new List<Room>(roomListLength);
-            for (int i = 0; i < roomListLength; i++)
+    // All LobbyMessage must be able to be serialized. Deserialize is optional because some message are just signals 
+    // and contains no information.
+    abstract public class LobbyMsgBase
+    {
+        abstract public ArraySegment<byte> Serialize();
+        public static LobbyMsgBase Desserialize(ArraySegment<byte> data)
+        {
+            Log.Error("Calling LobbyMsgBase's Desserialize!");
+            return null;
+        }
+    }
+
+    // All players need to send this update immediately when they connect to the Lobby server in order to 
+    // register their information such as their name.
+    public class MsgPlayerInfoUpdate : LobbyMsgBase
+    {
+        public string Name { set; get; }
+
+        public MsgPlayerInfoUpdate(string Name) { this.Name = Name; }
+
+        override public ArraySegment<byte> Serialize()
+        {
+            return LobbyMsgHelper.GenerateMsg((writer) =>
             {
-                Room room = new Room();
-                room.RoomName = reader.ReadString();
-                room.numPlayers = reader.ReadInt32();
-                result.roomList.Add(room);
-            }
-            return result;
-        });
-    }
-}
+                writer.Write((byte)LobbyPacketHeader.PlayerInfoUpdate);
+                writer.Write(Name);
+            });
+        }
 
-// Sent by client when they want to join a room.
-public class MsgJoinRoomRequest : LobbyMsgBase
-{
-    //To be Changed: client should also send the room's uuid, but since we have only one room for now, so we don't need that
-    override public ArraySegment<byte> Serialize()
-    {
-        return LobbyMsgHelper.GenerateMsg((writer) => {
-            writer.Write((byte)LobbyPacketHeader.JoinRoomRequest);
-        });
-    }
-}
-
-// The reply of MsgJoinRoomRequest. If success = false, failureMsg will explain why client cannot join the room.
-public class MsgJoinRoomResponse : LobbyMsgBase
-{
-    public bool success;
-    public string failureMsg;
-
-    public MsgJoinRoomResponse(bool success, string failureMsg = "") 
-    {
-        this.success = success;
-        this.failureMsg = failureMsg;
-    }
-
-    override public ArraySegment<byte> Serialize()
-    {
-        return LobbyMsgHelper.GenerateMsg((writer) => {
-            writer.Write((byte)LobbyPacketHeader.JoinRoomResponse);
-            writer.Write(success);
-            writer.Write(failureMsg);
-        });
-    }
-
-    public static MsgJoinRoomResponse Desserialize(ArraySegment<byte> data) {
-        return LobbyMsgHelper.InterpretMsg<MsgJoinRoomResponse>(data, (reader) => {
-            bool success = reader.ReadBoolean();
-            string failureMsg = reader.ReadString();
-            return new MsgJoinRoomResponse(success, failureMsg);
-        });
-    }
-}
-
-// Server send this to all players in the room to update the information.
-public class MsgRoomUpdate : LobbyMsgBase
-{
-    public string RoomName;
-    public List<Player> playerList;
-
-    override public ArraySegment<byte> Serialize()
-    {
-        return LobbyMsgHelper.GenerateMsg((writer) => {
-            writer.Write((byte)LobbyPacketHeader.RoomUpdate);
-            writer.Write(RoomName);
-            writer.Write(playerList.Count);
-            foreach (Player player in playerList)
+        public new static MsgPlayerInfoUpdate Desserialize(ArraySegment<byte> data)
+        {
+            return LobbyMsgHelper.InterpretMsg<MsgPlayerInfoUpdate>(data, (reader) =>
             {
-                writer.Write(player.Name);
-                writer.Write(player.isReady);
-            }
-        });
+                return new MsgPlayerInfoUpdate(reader.ReadString());
+            });
+        }
     }
 
-    public static MsgRoomUpdate Desserialize(ArraySegment<byte> data) 
+    // Server will boardcast this message to all players when there is any changes in the lobby (such as new game server 
+    // available/ numPlayer of a game server changes/ game server is down...) It also sends this message to player who 
+    // just join the lobby server.
+    public class MsgLobbyInfoUpdate : LobbyMsgBase
     {
-        return LobbyMsgHelper.InterpretMsg<MsgRoomUpdate>(data, (reader) => {
-            MsgRoomUpdate result = new MsgRoomUpdate();
-            result.RoomName = reader.ReadString();
-            int size = reader.ReadInt32();
-            result.playerList = new List<Player>();
-            for (int i = 0; i < size; i++)
+        public List<Room> RoomList;
+
+        override public ArraySegment<byte> Serialize()
+        {
+            return LobbyMsgHelper.GenerateMsg((writer) =>
             {
-                Player player = new Player(reader.ReadString());
-                player.isReady = reader.ReadBoolean();
-                result.playerList.Add(player);
-            }
-            return result;
-        });
+                writer.Write((byte)LobbyPacketHeader.LobbyInfoUpdate);
+                writer.Write(RoomList.Count);
+                foreach (Room room in RoomList)
+                {
+                    writer.Write(room.RoomName);
+                    writer.Write(room.uuid);
+                    writer.Write(room.PlayerList.Count);
+                }
+            });
+        }
+
+        public new static MsgLobbyInfoUpdate Desserialize(ArraySegment<byte> data)
+        {
+            return LobbyMsgHelper.InterpretMsg<MsgLobbyInfoUpdate>(data, (reader) =>
+            {
+                MsgLobbyInfoUpdate result = new MsgLobbyInfoUpdate();
+                int roomListLength = reader.ReadInt32();
+                result.RoomList = new List<Room>(roomListLength);
+                for (int i = 0; i < roomListLength; i++)
+                {
+                    string roomName = reader.ReadString();
+                    string uuid = reader.ReadString();
+                    int numPlayers = reader.ReadInt32();
+                    result.RoomList.Add(new Room(uuid: uuid, roomName: roomName, numPlayers: numPlayers));
+                }
+                return result;
+            });
+        }
+    }
+
+    // Sent by client when they want to join a room.
+    public class MsgJoinRoomRequest : LobbyMsgBase
+    {
+        public string RoomUuid;
+        public MsgJoinRoomRequest(string uuid) { RoomUuid = uuid; }
+        override public ArraySegment<byte> Serialize()
+        {
+            return LobbyMsgHelper.GenerateMsg((writer) => {
+                writer.Write((byte)LobbyPacketHeader.JoinRoomRequest);
+                writer.Write(RoomUuid);
+            });
+        }
+
+        public new static MsgJoinRoomRequest Desserialize(ArraySegment<byte> data)
+        {
+            return LobbyMsgHelper.InterpretMsg<MsgJoinRoomRequest>(data, (reader) =>
+            {
+                return new MsgJoinRoomRequest(reader.ReadString());
+            });
+        }
+    }
+
+    // The reply of MsgJoinRoomRequest. If success, ErrorCode = ErrorType.None, else, the errorcode is set.
+    public class MsgJoinRoomResponse : LobbyMsgBase
+    {
+        public ErrorType ErrorCode;
+
+        public MsgJoinRoomResponse(ErrorType errorCode = ErrorType.None)
+        {
+            this.ErrorCode = errorCode;
+        }
+
+        override public ArraySegment<byte> Serialize()
+        {
+            return LobbyMsgHelper.GenerateMsg((writer) => {
+                writer.Write((byte)LobbyPacketHeader.JoinRoomResponse);
+                writer.Write((byte)ErrorCode);
+            });
+        }
+
+        public new static MsgJoinRoomResponse Desserialize(ArraySegment<byte> data)
+        {
+            return LobbyMsgHelper.InterpretMsg<MsgJoinRoomResponse>(data, (reader) => {
+                bool success = reader.ReadBoolean();
+                ErrorType errorCode = (ErrorType) reader.ReadByte();
+                return new MsgJoinRoomResponse(errorCode);
+            });
+        }
+    }
+
+    // Server send this to all players in the room to update the information.
+    public class MsgRoomUpdate : LobbyMsgBase
+    {
+        public string RoomName;
+        public List<Player> PlayerList;
+
+        override public ArraySegment<byte> Serialize()
+        {
+            return LobbyMsgHelper.GenerateMsg((writer) => {
+                writer.Write((byte)LobbyPacketHeader.RoomUpdate);
+                writer.Write(RoomName);
+                writer.Write(PlayerList.Count);
+                foreach (Player player in PlayerList)
+                {
+                    writer.Write(player.uuid);
+                    writer.Write(player.Name);
+                    writer.Write(player.IsReady);
+                }
+            });
+        }
+
+        public new static MsgRoomUpdate Desserialize(ArraySegment<byte> data)
+        {
+            return LobbyMsgHelper.InterpretMsg<MsgRoomUpdate>(data, (reader) => {
+                MsgRoomUpdate result = new MsgRoomUpdate();
+                result.RoomName = reader.ReadString();
+                int size = reader.ReadInt32();
+                result.PlayerList = new List<Player>();
+                for (int i = 0; i < size; i++)
+                {
+                    string uuid = reader.ReadString();
+                    string playerName = reader.ReadString();
+                    bool isReady = reader.ReadBoolean();
+                    Player player = new Player(uuid: uuid, name: playerName, isReady: isReady);
+                    result.PlayerList.Add(player);
+                }
+                return result;
+            });
+        }
+    }
+
+    // Client will send this to lobby server when clicking the back button in room
+    public class MsgLeaveRoomSignal : LobbyMsgBase
+    {
+        override public ArraySegment<byte> Serialize()
+        {
+            return LobbyMsgHelper.GenerateMsg((writer) =>
+            {
+                writer.Write((byte)LobbyPacketHeader.LeaveRoomSignal);
+            });
+        }
+    }
+
+    // Client will send this signal to server when they click the ready button.
+    public class MsgReadySignal : LobbyMsgBase
+    {
+        override public ArraySegment<byte> Serialize()
+        {
+            return LobbyMsgHelper.GenerateMsg((writer) => {
+                writer.Write((byte)LobbyPacketHeader.ReadySignal);
+            });
+        }
+    }
+
+    // Server tells the client to connect to the game server
+    public class MsgGameStartSignal : LobbyMsgBase
+    {
+        public string GameServerIP { set; get; }
+        public int GameServerPort { set; get; }
+
+        public MsgGameStartSignal(string GameServerIP, int GameServerPort)
+        {
+            this.GameServerIP = GameServerIP;
+            this.GameServerPort = GameServerPort;
+        }
+
+        override public ArraySegment<byte> Serialize()
+        {
+            return LobbyMsgHelper.GenerateMsg((writer) => {
+                writer.Write((byte)LobbyPacketHeader.StartGame);
+                writer.Write(GameServerIP);
+                writer.Write(GameServerPort);
+            });
+        }
+
+        public new static MsgGameStartSignal Desserialize(ArraySegment<byte> data)
+        {
+            return LobbyMsgHelper.InterpretMsg<MsgGameStartSignal>(data, (reader) => {
+                string ip = reader.ReadString();
+                int port = reader.ReadInt32();
+                return new MsgGameStartSignal(ip, port);
+            });
+        }
     }
 }
+#endregion
 
-// Client will send this signal to server when they click the ready button.
-public class MsgReadySignal : LobbyMsgBase
-{
-    override public ArraySegment<byte> Serialize()
-    {
-        return LobbyMsgHelper.GenerateMsg((writer) => {
-            writer.Write((byte)LobbyPacketHeader.ReadySignal);
-        });
-    }
-}
-
-// Server tells the client to connect to the game server
-public class MsgGameStartSignal : LobbyMsgBase
-{
-    string GameServerIP;
-    int GameServerPort;
-
-    public MsgGameStartSignal(string GameServerIP, int GameServerPort)
-    {
-        this.GameServerIP = GameServerIP;
-        this.GameServerPort = GameServerPort;
-    }
-
-    override public ArraySegment<byte> Serialize()
-    {
-        return LobbyMsgHelper.GenerateMsg((writer) => {
-            writer.Write((byte)LobbyPacketHeader.StartGame);
-            writer.Write(GameServerIP);
-            writer.Write(GameServerPort);
-        });
-    }
-
-    public static MsgGameStartSignal Desserialize(ArraySegment<byte> data) 
-    {
-        return LobbyMsgHelper.InterpretMsg<MsgGameStartSignal>(data, (reader) => {
-            string ip = reader.ReadString();
-            int port = reader.ReadInt32();
-            return  new MsgGameStartSignal(ip, port);       
-        });
-    } 
-}
 /************************************************************************************************************************
-                                                    LobbyNetworkManager
+                                                            LobbyNetworkManager
 ************************************************************************************************************************/
+
 public class LobbyNetworkManager : MonoBehaviour
 {
-    //constants
-    const int MAX_ROOM_PLAYERS = 4;
-
     //configurations
     [Header("Transport Configuration")]
     public ushort Port = 27777;
@@ -313,41 +355,44 @@ public class LobbyNetworkManager : MonoBehaviour
     public uint SendWindowSize = 4096; //Kcp.WND_SND; 32 by default. Mirror sends a lot, so we need a lot more.
     [Tooltip("KCP window size can be modified to support higher loads.")]
     public uint ReceiveWindowSize = 4096; //Kcp.WND_RCV; 128 by default. Mirror sends a lot, so we need a lot more.
+    [Tooltip("If checked, the lobby will always direct players to game server at localhost:7777")]
+    public bool DebugLocalServers = false;
+    [Header("Events")]
 
     //reference
-    public MenuController menuController;
-    public RoomListPanel roomListPanel;
+    public GameConfiguration Config;
 
     //variables
-    KcpServer server;
-    KcpClient client;
+    KcpServer LobbyServer;
+    //KcpServer GameServerManagement;
+    KcpClient Client;
+    Dictionary<int, Player> ConnIdToPlayer;       // For server only.
+    Dictionary<string, Room> UuidToRoom;
+    public Room CurrRoom;             //to be changed, please add getters
 
-    GameConfiguration config;
-    Dictionary<int, Player> connIdToPlayer;     //for server only.
-    List<Room> roomList;
-    public Room currRoom;       //for client only. This is null if client is not in any room, else it is the client's current room.
+    //events
+    // Define what to do after lobby server has processed LobbyInfoUpdate
+    // Each room in the roomList has uuid, roomName and numPlayers, but their
+    // playerList is null.
+    public Action<List<Room>> Event_ReceiveLobbyInfoUpdate = (roomList) => { };
 
+    // Define what to do after client receive roomUpdate.
+    // The room contains updated information of the player's room.
+    public Action<Room> Event_ReceiveRoomUpdate = (room) => { };
 
-    //public static LobbyNetworkManager selfReference;
+    // Define what to do after client receive JoinRoomResponse.
+    public Action<ErrorType> Event_ReceiveJoinRoomResponse = (errorType) => { };
 
-    // Call this when the LobbyNetworkManager is being loaded into the scene
-    void Awake()
+    // Define what to do after client diconnected from lobby server.
+    public Action Event_ClientDisconnected = () => { };
+
+    private void Awake()
     {
-        config = GameConfiguration.Instance;
-        connIdToPlayer = new Dictionary<int, Player>();
-        roomList = new List<Room>();
-
-        //To be changed. For now we assume there is already a game server in the list.
-#if UNITY_SERVER
-        Room gameRoom1 = new Room();
-        gameRoom1.RoomName = "Room";
-        gameRoom1.PlayerList = new List<Player>();
-        roomList.Add(gameRoom1);
-#endif
-        
+        ConnIdToPlayer = new Dictionary<int, Player>();
+        UuidToRoom = new Dictionary<string, Room>();
 
 #if UNITY_SERVER
-        server = new KcpServer(
+        LobbyServer = new KcpServer(
             (connectionId) => OnServerConnected(connectionId),
             (connectionId, message) => OnServerDataReceived(connectionId, message),
             (connectionId) => OnServerDisconnected(connectionId),
@@ -358,30 +403,291 @@ public class LobbyNetworkManager : MonoBehaviour
             SendWindowSize,
             ReceiveWindowSize
         );
-        server.Start(Port);
+        LobbyServer.Start(Port);
 #else
-        client = new KcpClient(
+        Client = new KcpClient(
             () => OnClientConnected(),
             (message) => OnClientDataReceived(message),
             () => OnClientDisconnected()
         );
+#endif
+
+        //To be changed. For now we assume there is already a game server in the list.
+#if UNITY_SERVER
+        Room gameRoom1 = new Room();
+        UuidToRoom.Add(gameRoom1.uuid, gameRoom1);
 #endif
     }
 
     void Update()
     {
 #if UNITY_SERVER
-            server.Tick();
+        LobbyServer.Tick();
 #else
-            client.Tick();
+        Client.Tick();
 #endif
     }
 
+    ~LobbyNetworkManager()
+    {
+        if (Client != null)
+            Client.Disconnect();
+        if (LobbyServer != null)
+        {
+            foreach (int connectionId in ConnIdToPlayer.Keys)
+                LobbyServer.Disconnect(connectionId);
+        }
+            
+    }
+
+#region Server
+    // BoardCast the LobbyMessage to all connections in the list
+    void MultiCast(LobbyMsgBase packet, int[] conns)
+    {
+        foreach (int connectionId in conns)
+            LobbyServer.Send(connectionId, packet.Serialize(), KcpChannel.Reliable);
+    }
+
+    // BoardCast the LobbyMessage to all players in the server
+    void BoardCast(LobbyMsgBase packet)
+    {
+        foreach (int connectionId in ConnIdToPlayer.Keys)
+            LobbyServer.Send(connectionId, packet.Serialize(), KcpChannel.Reliable);
+    }
+
+    // Invoked when a client connects to the server.
+    void OnServerConnected(int connectionId)
+    {
+        //do nothing
+    }
+
+    // Invoked when a server receives a message from client.
+    void OnServerDataReceived(int connectionId, ArraySegment<byte> message)
+    {
+        // Read the LobbyPacketHeader in the packet
+        MemoryStream m = new MemoryStream(message.Array);
+        m.Seek(1, SeekOrigin.Begin);        // Skip 1 byte, because the first byte is Kcp header.
+        BinaryReader reader = new BinaryReader(m);
+        LobbyPacketHeader header = (LobbyPacketHeader) reader.ReadByte();
+        switch (header)
+        {
+            case LobbyPacketHeader.PlayerInfoUpdate:
+                HandlePlayerInfoUpdate(connectionId, MsgPlayerInfoUpdate.Desserialize(message));
+                break;
+            case LobbyPacketHeader.JoinRoomRequest:
+                HandleJoinRoomRequest(connectionId, MsgJoinRoomRequest.Desserialize(message));
+                break;
+            case LobbyPacketHeader.ReadySignal:
+                HandleReadySignal(connectionId);
+                break;
+            case LobbyPacketHeader.LeaveRoomSignal:
+                HandleLeaveRoomSignal(connectionId);
+                break;
+        }
+    }
+
+
+    // Invoked when a client disconnected from the server
+    // Remove player in ConnToPlayer UuidToRoom. If player is in a room, boardcast
+    // update to all players in the room.
+    void OnServerDisconnected(int connectionId)
+    {
+        Debug.Log("Client " + connectionId.ToString() + " has disconnected.");
+        Player player;
+        if (!ConnIdToPlayer.TryGetValue(connectionId, out player))
+        {
+            Debug.LogError("Cannot find " + connectionId.ToString() + "!");
+            return;
+        }
+        if (player.CurrRoom != null)
+        {
+            HandleLeaveRoomSignal(connectionId);
+        }
+        ConnIdToPlayer.Remove(connectionId);  
+    }
+
+    // Defines what server should do when received a packet from player.
+    // Once complete registering the new player, the lobby server should send the current lobby info to player.
+    void HandlePlayerInfoUpdate(int connectionId, MsgPlayerInfoUpdate packet)
+    {
+        ConnIdToPlayer[connectionId] = new Player(connectionId: connectionId, name : packet.Name);
+        Debug.Log(ConnIdToPlayer[connectionId].Name + " has connected to the Lobby Server.");
+
+        MsgLobbyInfoUpdate msg = new MsgLobbyInfoUpdate();
+        msg.RoomList = new List<Room>(UuidToRoom.Values);
+        LobbyServer.Send(connectionId, msg.Serialize(), KcpChannel.Reliable);
+    }
+
+    // When a player join a room, the server should first check if the room has reached numPlayer limit.
+    // Then the server will update the room data, and boardcast RoomUpdate to all player in the room.
+    // After that, the server should also boardcast LobbyInfoUpdate to all player in the server (because
+    // the numPlayer of that server has been updated).
+    void HandleJoinRoomRequest(int connectionId, MsgJoinRoomRequest packet)
+    {
+        //check room size
+        string roomUuid = packet.RoomUuid;
+        Room room;
+        Player player;
+        MsgJoinRoomResponse response;
+        if (!UuidToRoom.TryGetValue(packet.RoomUuid, out room))
+        {
+            response = new MsgJoinRoomResponse(ErrorType.RoomNotExist);
+            LobbyServer.Send(connectionId, response.Serialize(), KcpChannel.Reliable);
+            return;
+        }
+
+        if (!ConnIdToPlayer.TryGetValue(connectionId, out player))
+        {
+            Debug.LogError("Unknown connectionId=" + connectionId.ToString() + " is trying to join a room.");
+            response = new MsgJoinRoomResponse(ErrorType.InternalError);
+            LobbyServer.Send(connectionId, response.Serialize(), KcpChannel.Reliable);
+            return;
+        }
+
+        if (room.NumPlayers > GameConfiguration.MAX_ROOM_PLAYERS)
+        {
+            response = new MsgJoinRoomResponse(ErrorType.RoomFull);
+            LobbyServer.Send(connectionId, response.Serialize(), KcpChannel.Reliable);
+            return;
+        }
+
+        response = new MsgJoinRoomResponse(ErrorType.None);
+        LobbyServer.Send(connectionId, response.Serialize(), KcpChannel.Reliable);
+
+        UuidToRoom[packet.RoomUuid].PlayerList.Add(player);
+        UuidToRoom[packet.RoomUuid].NumPlayers = room.PlayerList.Count;
+        ConnIdToPlayer[connectionId].CurrRoom = room;
+        Debug.Log("Player " + player.Name + " joined " + room.RoomName + ".");
+        MultiCastRoomUpdate(UuidToRoom[packet.RoomUuid]);
+
+        MsgLobbyInfoUpdate lobbyInfoMsg = new MsgLobbyInfoUpdate();
+        lobbyInfoMsg.RoomList = new List<Room>(UuidToRoom.Values);
+        BoardCast(lobbyInfoMsg);
+    }
+
+    // Flip the player's ready state. Check if all players in the room are ready, if yes, then forward them to the game server.
+    void HandleReadySignal(int connectionId)
+    {
+        Player player;
+        if (!ConnIdToPlayer.TryGetValue(connectionId, out player))
+        {
+            Debug.LogError("Unkown connectionId=" + connectionId + " is sending Ready signal.");
+            return;
+        }
+
+        ConnIdToPlayer[connectionId].IsReady = !ConnIdToPlayer[connectionId].IsReady;
+
+        if (player.CurrRoom == null)
+        {
+            Debug.LogError("Player " + player.Name + " has no CurrRoom!");
+            return;
+        }
+
+        MultiCastRoomUpdate(player.CurrRoom);
+
+        bool allReady = true;
+        foreach (Player p in player.CurrRoom.PlayerList)
+        {
+            allReady = allReady & p.IsReady;
+        }
+
+        if (allReady)
+        {
+            MsgGameStartSignal gameStartSignal = SearchGameServer();
+            List<int> connList = new List<int>();
+            foreach (Player p in player.CurrRoom.PlayerList)
+            {
+                connList.Add(p.ConnectionId);
+            }
+            MultiCast(gameStartSignal, connList.ToArray());
+        }
+    }
+
+    // This helper function searchs the available game server, then
+    // tells the server player information, then construct a new
+    // MsgGameStartSignal containing the game server's ip and port.
+    private MsgGameStartSignal SearchGameServer()
+    {
+        if (DebugLocalServers)
+            return new MsgGameStartSignal("localhost", 7777);
+        //to be changed, not implemented yet
+        return new MsgGameStartSignal("52.183.4.114", 7777); 
+    }
+
+    // When player leaves the room, remove player from room's playerList, set
+    // player's currRoom to null, then boardcast roomUpdate to all players in room,
+    // After that, the server should also boardcast LobbyInfoUpdate to all player in the server (because
+    // the numPlayer of that server has been updated).
+    void HandleLeaveRoomSignal(int connectionId)
+    {
+        Player player;
+        if (!ConnIdToPlayer.TryGetValue(connectionId, out player))
+        {
+            Debug.LogError("Unknown connectionId=" + connectionId.ToString() + "leave the room.");
+            return;
+        }
+        Room room = player.CurrRoom;
+        if (room == null)
+        {
+            Debug.LogError("Player " + player.Name + " tries to leave a room, but that player is not in any room!");
+            return;
+        }
+
+        room.PlayerList.RemoveAll((p) => { return p.uuid.Equals(player.uuid); });
+        room.NumPlayers = room.PlayerList.Count;
+        player.CurrRoom = null;
+        player.IsReady = false;
+
+        Debug.Log("Player " + player.Name + " leaves " + room.RoomName + ".");
+        MultiCastRoomUpdate(room);
+
+        MsgLobbyInfoUpdate lobbyInfoMsg = new MsgLobbyInfoUpdate();
+        lobbyInfoMsg.RoomList = new List<Room>(UuidToRoom.Values);
+        BoardCast(lobbyInfoMsg);
+    }
+
+    // Multicast the roomUpdateMsg to all players in the room
+    private void MultiCastRoomUpdate(Room room)
+    {
+        MsgRoomUpdate roomUpdateMsg = new MsgRoomUpdate();
+        roomUpdateMsg.RoomName = room.RoomName;
+        roomUpdateMsg.PlayerList = new List<Player>(room.PlayerList);
+        List<int> connList = new List<int>();
+        foreach (Player p in room.PlayerList)
+        {
+            connList.Add(p.ConnectionId);
+        }
+        MultiCast(roomUpdateMsg, connList.ToArray());
+    }
+
+#endregion
+
+#region GameServerManagement
+    // Invoked when a game server connects to the lobby.
+    void OnGameServerConnected(int connectionId)
+    {
+
+    }
+
+    // Invoked when a server receives a message from game server.
+    void OnGameServerDataReceived(int connectionId, ArraySegment<byte> message)
+    {
+
+    }
+
+    // Invoked when a game server shuts down or offline.
+    void OnGameServerDisconnected(int connectionId)
+    {
+
+    }
+#endregion
+
+#region Client
+    // Start connect to the lobby server.
     public void ClientConnectLobby()
     {
-        Debug.Log("Debug IP: " + LobbyServerIP);
-        client.Connect(
-            LobbyServerIP, 
+        Client.Connect(
+            LobbyServerIP,
             Port,
             NoDelay,
             Interval,
@@ -391,142 +697,12 @@ public class LobbyNetworkManager : MonoBehaviour
             ReceiveWindowSize
         );
     }
-/************************************************************************************************************************
-                                                    LobbyNetworkManager(Server)
-************************************************************************************************************************/
-    // Invoked when a client connects to the server
-    void OnServerConnected(int connectionId)
-    {
-        Debug.Log("OnServerConnected: " + connectionId.ToString());
-        // Generate a new player instance for the new connection, put it in dictionary
-        connIdToPlayer.Add(connectionId, new Player("NewPlayer"));
-    }
 
-    // Invoked when a server receives a message
-    void OnServerDataReceived(int connectionId, ArraySegment<byte> message)
-    {
-        // Read the LobbyPacketHeader in the packet
-        MemoryStream m = new MemoryStream(message.Array);
-        m.Seek(1, SeekOrigin.Begin);        //skip 1 byte, because the first byte is Kcp header
-        BinaryReader reader = new BinaryReader(m);
-        LobbyPacketHeader header = (LobbyPacketHeader) reader.ReadByte();
-        switch (header)
-        {
-            case LobbyPacketHeader.PlayerInfoUpdate:
-                HandlePlayerInfoUpdate(connectionId, MsgPlayerInfoUpdate.Desserialize(message));
-                break;
-            case LobbyPacketHeader.JoinRoomRequest:
-                HandleJoinRoomRequest(connectionId, null);
-                break;
-            case LobbyPacketHeader.ReadySignal:
-                HandleReadySignal(connectionId, null);
-                break;
-
-        }
-    }
-
-    // Invoked when a client disconnected from the server
-    void OnServerDisconnected(int connectionId)
-    {
-        Debug.Log("OnServerDisconnected: " + connectionId.ToString());
-    }
-
-    // Defines what server should do when received a packet from player.
-    // Once complete registering the new player, the lobby server should send the current lobby info to player.
-    void HandlePlayerInfoUpdate(int connectionId, MsgPlayerInfoUpdate packet)
-    {
-        connIdToPlayer[connectionId] = new Player(packet.Name, connectionId);
-        Debug.Log(connIdToPlayer[connectionId].Name + " has connected to the Lobby Server.");
-
-        MsgLobbyInfoUpdate msg = new MsgLobbyInfoUpdate();
-        msg.roomList = new List<Room>(roomList);
-        server.Send(connectionId, msg.Serialize(), KcpChannel.Reliable);
-    }
-
-    // When a player join a room, the server should first check if the room has reached numPlayer limit.
-    // Then the server will update the room data, and boardcast RoomUpdate to all player in the room.
-    // After that, the server should also boardcast LobbyInfoUpdate to all player in the server (because
-    // the numPlayer of that server has updated).
-    void HandleJoinRoomRequest(int connectionId, MsgJoinRoomRequest packet)
-    {
-        MsgJoinRoomResponse response;
-        if (roomList[0].PlayerList.Count >= MAX_ROOM_PLAYERS)
-        {
-            response = new MsgJoinRoomResponse(false, "The room is full.");
-            server.Send(connectionId, response.Serialize(), KcpChannel.Reliable);
-            return;
-        }
-        Player player = connIdToPlayer[connectionId];
-        roomList[0].PlayerList.Add(player);
-        MsgRoomUpdate roomUpdateMsg = new MsgRoomUpdate();
-        roomUpdateMsg.RoomName = roomList[0].RoomName;
-        roomUpdateMsg.playerList = new List<Player>(roomList[0].PlayerList);
-
-        List<int> connList = new List<int>();
-        foreach (Player p in roomList[0].PlayerList)
-        {
-            connList.Add(p.connectionId);
-        }
-        MultiCast(roomUpdateMsg, connList.ToArray());
-
-        MsgLobbyInfoUpdate lobbyInfoMsg = new MsgLobbyInfoUpdate();
-        lobbyInfoMsg.roomList = new List<Room>(roomList);
-        BoardCast(lobbyInfoMsg);
-    }
-
-    // Flip the player's ready state. Check if all players in the room are ready, if yes, then forward them to the game server.
-    void HandleReadySignal(int connectionId, MsgReadySignal packet)
-    {
-        connIdToPlayer[connectionId].isReady = !connIdToPlayer[connectionId].isReady;
-
-        MsgRoomUpdate roomUpdateMsg = new MsgRoomUpdate();
-        roomUpdateMsg.RoomName = roomList[0].RoomName;
-        roomUpdateMsg.playerList = new List<Player>(roomList[0].PlayerList);
-
-        List<int> connList = new List<int>();
-        foreach (Player p in roomList[0].PlayerList)
-        {
-            connList.Add(p.connectionId);
-        }
-        MultiCast(roomUpdateMsg, connList.ToArray());
-
-        //To be changed! We assume there is only one room in the room for now. Server needs to know what room the player is in.
-        bool allReady = true;
-        foreach (Player player in roomList[0].PlayerList)
-        {
-            allReady = allReady & player.isReady;
-        }
-
-        if (allReady)
-        {
-            Debug.Log("All player ready. Game Start");
-            MsgGameStartSignal gameStartSignal = new MsgGameStartSignal("52.183.4.114", 7777);
-            MultiCast(gameStartSignal, connList.ToArray());
-        }
-    }
-
-    // BoardCast the LobbyMessage to all connections in the list
-    void MultiCast(LobbyMsgBase packet, int[] conns)
-    {
-        foreach (int connectionId in conns)
-            server.Send(connectionId, packet.Serialize(), KcpChannel.Reliable);
-    }
-
-    // BoardCast the LobbyMessage to all players in the server
-    void BoardCast(LobbyMsgBase packet)
-    {
-        foreach (int connectionId in connIdToPlayer.Keys)
-            server.Send(connectionId, packet.Serialize(), KcpChannel.Reliable);
-    }
-
-/************************************************************************************************************************
-                                                    LobbyNetworkManager(Client)
-************************************************************************************************************************/
     // Invoked when a client connects to the lobby server. Send player information immediately.
     void OnClientConnected()
     {
-        MsgPlayerInfoUpdate msg = new MsgPlayerInfoUpdate(config.myName);
-        client.Send(msg.Serialize(), KcpChannel.Reliable);
+        MsgPlayerInfoUpdate msg = new MsgPlayerInfoUpdate(Config.MyName);
+        Client.Send(msg.Serialize(), KcpChannel.Reliable);
     }
 
     // Invoked when a client receives a message from the lobby server.
@@ -536,7 +712,7 @@ public class LobbyNetworkManager : MonoBehaviour
         MemoryStream m = new MemoryStream(message.Array);
         m.Seek(1, SeekOrigin.Begin);        //skip 1 byte, because the first byte is Kcp header
         BinaryReader reader = new BinaryReader(m);
-        LobbyPacketHeader header = (LobbyPacketHeader) reader.ReadByte();
+        LobbyPacketHeader header = (LobbyPacketHeader)reader.ReadByte();
         switch (header)
         {
             case LobbyPacketHeader.LobbyInfoUpdate:
@@ -557,20 +733,24 @@ public class LobbyNetworkManager : MonoBehaviour
     // Invoked when client is disconnected from the lobby server
     void OnClientDisconnected()
     {
-        Debug.Log("OnClientDisconnected");
+        Debug.Log("Disconnected from server.");
+        //clean up data
+        CurrRoom = null;
+        ConnIdToPlayer = new Dictionary<int, Player>();
+        UuidToRoom = new Dictionary<string, Room>();
+        Event_ClientDisconnected();
     }
 
     // Defines what to do when client receives MsgLobbyInfoUpdate packet.
     // Update the LobbyPanel.
     void HandleLobbyInfoUpdate(MsgLobbyInfoUpdate packet)
     {
-        roomList = new List<Room>(packet.roomList);
-        Debug.Log("Debug: HandleLobbyInfoUpdate");
-        for (int i = 0; i < roomList.Count; i++)
+        List<Room> roomList = new List<Room>(packet.RoomList);
+        foreach (Room room in roomList)
         {
-            Debug.Log(roomList[0].RoomName + "\t\t" + roomList[0].numPlayers);
+            UuidToRoom[room.uuid] = room;
         }
-        roomListPanel.UpdateRoom(roomList[0].numPlayers);
+        Event_ReceiveLobbyInfoUpdate(roomList);
     }
 
     // Defines what to do when client receives MsgJoinRoomResponse packet.
@@ -578,35 +758,32 @@ public class LobbyNetworkManager : MonoBehaviour
     // if failed, show message window.
     void HandleJoinRoomResponse(MsgJoinRoomResponse packet)
     {
-        if (packet.success)
-        {
-            Debug.Log("Join room success!");
-        }
-        else
-        {
-
-        }
+        Event_ReceiveJoinRoomResponse.Invoke(packet.ErrorCode);
     }
 
+    
+    // Defines what to do when client receives MsgRoomUpdate packet.
     void HandleRoomUpdate(MsgRoomUpdate packet)
     {
-        currRoom = new Room();
-        currRoom.PlayerList = new List<Player>(packet.playerList);
-        currRoom.RoomName = packet.RoomName;
+        CurrRoom = new Room(roomName: packet.RoomName, 
+                            numPlayers: packet.PlayerList.Count,
+                            playerList: packet.PlayerList);
 
-        Debug.Log("HandleRoomUpdate: " + currRoom.RoomName);
-        foreach (Player player in currRoom.PlayerList)
-        {
-            Debug.Log(player.Name + "\t\t" + player.isReady);
-        }
+        Event_ReceiveRoomUpdate.Invoke(CurrRoom);
     }
 
+    // Defines what to do when client receives GameStartSignal.
+    // Move to the Game scene.
     void HandleGameStartSignal(MsgGameStartSignal packet)
     {
+        Config.GameServerIP = packet.GameServerIP;
+        Config.GameServerPort = packet.GameServerPort;
+
+        //to be changed, use config to connect instead
         SceneManager.sceneLoaded += (scene, mode) => {
             if (scene.name == "PreTestScene")
             {
-                System.Threading.Thread.Sleep(UnityEngine.Random.Range(500, 2000));
+                //System.Threading.Thread.Sleep(UnityEngine.Random.Range(1000, 2000));
                 // to be changed. Now we assume the both lobby server and game server are in the same vm instance
                 GameObject networkManagerObj = GameObject.Find("NetworkRoomManager");
 
@@ -615,8 +792,8 @@ public class LobbyNetworkManager : MonoBehaviour
                 else
                     Debug.Log("networkManagerObj NOT FOUND!!!");
                 NetworkRoomManager networkManager = networkManagerObj.GetComponent<NetworkRoomManager>();
-                networkManager.networkAddress = LobbyServerIP;
-                Debug.Log("Now the networkManager's networkAddress is " + LobbyServerIP);
+                networkManager.networkAddress = packet.GameServerIP;
+                Debug.Log("Now the networkManager's networkAddress is " + packet.GameServerIP);
                 networkManager.StartClient();
                 Debug.Log("Called startclient()");
             }
@@ -625,16 +802,31 @@ public class LobbyNetworkManager : MonoBehaviour
     }
 
     // Send the joinRoom message to server.
-    public void JoinRoom(String roomUUID)
+    public void JoinRoom(string roomUUID)
     {
-        MsgJoinRoomRequest msg = new MsgJoinRoomRequest();
-        client.Send(msg.Serialize(), KcpChannel.Reliable);
+        MsgJoinRoomRequest msg = new MsgJoinRoomRequest(roomUUID);
+        Client.Send(msg.Serialize(), KcpChannel.Reliable);
+    }
+
+    // Send the leaveRoom message to server.
+    public void LeaveRoom()
+    {
+        CurrRoom = null;
+        MsgLeaveRoomSignal msg = new MsgLeaveRoomSignal();
+        Client.Send(msg.Serialize(), KcpChannel.Reliable);
+    }
+
+    // Close client socket.
+    public void Disconnect()
+    {
+        Client.Disconnect();
     }
 
     // Send the player's ready state to the server.
     public void sendReadySignal()
     {
         MsgReadySignal msg = new MsgReadySignal();
-        client.Send(msg.Serialize(), KcpChannel.Reliable);
+        Client.Send(msg.Serialize(), KcpChannel.Reliable);
     }
+#endregion
 }

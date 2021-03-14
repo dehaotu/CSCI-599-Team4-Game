@@ -12,8 +12,14 @@ public class GameConfiguration : MonoBehaviour
     public static GameConfiguration Instance { get { return _instance; } }
 
     #region Variables
-    public string myName { set; get; }
-    public string gameServerIP { set; get; }
+    public string MyName { set; get; }
+    public string GameServerIP { set; get; }
+    public int GameServerPort { set; get; }
+    #endregion
+
+    #region Constant
+    public const int MAX_ROOM_PLAYERS = 4;
+    public const ushort GMAESERVER_TO_LOBBYSERVER_PORT = 37777;
     #endregion
 
     private void Awake()
