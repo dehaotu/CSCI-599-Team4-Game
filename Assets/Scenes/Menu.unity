@@ -463,14 +463,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Port: 27777
-  LobbyServerIP: 52.183.4.114
+  LobbyServerIP: localhost
   NoDelay: 1
   Interval: 10
   FastResend: 2
   CongestionWindow: 0
   SendWindowSize: 4096
   ReceiveWindowSize: 4096
-  DebugLocalServers: 0
+  DebugLocalServers: 1
   Config: {fileID: 1601668591}
 --- !u!4 &174310634
 Transform:

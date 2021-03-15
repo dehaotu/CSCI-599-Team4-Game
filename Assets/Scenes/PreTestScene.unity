@@ -533,7 +533,7 @@ MonoBehaviour:
   roomPlayerPrefab: {fileID: 1257700833802494063, guid: d73367814be36b34e9812a10338ef602,
     type: 3}
   RoomScene: Assets/Scenes/PreTestScene.unity
-  GameplayScene: Assets/Scenes/TestScene.unity
+  GameplayScene: Assets/Scenes/TinsTestScene.unity
   _allPlayersReady: 0
   roomSlots: []
   clientIndex: 0
