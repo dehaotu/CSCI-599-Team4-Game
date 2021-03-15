@@ -20,7 +20,7 @@ public class CrystalCollision : MonoBehaviour
     {
         Debug.Log(collision.gameObject.name);
 
-        if (collision.gameObject.name == "PlayerCollider")
+        if (!crystalStatus.isAlly && collision.gameObject.name == "PlayerCollider")
         {
             attackStatus = collision.GetComponentInParent<HeroStatus>().transform.gameObject.GetComponentInChildren<IsometricCharacterRenderer>();
             attacker = collision.GetComponentInParent<HeroStatus>();

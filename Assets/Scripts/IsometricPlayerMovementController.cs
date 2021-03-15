@@ -40,6 +40,7 @@ public class IsometricPlayerMovementController : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
+
         if (!isLocalPlayer) {
             //GameObject.Find("Inventory Menu").GetComponent<CanvasGroup>().alpha = 0;
             return;
@@ -47,7 +48,13 @@ public class IsometricPlayerMovementController : NetworkBehaviour
         if (isoRenderer.isPlayingAttack()) return;
         float horizontalInput = 0;
         float verticalInput = 0;
-        
+
+        /*if (heroStatus.checkAlive())
+        {
+            agent.isStopped = false;
+        }
+        else agent.isStopped = true;*/
+
         // edited
         if (Input.GetKeyDown(KeyCode.Mouse0) && heroStatus.checkAlive() && !UnityEngine.EventSystems.EventSystem.current.IsPointerOverGameObject())
         {
@@ -55,7 +62,6 @@ public class IsometricPlayerMovementController : NetworkBehaviour
             Vector2 mousePositionInGame = playerCamera.ScreenToWorldPoint(mousePositionOnScreen);
             destination = mousePositionInGame;
             agent.SetDestination(destination);
-            Debug.Log("New destinaion: " + destination);
         }
 
         Vector2 inputVector = new Vector2(0, 0);
@@ -70,8 +76,10 @@ public class IsometricPlayerMovementController : NetworkBehaviour
          Debug.Log(IsometricCharacterRenderer.DirectionToIndex(movement, 8));*/
 
         CmdSetDirection(movement);
-        if (heroStatus.checkAlive()) rbody.MovePosition(newPos);
-
+        if (heroStatus.checkAlive())
+        {
+            rbody.MovePosition(newPos);
+        }
         //test attack
         if (Input.GetKeyDown(KeyCode.F))
         {
@@ -87,10 +95,13 @@ public class IsometricPlayerMovementController : NetworkBehaviour
             }
         }
 
-        if (heroStatus.currentHealth <= 0)
+        if (!heroStatus.checkAlive())
         {
             stopAction = true;
             isoRenderer.Dead();
+        } else
+        {
+            stopAction = false;
         }
     }
 
