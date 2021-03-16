@@ -27,6 +27,13 @@ public class CrystalCollision : MonoBehaviour
         }
     }
 
+    private void OnTriggerExit2D(Collider2D collision)
+    {
+        attackStatus = null;
+        attacker = null;
+    }
+
+
     private void FixedUpdate()
     {
         if (attackStatus != null && attackStatus.isPlayingAttack() && currAttackID != attackStatus.getAttackID())
