@@ -110,19 +110,25 @@ public class IsometricPlayerMovementController : NetworkBehaviour
         if (!stopAction) isoRenderer.SetDirection(direction);
     }
 
-    void OnCollisionEnter2D(Collision2D other)
+    void OnTriggerEnter2D(Collider2D otherCollider)
     {
         if (!isLocalPlayer) return;
-        if (other.gameObject.CompareTag("EnemyMinion"))
+        if (!otherCollider.transform.parent)
+            return;
+
+        GameObject otherGameObject = otherCollider.transform.parent.gameObject;
+        Debug.Log(otherGameObject.name);
+        if (otherGameObject.CompareTag("EnemyMinion"))
         {
             isoRenderer.SetDirection(Vector2.zero);
             isEnemyClose = true;
-            targetObject = other.gameObject;
-        } else if (other.gameObject.CompareTag("Monster"))
+            targetObject = otherGameObject;
+        }
+        else if (otherGameObject.CompareTag("Monster"))
         {
             isoRenderer.SetDirection(Vector2.zero);
             isMonsterClose = true;
-            targetObject = other.gameObject;
+            targetObject = otherGameObject;
         }
     }
 
