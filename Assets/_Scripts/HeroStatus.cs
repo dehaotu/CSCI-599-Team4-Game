@@ -16,6 +16,8 @@ public class HeroStatus : NetworkBehaviour
 {
     //Synchronized Fields
     [SyncVar]
+    public string playerName = "";
+    [SyncVar]
     public int maxHealth = 100;
     [SyncVar]
     public int currentHealth;
@@ -85,6 +87,7 @@ public class HeroStatus : NetworkBehaviour
         coinText.text = coinAmount.ToString();
         Debug.Log(GetComponent<NetworkIdentity>().netId.ToString());
         agent = gameObject.GetComponent<NavMeshAgent>();
+        transform.Find("Status Canvas/Name").GetComponent<Text>().text = playerName;
     }
 
     private void FixedUpdate()
