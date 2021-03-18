@@ -1,7 +1,8 @@
 ﻿using UnityEngine;
 using System.Collections;
 
-public class Vendor : Inventory {
+public class Vendor : Inventory
+{
 
     //单例模式
     private static Vendor _instance;
@@ -28,16 +29,16 @@ public class Vendor : Inventory {
     }
 
     //初始化商贩
-    private void InitShop() 
+    private void InitShop()
     {
-        for(int i = 1; i < 8; i++)
+        for (int i = 1; i < 8; i++)
         {
             StoreItem(i);
         }
     }
 
     //主角购买物品
-    public void BuyItem(Item item) 
+    public void BuyItem(Item item)
     {
         bool isSusscess = player.ConsumeCoin(item.BuyPrice);//主角消耗金币购买物品
         if (isSusscess)
@@ -48,7 +49,7 @@ public class Vendor : Inventory {
     }
 
     //主角售卖物品
-    public void SellItem(Item item) 
+    public void SellItem(Item item)
     {
         player.EarnCoin(item.SellPrice);//主角赚取到售卖物品的金币
         InventoryManager.Instance.ReduceAmountItem(1);//鼠标上的物品减少或者销毁

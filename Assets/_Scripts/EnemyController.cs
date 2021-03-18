@@ -87,9 +87,8 @@ public class EnemyController : NetworkBehaviour
         timer += Time.deltaTime;
 
         if (!alive) NetworkServer.Destroy(this.gameObject);
-
+        healthBar.SetHealth(currentHealthPoints);
         if (findObject != null) {
-            healthBar.SetHealth(currentHealthPoints);
             Vector2 playerPosition = findObject.transform.position;
             if (Vector2.Distance(playerPosition, rbody.position) <= maxChaseDistance)
             {
@@ -174,5 +173,11 @@ public class EnemyController : NetworkBehaviour
         {
             alive = false;
         }
+    }
+
+    [Command]
+    void CmdTakeDamage(int damage)
+    {
+        TakeDamage(damage);
     }
 }
