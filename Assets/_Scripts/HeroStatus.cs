@@ -35,11 +35,11 @@ public class HeroStatus : NetworkBehaviour
     //Basic Attributes：
     public HealthBar healthBar;
     [SerializeField]
-    [SyncVar(hook = nameof(SetAttack))]
+    [SyncVar]
     private int basicAttackPoints = 10;
     public int BasicAttackPoints { get { return basicAttackPoints; } set { SetAttack(value); } }  //Basic Attack Points
     [SerializeField]
-    [SyncVar(hook = nameof(SetDefense))]
+    [SyncVar]
     private int basicDefensePoints = 10;
     public int BasicDefensePoints{ get { return basicDefensePoints; } set { SetDefense(value); } }  //Basic Defense Points
 
@@ -47,7 +47,7 @@ public class HeroStatus : NetworkBehaviour
     public int OriginalAP {get {return originalAP;}}
     private int originalDP = 10;
     public int OriginalDP {get {return originalDP;}}
-
+    
     private Text coinText;  //Get gold amount from Coin GameObject
     [SyncVar]
     private int coins;
@@ -83,11 +83,16 @@ public class HeroStatus : NetworkBehaviour
     {
         currentHealth = maxHealth;
         healthBar.SetMaxHealth(maxHealth);
-        coinText = GameObject.Find("Coin").GetComponentInChildren<Text>();
-        coinText.text = coinAmount.ToString();
+        if (isLocalPlayer)
+        {
+            coinText = transform.Find("Inventory Menu/Coin").GetComponentInChildren<Text>();
+            coinText.text = coinAmount.ToString();
+        }
+        transform.Find("Status Canvas/Name").GetComponent<Text>().text = playerName;
+        StatusBoard.Instance.setParentLocalPlayer(gameObject);
         Debug.Log(GetComponent<NetworkIdentity>().netId.ToString());
         agent = gameObject.GetComponent<NavMeshAgent>();
-        transform.Find("Status Canvas/Name").GetComponent<Text>().text = playerName;
+        
     }
 
     private void FixedUpdate()
@@ -123,23 +128,27 @@ public class HeroStatus : NetworkBehaviour
         }
 
         // show death screen
-        if (!alive && !respawning)
+        if (isLocalPlayer)
         {
-            respawning = true;
-            respawnCountDown = respawnTime;
-            CanvasGroup deathCanvs = transform.Find("DeathCanvas").GetComponent<CanvasGroup>();
-            deathCanvs.alpha = 1;
-            deathCanvs.blocksRaycasts = true;
-        } else if (!alive && respawning && respawnCountDown > 0)
-        {
-            respawnCountDown -= Time.deltaTime;
-        } else if (!alive && respawning && respawnCountDown <= 0 && isServer)
-        {
-            respawning = false;
-            RpcRespawn();
-            agent.enabled = false;
+            if (!alive && !respawning)
+            {
+                respawning = true;
+                respawnCountDown = respawnTime;
+                CanvasGroup deathCanvs = transform.Find("DeathCanvas").GetComponent<CanvasGroup>();
+                deathCanvs.alpha = 1;
+                deathCanvs.blocksRaycasts = true;
+            }
+            else if (!alive && respawning && respawnCountDown > 0)
+            {
+                respawnCountDown -= Time.deltaTime;
+            }
+            else if (!alive && respawning && respawnCountDown <= 0 && isServer)
+            {
+                respawning = false;
+                RpcRespawn();
+                agent.enabled = false;
+            }
         }
-        
     }
 
     public bool checkAlive()
@@ -180,28 +189,42 @@ public class HeroStatus : NetworkBehaviour
 
     public void SetAttack(int value)
     {
-        if(isServer) basicAttackPoints = value;
+        if (isServer) basicAttackPoints = value;
+        else CmdSetAttack(value);
+    }
+
+    [Command]
+    void CmdSetAttack(int value)
+    {
+        SetAttack(value);
     }
 
     public void SetDefense(int value)
     {
         if (isServer) basicDefensePoints = value;
+        else CmdSetDefense(value);
     }
 
-    public void SetAttack(int oldAttack, int newAttack)
+    [Command]
+    void CmdSetDefense(int value)
     {
-        //string text = string.Format("Attack：{0}\nDefense：{1}", newAttack, basicDefensePoints);
-        //StatusBoard.Instance.UpdatePlayerAttribute(text);
-        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
-        foreach(var player in players)
-        {
-            if (!player.GetComponent<HeroStatus>().isLocalPlayer)
-            {
-                string text = string.Format("Attack：{0}\nDefense：{1}", newAttack, player.GetComponent<HeroStatus>().BasicDefensePoints);
-                StatusBoard.Instance.UpdatePlayerAttribute(text);
-            }
-        }
+        SetDefense(value);
     }
+    /*
+        public void SetAttack(int oldAttack, int newAttack)
+        {
+            //string text = string.Format("Attack：{0}\nDefense：{1}", newAttack, basicDefensePoints);
+            //StatusBoard.Instance.UpdatePlayerAttribute(text);
+            GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+            foreach(var player in players)
+            {
+                if (!player.GetComponent<HeroStatus>().isLocalPlayer)
+                {
+                    string text = string.Format("Attack：{0}\nDefense：{1}", newAttack, player.GetComponent<HeroStatus>().BasicDefensePoints);
+                    StatusBoard.Instance.UpdatePlayerAttribute(text);
+                }
+            }
+        }*/
 
     public void SetDefense(int oldDefense, int newDefense)
     {
@@ -220,16 +243,33 @@ public class HeroStatus : NetworkBehaviour
     //Use Coins
     public bool ConsumeCoin(int amount)
     {
+
         if (coinAmount >= amount)
         {
-            coinAmount -= amount;
-            coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
-            coins = coinAmount;
+            ConsumeCoinHelper(amount);
             return true;  //消费成功 Successful purchase
         }
-        return false;  //否则消费失败 Failed purchase
+        else return false;  //否则消费失败 Failed purchase
+        
     }
 
+    void ConsumeCoinHelper(int amount)
+    {
+        
+        coinAmount -= amount;
+        coinText = transform.Find("Inventory Menu/Coin").GetComponentInChildren<Text>();
+        coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
+        coins = coinAmount;
+
+        
+    }
+
+  /*  [Command]
+    void CmdConsumeCoin(int amount)
+    {
+        ConsumeCoinHelper(amount);
+    }
+*/
     //赚取金币
     //Earn Coins
     public void EarnCoin(int amount)

@@ -38,10 +38,14 @@ public class InventoryManager : MonoBehaviour {
 
     void Start() 
     {
-        toolTip = GameObject.FindObjectOfType<ToolTip>();//根据类型获取
-        canvas = GameObject.Find("Inventory Menu").GetComponent<Canvas>();
-        pickedItem = GameObject.Find("PickedItem").GetComponent<ItemUI>();
-        pickedItem.Hide();//开始为隐藏状态
+        if (GameObject.Find("Inventory Menu")!=null && GameObject.Find("PickedItem") != null)
+        {
+            toolTip = GameObject.FindObjectOfType<ToolTip>();//根据类型获取
+            canvas = GameObject.Find("Inventory Menu").GetComponent<Canvas>();
+            pickedItem = GameObject.Find("PickedItem").GetComponent<ItemUI>();
+            pickedItem.Hide();//开始为隐藏状态
+        }
+        
     }
 
     void Update() 

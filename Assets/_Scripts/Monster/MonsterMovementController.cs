@@ -181,4 +181,10 @@ public class MonsterMovementController : NetworkBehaviour
         monsterStatus.TakeDamage(damage: damage);
         Debug.Log(damage);
     }
+
+    [Command]
+    void CmdTakeDamage(int damage)
+    {
+        TakeDamage(damage);
+    }
 }
