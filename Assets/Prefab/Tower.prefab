@@ -111,7 +111,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0.086, y: 1.281}
+  m_AnchoredPosition: {x: 0.047, y: 1.603}
   m_SizeDelta: {x: 83.1543, y: 10.888426}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &9099581092227891917
@@ -548,7 +548,7 @@ SpriteRenderer:
   m_SortingLayerID: -211649221
   m_SortingLayer: -1
   m_SortingOrder: 6
-  m_Sprite: {fileID: 21300000, guid: ba0dd6a936ba246bc9e5c9d11a08caf4, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 70706482082b54edc9f2ae34aa077632, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -581,6 +581,8 @@ MonoBehaviour:
   firingRange: 3
   CrystalBulletPrefab: {fileID: 7394611567786144978, guid: d73bebf838f3d3640a7384b019b7b254,
     type: 3}
+  isAlly: 0
+  alive: 1
 --- !u!114 &9099581092916373635
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -612,9 +614,9 @@ PolygonCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.508, y: 1.976}
+    border: {x: 1.3160001, y: 0.68200004, z: 0.74600005, w: 0.43800002}
+    pivot: {x: 0.5109289, y: 0.52732253}
+    oldSize: {x: 4, y: 4}
     newSize: {x: 1.508, y: 1.976}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -622,15 +624,20 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: 0.5670771, y: -0.77554584}
-      - {x: 0.17026746, y: -1.0296435}
-      - {x: -0.1766733, y: -1.0993353}
-      - {x: -0.46165103, y: -0.83673525}
-      - {x: -0.39404976, y: -0.6877432}
-      - {x: -0.76817095, y: -0.48628107}
-      - {x: -0.8642966, y: -0.1836324}
-      - {x: 0.045158565, y: -0.01205945}
-      - {x: 0.85184747, y: -0.31799892}
+    - - {x: 0.18834576, y: -0.73332345}
+      - {x: -0.067943335, y: -0.75769466}
+      - {x: -0.18922715, y: -0.6303002}
+      - {x: -0.37768248, y: -0.51146156}
+      - {x: -0.44090557, y: -0.37889826}
+      - {x: -0.27315953, y: -0.30836612}
+      - {x: -0.3176388, y: 0.033534016}
+      - {x: -0.29418552, y: 0.033009768}
+      - {x: 0.010951724, y: 0.09626164}
+      - {x: 0.32279417, y: -0.027335234}
+      - {x: 0.24132574, y: -0.18024354}
+      - {x: 0.28701305, y: -0.43002117}
+      - {x: 0.3555222, y: -0.50419074}
+      - {x: 0.37877536, y: -0.6007335}
 --- !u!1001 &8868651373554718723
 PrefabInstance:
   m_ObjectHideFlags: 0
