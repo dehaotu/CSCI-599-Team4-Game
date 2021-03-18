@@ -150,22 +150,22 @@ public class EnemyController : NetworkBehaviour
     {
         return alive;
     }
-/*
-    [Command]
-    public void CmdSyncPos(Vector2 localPosition)
-    {
-        RpcSyncPos(localPosition);
-    }
-
-    [ClientRpc]
-    void RpcSyncPos(Vector2 localPosition)
-    {
-        if (!isLocalPlayer)
+    /*
+        [Command]
+        public void CmdSyncPos(Vector2 localPosition)
         {
-            transform.localPosition = localPosition;
+            RpcSyncPos(localPosition);
         }
-    }
-*/
+
+        [ClientRpc]
+        void RpcSyncPos(Vector2 localPosition)
+        {
+            if (!isLocalPlayer)
+            {
+                transform.localPosition = localPosition;
+            }
+        }
+    */
     public void TakeDamage(int damage)
     {
         currentHealthPoints -= damage;
@@ -173,11 +173,5 @@ public class EnemyController : NetworkBehaviour
         {
             alive = false;
         }
-    }
-
-    [Command]
-    void CmdTakeDamage(int damage)
-    {
-        TakeDamage(damage);
     }
 }

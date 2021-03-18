@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using Mirror;
 
-public class MonsterMovementController : NetworkBehaviour
+public class MonsterController : NetworkBehaviour
 {
 
     public float movementSpeed = 1f;
@@ -179,12 +179,5 @@ public class MonsterMovementController : NetworkBehaviour
     public void TakeDamage(int damage)
     {
         monsterStatus.TakeDamage(damage: damage);
-        Debug.Log(damage);
-    }
-
-    [Command]
-    void CmdTakeDamage(int damage)
-    {
-        TakeDamage(damage);
     }
 }

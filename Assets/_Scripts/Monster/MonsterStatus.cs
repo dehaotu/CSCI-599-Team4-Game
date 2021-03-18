@@ -55,7 +55,8 @@ public class MonsterStatus : NetworkBehaviour
         CreateHeal(autoHealPerFrame);
     }
 
-    public void TakeDamage(int damage) {
+    public void TakeDamage(int damage)
+    {
         currHP -= damage;
         if (currHP <= 0)
         {
