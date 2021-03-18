@@ -37,21 +37,21 @@ public class MonsterBase3Controller : MonsterBaseController
     {
 
         monster1 = Instantiate(monster1Prefab);
-        var monster1Controller = monster1.GetComponent<MonsterMovementController>();
+        var monster1Controller = monster1.GetComponent<MonsterController>();
         monster1Controller.SetInitialPosition(position: centralPosition + monster1RelativePosition);
         monster1Controller.SetMosterBaseCollider(collider: monsterBaseCollider);
         monster1Status = monster1.GetComponent<MonsterStatus>();
         NetworkServer.Spawn(monster1);
 
         monster2 = Instantiate(monster2Prefab);
-        var monster2Controller = monster2.GetComponent<MonsterMovementController>();
+        var monster2Controller = monster2.GetComponent<MonsterController>();
         monster2Controller.SetInitialPosition(position: centralPosition + monster2RelativePosition);
         monster2Controller.SetMosterBaseCollider(collider: monsterBaseCollider);
         monster2Status = monster2.GetComponent<MonsterStatus>();
         NetworkServer.Spawn(monster2);
 
         monster3 = Instantiate(monster3Prefab);
-        var monster3Controller = monster3.GetComponent<MonsterMovementController>();
+        var monster3Controller = monster3.GetComponent<MonsterController>();
         monster3Controller.SetInitialPosition(position: centralPosition + monster3RelativePosition);
         monster3Controller.SetMosterBaseCollider(collider: monsterBaseCollider);
         monster3Status = monster3.GetComponent<MonsterStatus>();

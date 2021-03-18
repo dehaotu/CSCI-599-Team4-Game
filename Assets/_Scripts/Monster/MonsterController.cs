@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using Mirror;
 
-public class MonsterMovementController : NetworkBehaviour
+public class MonsterController : NetworkBehaviour
 {
 
     public float movementSpeed = 1f;

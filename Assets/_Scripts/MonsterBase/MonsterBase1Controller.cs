@@ -28,7 +28,7 @@ public class MonsterBase1Controller : MonsterBaseController
     {
 
         monster1 = Instantiate(monster1Prefab);
-        var monster1Controller = monster1.GetComponent<MonsterMovementController>();
+        var monster1Controller = monster1.GetComponent<MonsterController>();
         monster1Controller.SetInitialPosition(position: centralPosition + monster1RelativePosition);
         monster1Controller.SetMosterBaseCollider(collider: monsterBaseCollider);
         monster1Status = monster1.GetComponent<MonsterStatus>();

@@ -90,7 +90,7 @@ public class IsometricPlayerMovementController : NetworkBehaviour
                 {
                     targetObject.GetComponent<EnemyController>().TakeDamage(heroStatus.BasicAttackPoints);
                 } else if (isMonsterClose) {
-                    targetObject.GetComponent<MonsterMovementController>().TakeDamage(heroStatus.BasicAttackPoints);
+                    targetObject.GetComponent<MonsterController>().TakeDamage(heroStatus.BasicAttackPoints);
                 }
             }
         }
