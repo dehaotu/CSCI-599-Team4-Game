@@ -51,7 +51,6 @@ public class CrystalBullet : MonoBehaviour
     private void HitTarget()
     {
         Destroy(gameObject);
-        Debug.Log("Hit");
         target.GetComponent<HeroStatus>().TakeDamage(damage);
 
     }
