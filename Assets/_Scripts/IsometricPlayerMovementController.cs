@@ -19,9 +19,14 @@ public class IsometricPlayerMovementController : NetworkBehaviour
 
     private Camera playerCamera;
 
-    GameObject targetObject;
-    bool isEnemyClose = false;
-    bool isMonsterClose = false;
+    [SyncVar]
+    public GameObject targetObject;
+
+    [SyncVar]
+    public bool isEnemyClose = false;
+
+    [SyncVar]
+    public bool isMonsterClose = false;
 
     private void Awake()
     {
@@ -44,7 +49,7 @@ public class IsometricPlayerMovementController : NetworkBehaviour
             GameObject menu = transform.Find("Inventory Menu").transform.gameObject;
             menu.SetActive(false);
         }
-        
+
     }
     // Update is called once per frame
     void Update()
@@ -94,12 +99,7 @@ public class IsometricPlayerMovementController : NetworkBehaviour
             if (heroStatus.checkAlive())
             {
                 isoRenderer.Attack();
-                if (isEnemyClose)
-                {
-                    targetObject.GetComponent<EnemyController>().TakeDamage(heroStatus.BasicAttackPoints);
-                } else if (isMonsterClose) {
-                    targetObject.GetComponent<MonsterController>().TakeDamage(heroStatus.BasicAttackPoints);
-                }
+                CmdAttack();
             }
         }
 
@@ -122,24 +122,57 @@ public class IsometricPlayerMovementController : NetworkBehaviour
     void OnCollisionEnter2D(Collision2D other)
     {
         if (!isLocalPlayer) return;
-        if (other.gameObject.CompareTag("EnemyMinion"))
-        {
-            isoRenderer.SetDirection(Vector2.zero);
-            isEnemyClose = true;
-            targetObject = other.gameObject;
-        }
-        else if (other.gameObject.CompareTag("Monster"))
-        {
-            isoRenderer.SetDirection(Vector2.zero);
-            isMonsterClose = true;
-            targetObject = other.gameObject;
-        }
+        CmdUpdateCollisionEnter(other.gameObject);
     }
 
     void OnCollisionExit2D(Collision2D other)
     {
+        if (!isLocalPlayer) return;
+        CmdUpdateCollisionExit();
+    }
+
+    // Commands
+
+    [Command]
+    void CmdUpdateCollisionEnter(GameObject otherGameObject)
+    {
+        if (otherGameObject == null)
+        {
+            return;
+        }
+        else if (otherGameObject.CompareTag("EnemyMinion"))
+        {
+            isoRenderer.SetDirection(Vector2.zero);
+            isEnemyClose = true;
+            targetObject = otherGameObject;
+        }
+        else if (otherGameObject.CompareTag("Monster"))
+        {
+            isoRenderer.SetDirection(Vector2.zero);
+            isMonsterClose = true;
+            targetObject = otherGameObject;
+        }
+    }
+
+    [Command]
+    void CmdUpdateCollisionExit()
+    {
         isEnemyClose = false;
         isMonsterClose = false;
         targetObject = null;
+    }
+
+    [Command]
+    private void CmdAttack()
+    {
+        if (isEnemyClose)
+        {
+            targetObject.GetComponent<EnemyController>().TakeDamage(heroStatus.BasicAttackPoints);
+        }
+        else if (isMonsterClose)
+        {
+            Debug.Log("In attack");
+            targetObject.GetComponent<MonsterController>().TakeDamage(heroStatus.BasicAttackPoints);
+        }
     }
 }
