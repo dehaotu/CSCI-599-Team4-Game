@@ -126,7 +126,6 @@ public class HeroStatus : NetworkBehaviour
         {
             StatusBoard.Instance.DisplaySwitch();
         }
-
         // show death screen
         if (isLocalPlayer)
         {
@@ -134,19 +133,22 @@ public class HeroStatus : NetworkBehaviour
             {
                 respawning = true;
                 respawnCountDown = respawnTime;
-                CanvasGroup deathCanvs = transform.Find("DeathCanvas").GetComponent<CanvasGroup>();
-                deathCanvs.alpha = 1;
-                deathCanvs.blocksRaycasts = true;
+                CanvasGroup deathCanvas = transform.Find("DeathCanvas").GetComponent<CanvasGroup>();
+                deathCanvas.alpha = 1;
+                deathCanvas.blocksRaycasts = true;
             }
             else if (!alive && respawning && respawnCountDown > 0)
             {
                 respawnCountDown -= Time.deltaTime;
             }
-            else if (!alive && respawning && respawnCountDown <= 0 && isServer)
+            else if (!alive && respawning && respawnCountDown <= 0 )
             {
-                respawning = false;
-                RpcRespawn();
+                
                 agent.enabled = false;
+                CanvasGroup deathCanvas = transform.Find("DeathCanvas").GetComponent<CanvasGroup>();
+                deathCanvas.alpha = 0;
+                deathCanvas.blocksRaycasts = false;
+                CmdRespawn();
             }
         }
     }
@@ -166,24 +168,27 @@ public class HeroStatus : NetworkBehaviour
         }
     }
 
+    [Command]
+    void CmdRespawn()
+    {
+        RpcRespawn();
+        
+    }
+
     [ClientRpc]
     private void RpcRespawn()
     {
         GameObject[] sapwnPoints = GameObject.FindGameObjectsWithTag("PlayerSpawns");
         GameObject chosenSpawn = sapwnPoints[UnityEngine.Random.Range(0, sapwnPoints.Length)];
-        if (isServer)
-        {
-            CanvasGroup deathCanvs = transform.Find("DeathCanvas").GetComponent<CanvasGroup>();
-            deathCanvs.alpha = 0;
-            deathCanvs.blocksRaycasts = false;
-            transform.position = chosenSpawn.transform.position;
-            agent.enabled = true;
-            alive = true;
-            currentHealth = maxHealth;
-            Debug.Log("teleported");
-            Debug.Log(chosenSpawn.name);
-            Debug.Log(chosenSpawn.transform.position);
-        }
+        
+        transform.position = chosenSpawn.transform.position;
+        agent.enabled = true;
+        alive = true;
+        respawning = false;
+        currentHealth = maxHealth;
+        /* Debug.Log("teleported");
+        Debug.Log(chosenSpawn.name);
+        Debug.Log(chosenSpawn.transform.position);*/
     }
 
 
