@@ -111,7 +111,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: -0.02, y: 1.256}
+  m_AnchoredPosition: {x: 0.097, y: 1.674}
   m_SizeDelta: {x: 83.1543, y: 10.888426}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &9099581092227891917
@@ -548,7 +548,7 @@ SpriteRenderer:
   m_SortingLayerID: -211649221
   m_SortingLayer: -1
   m_SortingOrder: 6
-  m_Sprite: {fileID: 21300000, guid: 194f6254035cd414a8107a0b50e320b8, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 2d48a7e682a7f450785fdbfec72f83f8, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
@@ -581,6 +581,8 @@ MonoBehaviour:
   firingRange: 3
   CrystalBulletPrefab: {fileID: 7394611567786144978, guid: d73bebf838f3d3640a7384b019b7b254,
     type: 3}
+  isAlly: 0
+  alive: 1
 --- !u!114 &9099581092916373635
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -612,9 +614,9 @@ PolygonCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
-    border: {x: 0, y: 0, z: 0, w: 0}
-    pivot: {x: 0.5, y: 0.5}
-    oldSize: {x: 1.508, y: 1.904}
+    border: {x: 0.60545456, y: 0.4018182, z: 0.77818185, w: 0}
+    pivot: {x: 0.33970857, y: 0.59471744}
+    oldSize: {x: 3.6363637, y: 3.6363637}
     newSize: {x: 1.508, y: 1.976}
     adaptiveTilingThreshold: 0.5
     drawMode: 0
@@ -622,13 +624,15 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: -0.66671264, y: -0.79667205}
-      - {x: -0.12572443, y: -0.9784173}
-      - {x: 0.56860334, y: -0.8714726}
-      - {x: 0.79721254, y: -0.73855203}
-      - {x: 0.6969302, y: -0.48517972}
-      - {x: 0.046792805, y: -0.20782562}
-      - {x: -0.79493886, y: -0.5574788}
+    - - {x: -0.7140052, y: -0.65087366}
+      - {x: -0.6224452, y: -1.1131805}
+      - {x: -0.16792381, y: -1.380362}
+      - {x: 0.48431024, y: -1.2975607}
+      - {x: 0.9465878, y: -0.9547434}
+      - {x: 1.0083416, y: -0.59179056}
+      - {x: 0.8059285, y: -0.28284895}
+      - {x: 0.07164669, y: -0.16226019}
+      - {x: -0.7241381, y: -0.4121098}
 --- !u!1001 &962752482347088736
 PrefabInstance:
   m_ObjectHideFlags: 0
