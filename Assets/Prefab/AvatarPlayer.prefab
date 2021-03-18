@@ -241,11 +241,9 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: 'Attack: 20
+  m_Text: 'Attack: 10
 
-    Defence: 20
-
-    Gold: 100'
+    Defence: 10'
 --- !u!1 &2642802091179565629
 GameObject:
   m_ObjectHideFlags: 0
@@ -398,7 +396,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 1
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Player 1
+  m_Text: 
 --- !u!1 &4086432516408159583
 GameObject:
   m_ObjectHideFlags: 0
@@ -689,7 +687,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6368254071528821512}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
@@ -731,6 +729,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2736520644812673711}
+  - component: {fileID: 3564763530267635555}
+  - component: {fileID: 783448267828936772}
   m_Layer: 5
   m_Name: AvatarPlayer
   m_TagString: Untagged
@@ -761,6 +761,33 @@ RectTransform:
   m_AnchoredPosition: {x: -452, y: 131}
   m_SizeDelta: {x: 172.97256, y: 172.97253}
   m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &3564763530267635555
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8002665639712947990}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59af73bea23dcd847bdd12c959e71b2e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  playerNetId: 0
+--- !u!225 &783448267828936772
+CanvasGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8002665639712947990}
+  m_Enabled: 1
+  m_Alpha: 1
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
+  m_IgnoreParentGroups: 0
 --- !u!1 &8026398845543063656
 GameObject:
   m_ObjectHideFlags: 0
@@ -856,7 +883,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1000012820103120, guid: 79b0aa487e620814387ea2277f8524a1, type: 3}
       propertyPath: m_Name
-      value: BracerSlot (1)
+      value: BracerSlot
       objectReference: {fileID: 0}
     - target: {fileID: 114000010682221540, guid: 79b0aa487e620814387ea2277f8524a1,
         type: 3}
@@ -1010,7 +1037,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1000012820103120, guid: 79b0aa487e620814387ea2277f8524a1, type: 3}
       propertyPath: m_Name
-      value: BootsSlot (1)
+      value: BootsSlot
       objectReference: {fileID: 0}
     - target: {fileID: 114000010682221540, guid: 79b0aa487e620814387ea2277f8524a1,
         type: 3}
@@ -1164,7 +1191,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1000012820103120, guid: 79b0aa487e620814387ea2277f8524a1, type: 3}
       propertyPath: m_Name
-      value: HeadSlot (1)
+      value: HeadSlot
       objectReference: {fileID: 0}
     - target: {fileID: 114000010682221540, guid: 79b0aa487e620814387ea2277f8524a1,
         type: 3}
@@ -1318,7 +1345,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1000012820103120, guid: 79b0aa487e620814387ea2277f8524a1, type: 3}
       propertyPath: m_Name
-      value: ChestSlot (1)
+      value: ChestSlot
       objectReference: {fileID: 0}
     - target: {fileID: 114000010682221540, guid: 79b0aa487e620814387ea2277f8524a1,
         type: 3}
@@ -1472,7 +1499,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1000012820103120, guid: 79b0aa487e620814387ea2277f8524a1, type: 3}
       propertyPath: m_Name
-      value: MainHandSlot (1)
+      value: MainHandSlot
       objectReference: {fileID: 0}
     - target: {fileID: 114000010682221540, guid: 79b0aa487e620814387ea2277f8524a1,
         type: 3}
@@ -1626,7 +1653,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1000012820103120, guid: 79b0aa487e620814387ea2277f8524a1, type: 3}
       propertyPath: m_Name
-      value: BeltSlot (1)
+      value: BeltSlot
       objectReference: {fileID: 0}
     - target: {fileID: 114000010682221540, guid: 79b0aa487e620814387ea2277f8524a1,
         type: 3}
@@ -1780,7 +1807,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1000012820103120, guid: 79b0aa487e620814387ea2277f8524a1, type: 3}
       propertyPath: m_Name
-      value: RingSlot (1)
+      value: RingSlot
       objectReference: {fileID: 0}
     - target: {fileID: 114000010682221540, guid: 79b0aa487e620814387ea2277f8524a1,
         type: 3}
@@ -1934,7 +1961,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1000012820103120, guid: 79b0aa487e620814387ea2277f8524a1, type: 3}
       propertyPath: m_Name
-      value: ShoulderSlot (1)
+      value: ShoulderSlot
       objectReference: {fileID: 0}
     - target: {fileID: 114000010682221540, guid: 79b0aa487e620814387ea2277f8524a1,
         type: 3}
@@ -2088,7 +2115,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1000012820103120, guid: 79b0aa487e620814387ea2277f8524a1, type: 3}
       propertyPath: m_Name
-      value: NeckSlot (1)
+      value: NeckSlot
       objectReference: {fileID: 0}
     - target: {fileID: 114000010682221540, guid: 79b0aa487e620814387ea2277f8524a1,
         type: 3}
@@ -2242,7 +2269,7 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 1000012820103120, guid: 79b0aa487e620814387ea2277f8524a1, type: 3}
       propertyPath: m_Name
-      value: OffHandSlot (1)
+      value: OffHandSlot
       objectReference: {fileID: 0}
     - target: {fileID: 114000010682221540, guid: 79b0aa487e620814387ea2277f8524a1,
         type: 3}

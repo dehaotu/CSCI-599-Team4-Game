@@ -210,7 +210,7 @@ GameObject:
   - component: {fileID: 8785576651862537056}
   m_Layer: 0
   m_Name: EnemyMinion
-  m_TagString: Untagged
+  m_TagString: EnemyMinion
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

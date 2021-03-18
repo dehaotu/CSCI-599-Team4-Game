@@ -36,13 +36,21 @@ public class IsometricPlayerMovementController : NetworkBehaviour
         agent.updateUpAxis = false;
     }
 
-
+    private void Start()
+    {
+        //disable non-local player inventory
+        if (!isLocalPlayer)
+        {
+            GameObject menu = transform.Find("Inventory Menu").transform.gameObject;
+            menu.SetActive(false);
+        }
+        
+    }
     // Update is called once per frame
     void Update()
     {
-
-        if (!isLocalPlayer) {
-            GameObject.Find("Inventory Menu").GetComponent<CanvasGroup>().alpha = 0;
+        if (!isLocalPlayer)
+        {
             return;
         }
         if (isoRenderer.isPlayingAttack()) return;
@@ -99,7 +107,8 @@ public class IsometricPlayerMovementController : NetworkBehaviour
         {
             stopAction = true;
             isoRenderer.Dead();
-        } else
+        }
+        else
         {
             stopAction = false;
         }
@@ -110,25 +119,20 @@ public class IsometricPlayerMovementController : NetworkBehaviour
         if (!stopAction) isoRenderer.SetDirection(direction);
     }
 
-    void OnTriggerEnter2D(Collider2D otherCollider)
+    void OnCollisionEnter2D(Collision2D other)
     {
         if (!isLocalPlayer) return;
-        if (!otherCollider.transform.parent)
-            return;
-
-        GameObject otherGameObject = otherCollider.transform.parent.gameObject;
-        Debug.Log(otherGameObject.name);
-        if (otherGameObject.CompareTag("EnemyMinion"))
+        if (other.gameObject.CompareTag("EnemyMinion"))
         {
             isoRenderer.SetDirection(Vector2.zero);
             isEnemyClose = true;
-            targetObject = otherGameObject;
+            targetObject = other.gameObject;
         }
-        else if (otherGameObject.CompareTag("Monster"))
+        else if (other.gameObject.CompareTag("Monster"))
         {
             isoRenderer.SetDirection(Vector2.zero);
             isMonsterClose = true;
-            targetObject = otherGameObject;
+            targetObject = other.gameObject;
         }
     }
 

@@ -39,4 +39,9 @@ public class MonsterBase1Controller : MonsterBaseController
     {
         NetworkServer.Destroy(monster1);
     }
+
+    public bool isMonsterAlive()
+    {
+        return monster1 == null || monster1Status.IsAlive();
+    }
 }
