@@ -24,40 +24,54 @@ public class CustomNetworkRoomManager : NetworkRoomManager
     /// <summary>
     /// This is called on the server when the server is started - including when a host is started.
     /// </summary>
-    public override void OnRoomStartServer() { }
+    public override void OnRoomStartServer() {
+        base.OnRoomStartServer();
+    }
 
     /// <summary>
     /// This is called on the server when the server is stopped - including when a host is stopped.
     /// </summary>
-    public override void OnRoomStopServer() { }
+    public override void OnRoomStopServer() {
+        base.OnRoomStopServer();
+    }
 
     /// <summary>
     /// This is called on the host when a host is started.
     /// </summary>
-    public override void OnRoomStartHost() { }
+    public override void OnRoomStartHost() {
+        base.OnRoomStartHost();
+    }
 
     /// <summary>
     /// This is called on the host when the host is stopped.
     /// </summary>
-    public override void OnRoomStopHost() { }
+    public override void OnRoomStopHost() {
+        base.OnRoomStopHost();
+    }
 
     /// <summary>
     /// This is called on the server when a new client connects to the server.
     /// </summary>
     /// <param name="conn">The new connection.</param>
-    public override void OnRoomServerConnect(NetworkConnection conn) { }
+    public override void OnRoomServerConnect(NetworkConnection conn) {
+        base.OnRoomServerConnect(conn);
+    }
 
     /// <summary>
     /// This is called on the server when a client disconnects.
     /// </summary>
     /// <param name="conn">The connection that disconnected.</param>
-    public override void OnRoomServerDisconnect(NetworkConnection conn) { }
+    public override void OnRoomServerDisconnect(NetworkConnection conn) {
+        base.OnRoomServerDisconnect(conn);
+    }
 
     /// <summary>
     /// This is called on the server when a networked scene finishes loading.
     /// </summary>
     /// <param name="sceneName">Name of the new scene.</param>
-    public override void OnRoomServerSceneChanged(string sceneName) { }
+    public override void OnRoomServerSceneChanged(string sceneName) {
+        base.OnRoomServerSceneChanged(sceneName);
+    }
 
     /// <summary>
     /// This allows customization of the creation of the room-player object on the server.
@@ -151,42 +165,56 @@ public class CustomNetworkRoomManager : NetworkRoomManager
     /// <summary>
     /// This is a hook to allow custom behaviour when the game client exits the room.
     /// </summary>
-    public override void OnRoomClientExit() { }
+    public override void OnRoomClientExit() {
+        base.OnRoomClientExit();
+    }
 
     /// <summary>
     /// This is called on the client when it connects to server.
     /// </summary>
     /// <param name="conn">The connection that connected.</param>
-    public override void OnRoomClientConnect(NetworkConnection conn) { }
+    public override void OnRoomClientConnect(NetworkConnection conn) {
+        base.OnRoomClientConnect(conn);
+    }
 
     /// <summary>
     /// This is called on the client when disconnected from a server.
     /// </summary>
     /// <param name="conn">The connection that disconnected.</param>
-    public override void OnRoomClientDisconnect(NetworkConnection conn) { }
+    public override void OnRoomClientDisconnect(NetworkConnection conn) {
+        base.OnRoomClientDisconnect(conn);
+    }
 
     /// <summary>
     /// This is called on the client when a client is started.
     /// </summary>
     /// <param name="roomClient">The connection for the room.</param>
-    public override void OnRoomStartClient() { }
+    public override void OnRoomStartClient() {
+        base.OnRoomStartClient();
+    }
 
     /// <summary>
     /// This is called on the client when the client stops.
     /// </summary>
-    public override void OnRoomStopClient() { }
+    public override void OnRoomStopClient() {
+        base.OnRoomStopClient();
+    }
 
     /// <summary>
     /// This is called on the client when the client is finished loading a new networked scene.
     /// </summary>
     /// <param name="conn">The connection that finished loading a new networked scene.</param>
-    public override void OnRoomClientSceneChanged(NetworkConnection conn) { }
+    public override void OnRoomClientSceneChanged(NetworkConnection conn) {
+        base.OnRoomClientSceneChanged(conn);
+    }
 
     /// <summary>
     /// Called on the client when adding a player to the room fails.
     /// <para>This could be because the room is full, or the connection is not allowed to have more players.</para>
     /// </summary>
-    public override void OnRoomClientAddPlayerFailed() { }
+    public override void OnRoomClientAddPlayerFailed() {
+        base.OnRoomClientAddPlayerFailed();
+    }
 
     #endregion
 

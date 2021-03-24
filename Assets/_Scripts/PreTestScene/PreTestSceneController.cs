@@ -16,6 +16,7 @@ public class PreTestSceneController : MonoBehaviour
     IEnumerator Connect()
     {
         yield return 0; //wait for a frame first
+        yield return 0; 
 #if !UNITY_SERVER
         GameConfiguration config = GameConfiguration.Instance;
         customNetworkRoomManager.networkAddress = config.GameServerIP;
