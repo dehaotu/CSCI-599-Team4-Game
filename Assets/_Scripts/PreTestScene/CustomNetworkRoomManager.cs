@@ -1,13 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using Mirror;
-using System;
-using System.Collections.Generic;
-
-public struct RoomPlayerInfoUpdateMessage : NetworkMessage
-{
-    public string playerName;
-}
 
 /*
 	Documentation: https://mirror-networking.com/docs/Components/NetworkRoomManager.html
@@ -24,77 +17,41 @@ public struct RoomPlayerInfoUpdateMessage : NetworkMessage
 /// It requires that the NetworkRoomPlayer component be on the room player objects.
 /// NetworkRoomManager is derived from NetworkManager, and so it implements many of the virtual functions provided by the NetworkManager class.
 /// </summary>
-public class CustomRoomManager : NetworkRoomManager
+public class CustomNetworkRoomManager : NetworkRoomManager
 {
-    private Dictionary<int, GameObject> connToRoomPlayer;   // A dictionary that maps connectionID to RoomPlayerPrefab
-
-    public MenuController menuController;
-
-    public CustomRoomManager()
-    {
-        connToRoomPlayer = new Dictionary<int, GameObject>();
-    }
-
-    /************************************************************************************************
-                                                 Server                                             
-    ************************************************************************************************/
     #region Server Callbacks
 
     /// <summary>
     /// This is called on the server when the server is started - including when a host is started.
     /// </summary>
-    public override void OnRoomStartServer()
-    {
-        base.OnRoomStartServer();
-    }
+    public override void OnRoomStartServer() { }
 
     /// <summary>
     /// This is called on the server when the server is stopped - including when a host is stopped.
     /// </summary>
-    public override void OnRoomStopServer()
-    {
-        base.OnRoomStopServer();
-    }
+    public override void OnRoomStopServer() { }
 
     /// <summary>
     /// This is called on the host when a host is started.
     /// </summary>
-    public override void OnRoomStartHost()
-    {
-        base.OnRoomStartHost();
-    }
+    public override void OnRoomStartHost() { }
 
     /// <summary>
     /// This is called on the host when the host is stopped.
     /// </summary>
-    public override void OnRoomStopHost()
-    {
-        base.OnRoomStopHost();
-    }
+    public override void OnRoomStopHost() { }
 
     /// <summary>
     /// This is called on the server when a new client connects to the server.
     /// </summary>
     /// <param name="conn">The new connection.</param>
-    public override void OnRoomServerConnect(NetworkConnection conn)
-    {
-        Debug.Log("Debug: A new player has joined the game!");
-
-        connToRoomPlayer.Remove(conn.connectionId);
-
-        base.OnRoomServerConnect(conn);
-    }
+    public override void OnRoomServerConnect(NetworkConnection conn) { }
 
     /// <summary>
     /// This is called on the server when a client disconnects.
     /// </summary>
     /// <param name="conn">The connection that disconnected.</param>
-    public override void OnRoomServerDisconnect(NetworkConnection conn)
-    {
-        Debug.Log("Debug: A player has disconnected!");
-
-        base.OnRoomServerDisconnect(conn);
-    }
+    public override void OnRoomServerDisconnect(NetworkConnection conn) { }
 
     /// <summary>
     /// This is called on the server when a networked scene finishes loading.
@@ -110,12 +67,7 @@ public class CustomRoomManager : NetworkRoomManager
     /// <returns>The new room-player object.</returns>
     public override GameObject OnRoomServerCreateRoomPlayer(NetworkConnection conn)
     {
-        GameObject roomPlayer = Instantiate(roomPlayerPrefab.gameObject, Vector3.zero, Quaternion.identity);
-
-        connToRoomPlayer.Add(conn.connectionId, roomPlayer);
-        Action<NetworkConnection, RoomPlayerInfoUpdateMessage> roomPlayerInfoUpdateHandler = OnReceviveRoomPlayerInfoUpdateMessage;
-        NetworkServer.RegisterHandler<RoomPlayerInfoUpdateMessage>(roomPlayerInfoUpdateHandler, false);
-        return roomPlayer;
+        return base.OnRoomServerCreateRoomPlayer(conn);
     }
 
     /// <summary>
@@ -127,8 +79,6 @@ public class CustomRoomManager : NetworkRoomManager
     /// <returns>A new GamePlayer object.</returns>
     public override GameObject OnRoomServerCreateGamePlayer(NetworkConnection conn, GameObject roomPlayer)
     {
-        //return base.OnRoomServerCreateGamePlayer(conn, roomPlayer);
-        // get start position from base class
         Transform startPos = GetStartPosition();
         GameObject playerPrefabPrev = playerPrefab;
         playerPrefabPrev.GetComponent<HeroStatus>().playerName = roomPlayer.GetComponent<CustomRoomPlayer>().playerName;
@@ -137,7 +87,6 @@ public class CustomRoomManager : NetworkRoomManager
             : Instantiate(playerPrefabPrev, Vector3.zero, Quaternion.identity);
         Debug.Log(gamePlayer.GetComponent<HeroStatus>().transform.Find("Status Canvas/Name").GetComponent<Text>().text);
         return gamePlayer;
-
     }
 
     /// <summary>
@@ -179,99 +128,65 @@ public class CustomRoomManager : NetworkRoomManager
     /// </summary>
     public override void OnRoomServerPlayersNotReady() { }
 
-    // This additional method handles what happen when server receives RoomPlayerInfoUpdateMessage.
-    public void OnReceviveRoomPlayerInfoUpdateMessage(NetworkConnection conn, RoomPlayerInfoUpdateMessage msg)
-    {
-        GameObject roomPlayerObj = connToRoomPlayer[conn.connectionId];
-        if (roomPlayerObj != null)
-        {
-            CustomRoomPlayer roomPlayer = roomPlayerObj.GetComponent<CustomRoomPlayer>();
-            roomPlayer.playerName = msg.playerName;
-        }
-    }
-
     #endregion
 
-    /************************************************************************************************
-                                                 Client                                             
-    ************************************************************************************************/
     #region Client Callbacks
 
     /// <summary>
     /// This is a hook to allow custom behaviour when the game client enters the room.
     /// </summary>
-    public override void OnRoomClientEnter()
-    {
-        base.OnRoomClientEnter();
+    public override void OnRoomClientEnter() {
+        Object[] roomPlayerList = GameObject.FindObjectsOfType(typeof(CustomRoomPlayer));
+        foreach(Object roomPlayerObj in roomPlayerList)
+        {
+            CustomRoomPlayer roomPlayer = (CustomRoomPlayer)roomPlayerObj;
+            if (roomPlayer.isLocalPlayer)
+            {
+                roomPlayer.CmdChangePlayerName(GameConfiguration.Instance.MyName);
+                return;
+            }
+        }
     }
 
     /// <summary>
     /// This is a hook to allow custom behaviour when the game client exits the room.
     /// </summary>
-    public override void OnRoomClientExit()
-    {
-        base.OnRoomClientExit();
-    }
+    public override void OnRoomClientExit() { }
 
     /// <summary>
     /// This is called on the client when it connects to server.
     /// </summary>
     /// <param name="conn">The connection that connected.</param>
-    public override void OnRoomClientConnect(NetworkConnection conn)
-    {
-        ClientScene.AddPlayer(conn);
-
-        //send player's name to server
-        RoomPlayerInfoUpdateMessage playerUpdateMsg;
-        playerUpdateMsg.playerName = menuController.myName;
-        conn.Send<RoomPlayerInfoUpdateMessage>(playerUpdateMsg);
-
-    }
+    public override void OnRoomClientConnect(NetworkConnection conn) { }
 
     /// <summary>
     /// This is called on the client when disconnected from a server.
     /// </summary>
     /// <param name="conn">The connection that disconnected.</param>
-    public override void OnRoomClientDisconnect(NetworkConnection conn)
-    {
-        base.OnRoomClientDisconnect(conn);
-        menuController.onServer_Disconnect();
-    }
+    public override void OnRoomClientDisconnect(NetworkConnection conn) { }
 
     /// <summary>
     /// This is called on the client when a client is started.
     /// </summary>
     /// <param name="roomClient">The connection for the room.</param>
-    public override void OnRoomStartClient()
-    {
-        base.OnRoomStartClient();
-    }
+    public override void OnRoomStartClient() { }
 
     /// <summary>
     /// This is called on the client when the client stops.
     /// </summary>
-    public override void OnRoomStopClient()
-    {
-        base.OnRoomStopClient();
-    }
+    public override void OnRoomStopClient() { }
 
     /// <summary>
     /// This is called on the client when the client is finished loading a new networked scene.
     /// </summary>
     /// <param name="conn">The connection that finished loading a new networked scene.</param>
-    public override void OnRoomClientSceneChanged(NetworkConnection conn)
-    {
-        base.OnRoomClientSceneChanged(conn);
-    }
+    public override void OnRoomClientSceneChanged(NetworkConnection conn) { }
 
     /// <summary>
     /// Called on the client when adding a player to the room fails.
     /// <para>This could be because the room is full, or the connection is not allowed to have more players.</para>
     /// </summary>
-    public override void OnRoomClientAddPlayerFailed()
-    {
-        base.OnRoomClientAddPlayerFailed();
-    }
+    public override void OnRoomClientAddPlayerFailed() { }
 
     #endregion
 
