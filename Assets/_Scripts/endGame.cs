@@ -15,7 +15,7 @@ public class endGame : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (!transform.GetComponent<MonsterBase1Controller>().isMonsterAlive())
+        if (!transform.GetComponent<EvilLordBaseController>().isMonsterAlive())
         {
             Win();
         }

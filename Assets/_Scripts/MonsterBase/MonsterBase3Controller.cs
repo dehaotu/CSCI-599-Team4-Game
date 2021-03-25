@@ -9,6 +9,8 @@ public class MonsterBase3Controller : MonsterBaseController
     public GameObject monster1Prefab;
     public GameObject monster2Prefab;
     public GameObject monster3Prefab;
+
+    // Instances of the monsters.
     GameObject monster1;
     GameObject monster2;
     GameObject monster3;
