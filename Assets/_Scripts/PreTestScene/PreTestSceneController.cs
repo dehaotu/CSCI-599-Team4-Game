@@ -7,10 +7,14 @@ public class PreTestSceneController : MonoBehaviour
 {
     public CustomNetworkRoomManager customNetworkRoomManager;
 
+    [Tooltip("Turn this on if you want to debug. If on, this scene will not automatically connect to the game server. And you need to open HUD GUI to connect.")]
+    public bool DebugMode;
+
     // Start is called before the first frame update
     void Start()
     {
-        StartCoroutine(Connect());
+        if (!DebugMode)
+            StartCoroutine(Connect());
     }
 
     IEnumerator Connect()
