@@ -3,6 +3,7 @@ using Mirror;
 
 public class MonsterStatus : NetworkBehaviour
 {
+
     [SyncVar]
     public int maxHP = 100;
 
@@ -19,6 +20,8 @@ public class MonsterStatus : NetworkBehaviour
 
     void Start()
     {
+        GameManager.Instance.AddCoins(5);
+
         currHP = maxHP;
         healthBar.SetMaxHealth(maxHP);
     }
