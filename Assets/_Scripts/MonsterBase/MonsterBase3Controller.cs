@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿// Server Only Script
+
+using UnityEngine;
 using Mirror;
 
 public class MonsterBase3Controller : MonsterBaseController
@@ -27,13 +29,29 @@ public class MonsterBase3Controller : MonsterBaseController
         base.Start();
     }
 
-    public override bool IsSpawnable()
+    public override void Update()
     {
-        return monster1 != null && monster2 != null && monster3 != null &&
-            !monster1Status.IsAlive() && !monster2Status.IsAlive() && !monster3Status.IsAlive();
+        base.Update();
+        if (!monster1Status.IsAlive())
+        {
+            NetworkServer.Destroy(monster1);
+        }
+        if (!monster2Status.IsAlive())
+        {
+            NetworkServer.Destroy(monster2);
+        }
+        if (!monster3Status.IsAlive())
+        {
+            NetworkServer.Destroy(monster3);
+        }
     }
 
-    public override void InstantiateMonsters()
+    public override bool IsInstantiatable()
+    {
+        return monster1 == null && monster2 == null && monster3 == null;
+    }
+
+    public override void Instantiate()
     {
 
         monster1 = Instantiate(monster1Prefab);
@@ -56,12 +74,5 @@ public class MonsterBase3Controller : MonsterBaseController
         monster3Controller.SetMosterBaseCollider(collider: monsterBaseCollider);
         monster3Status = monster3.GetComponent<MonsterStatus>();
         NetworkServer.Spawn(monster3);
-    }
-
-    public override void DestroyMonsters()
-    {
-        NetworkServer.Destroy(monster1);
-        NetworkServer.Destroy(monster2);
-        NetworkServer.Destroy(monster3);
     }
 }

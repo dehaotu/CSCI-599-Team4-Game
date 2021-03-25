@@ -1,4 +1,6 @@
-﻿using UnityEngine;
+﻿// Server Only Script
+
+using UnityEngine;
 using Mirror;
 
 public class MonsterBase1Controller : MonsterBaseController
@@ -19,12 +21,21 @@ public class MonsterBase1Controller : MonsterBaseController
         base.Start();
     }
 
-    public override bool IsSpawnable()
+    public override void Update()
     {
-        return monster1 != null && !monster1Status.IsAlive();
+        base.Update();
+        if (!monster1Status.IsAlive())
+        {
+            NetworkServer.Destroy(monster1);
+        }
     }
 
-    public override void InstantiateMonsters()
+    public override bool IsInstantiatable()
+    {
+        return monster1 == null;
+    }
+
+    public override void Instantiate()
     {
 
         monster1 = Instantiate(monster1Prefab);
@@ -35,11 +46,7 @@ public class MonsterBase1Controller : MonsterBaseController
         NetworkServer.Spawn(monster1);
     }
 
-    public override void DestroyMonsters()
-    {
-        NetworkServer.Destroy(monster1);
-    }
-
+    // TODO: add Evil lord base controller
     public bool isMonsterAlive()
     {
         return monster1 == null || monster1Status.IsAlive();
