@@ -13,14 +13,16 @@ public class RoomListPanel : MonoBehaviour
 
     public GameObject roomRowPrefab;
     public MenuController menuController;
-    public CustomNetworkDiscovery networkDiscovery;
 
-    public void UpdateRoom(IPEndPoint idAddress, int numPlayers)
+    public void UpdateRoom(List<Lobby.Room> roomList)
     {
-        GameObject newRow = Instantiate(roomRowPrefab, this.transform);
-        Button roomRow = newRow.GetComponent<Button>();
-        roomRow.GetComponentInChildren<Text>().text = "Room     " + numPlayers.ToString() + "/" + NUM_PLAYERS.ToString();
-        roomRow.onClick.AddListener(() => {menuController.onClick_Lobby_RoomRow();});
+        foreach (Lobby.Room room in roomList)
+        {
+            GameObject newRow = Instantiate(roomRowPrefab, this.transform);
+            Button roomRow = newRow.GetComponent<Button>();
+            roomRow.GetComponentInChildren<Text>().text = "Room     " + room.NumPlayers.ToString() + "/" + NUM_PLAYERS.ToString();
+            roomRow.onClick.AddListener(() => { menuController.onClick_Lobby_RoomRow(room.uuid); });
+        }
     }
 
     
