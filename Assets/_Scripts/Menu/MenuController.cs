@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Net;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.Assertions;
 using UnityEngine.UI;
-using Mirror;
+using MongoDB.Driver;
+using MongoDB.Bson;
 
 /*
 A support class for helper MenuController to show animation effect in menu.
@@ -65,11 +62,15 @@ public class MenuController : MonoBehaviour
     public GameObject mainMenuPanel;
     public GameObject playerListPanel;
     public RoomListPanel roomListPanel;
-    public GameObject nameInputField;
+    public GameObject accountInputField;
+    public GameObject passwordInputField;
     public GameObject serverDisconnectPanel;
     public GameObject connectingLobbyPanel;
     public GameObject joiningRoomPanel;
     public GameObject lobbyErrorPanel;
+    public GameObject loginErrorPanel;
+    public GameObject debugLoginPanel;
+    public GameObject debugLoginInputField;
     public GameConfiguration gameConfiguration;
     public LobbyNetworkManager lobbyNetworkManager;
     public PlayerInfoRow playerInfoRowPrefab;
@@ -183,14 +184,76 @@ public class MenuController : MonoBehaviour
 /************************************************************************************************
                                              LoginPanel                                             
 ************************************************************************************************/
+    class Test_Model
+    {
+        public ObjectId _id { set; get; }
+        public string account { set; get; }
+        public string pw { set; get; }
+        public string playerName { set; get; }
+    }
+
     public void onClick_LoginPanel_Confirm()
     {
+        /*
         InputField inputField = nameInputField.GetComponent<InputField>();
         gameConfiguration.MyName = inputField.text;
         Debug.Log("Debug: set name to " + gameConfiguration.MyName);
         loginPanel.SetActive(false);
         mainMenuPanel.SetActive(true);
         state = MenuState.MainMenu;
+        */
+
+        InputField accountField = accountInputField.GetComponent<InputField>();
+        string account = accountField.text;
+        InputField passwordField = passwordInputField.GetComponent<InputField>();
+        string password = passwordField.text;
+
+        //--------------------------------------TEST-------------------------------------
+        const string MONGO_URI = "mongodb+srv://team4:Team4sGameIsGreat@cluster0.xchoj.mongodb.net";
+        const string DATABASE_NAME = "TeamForce";
+        MongoClient client;
+        IMongoDatabase db;
+        client = new MongoClient(MONGO_URI);
+        db = client.GetDatabase(DATABASE_NAME);
+        Debug.Log("Success connect to MongoDB!");
+
+        IMongoCollection<Test_Model> userCollection = db.GetCollection<Test_Model>("Account");
+        Test_Model modelUser = userCollection.Find(user => user.account.Equals(account)).SingleOrDefault();
+        if (modelUser != null)
+        {
+            if (modelUser.pw == password)
+            {
+                Debug.Log("Login: Found playerName = " + modelUser.playerName);
+                gameConfiguration.MyName = modelUser.playerName;
+                loginPanel.SetActive(false);
+                mainMenuPanel.SetActive(true);
+                state = MenuState.MainMenu;
+            }
+            else
+            {
+                Debug.Log("Login: Incorrect password!");
+                GameObject loginErrorTextObj = loginErrorPanel.transform.Find("Text").gameObject;
+                Text errorText = loginErrorTextObj.GetComponent<Text>();
+                errorText.text = "Incorrect password!";
+                _setAllPlanelInactive();
+                loginErrorPanel.SetActive(true);
+            }
+        }
+        else
+        {
+            Debug.Log("Login: account not found!");
+            GameObject loginErrorTextObj = loginErrorPanel.transform.Find("Text").gameObject;
+            Text errorText = loginErrorTextObj.GetComponent<Text>();
+            errorText.text = "Account not found!";
+            _setAllPlanelInactive();
+            loginErrorPanel.SetActive(true);
+        }
+    }
+
+    public void onClick_LoginPanel_DebugLogin()
+    {
+        _setAllPlanelInactive();
+        debugLoginPanel.SetActive(true);
     }
 /************************************************************************************************
                                              MainMenuPanel                                             
@@ -282,6 +345,29 @@ public class MenuController : MonoBehaviour
         lobbyPanel.SetActive(true);
         state = MenuState.Lobby;
     }
+
+/************************************************************************************************
+                                             LobbyErrorPanel                                            
+************************************************************************************************/
+    public void onClick_LoginErrorPanel_Confirm()
+    {
+        _setAllPlanelInactive();
+        loginPanel.SetActive(true);
+        state = MenuState.Login;
+    }
+/************************************************************************************************
+                                             DebugLoginPanel                                            
+************************************************************************************************/
+    public void onClick_DebugLoginPanel_Confirm()
+    {
+        InputField inputField = debugLoginInputField.GetComponent<InputField>();
+        gameConfiguration.MyName = inputField.text;
+        Debug.Log("Debug: set name to " + gameConfiguration.MyName);
+        _setAllPlanelInactive();
+        loginPanel.SetActive(false);
+        mainMenuPanel.SetActive(true);
+        state = MenuState.MainMenu;
+    }
 /************************************************************************************************
                                         Helper Functions                                             
 ************************************************************************************************/
@@ -295,6 +381,8 @@ public class MenuController : MonoBehaviour
         connectingLobbyPanel.SetActive(false);
         joiningRoomPanel.SetActive(false);
         lobbyErrorPanel.SetActive(false);
+        debugLoginPanel.SetActive(false);
+        loginErrorPanel.SetActive(false);
     }
 
 }
