@@ -39,13 +39,24 @@ class MenuAnimator
 }
 
 /*
-MenuController consists of a menu animator, and different Button handlers.
+MenuController consists of a menu animator, and different GUI handlers.
+This is class is only responsible for Menu's GUI, for network part please see LobbyNetworkManager.
 */
 public class MenuController : MonoBehaviour
 {
-    private bool flag_isHost = false;    // Flag used for menu's state changing logic. true = host, false = client
+    enum MenuState
+    {
+        Login,
+        MainMenu,
+        ConnectingLobby,
+        Lobby,
+        JoiningRoom,
+        LobbyError,
+        Room
+    }
     private bool flag_client_actively_disconnect = false;   // Set this flag if user actively discconect from server so error message will not be shown
     private MenuAnimator animator;  // Used to move the map in the background
+    private MenuState state;
 
     public GameObject backGroundMap;
     public GameObject lobbyPanel;
@@ -53,16 +64,20 @@ public class MenuController : MonoBehaviour
     public GameObject loginPanel;
     public GameObject mainMenuPanel;
     public GameObject playerListPanel;
+    public RoomListPanel roomListPanel;
     public GameObject nameInputField;
     public GameObject serverDisconnectPanel;
-    public CustomRoomManager networkRoomManager;
-    public CustomNetworkDiscovery roomDiscovery;
+    public GameObject connectingLobbyPanel;
+    public GameObject joiningRoomPanel;
+    public GameObject lobbyErrorPanel;
+    public GameConfiguration gameConfiguration;
+    public LobbyNetworkManager lobbyNetworkManager;
     public PlayerInfoRow playerInfoRowPrefab;
 
     private int GUI_ROOMPANEL_HEIGH = 100;      // The height of the room panel to start appending playerinfo row
     private int GUI_ROOMPANEL_PLAYERINFOROW_GAP = 5;    // The gap between playerinfo row
     
-    public string myName {set; get;}    // The name of the playe who controls this computer
+    //public string myName {set; get;}    // The name of the playe who controls this computer
     public float cameraSpeedX = 0.4f;
     public float cameraSpeedY = 0.2f;
     public float period_rate = 0.5f; // How fast the camera to complete one back and forth
@@ -75,8 +90,15 @@ public class MenuController : MonoBehaviour
     void Start()
     {
         animator = new MenuAnimator(backGroundMap, cameraSpeedX, cameraSpeedY, period_rate);
+        lobbyNetworkManager.Event_ReceiveRoomUpdate = _updateRoom;
+        lobbyNetworkManager.Event_ClientDisconnected = onServer_Disconnect;
+        lobbyNetworkManager.Event_ReceiveLobbyInfoUpdate += onConnectingLobby;
+        lobbyNetworkManager.Event_ReceiveJoinRoomResponse += onReceiveJoinRoomResponse;
+        state = MenuState.Login;
+        _setAllPlanelInactive();
+        loginPanel.SetActive(true);
 #if UNITY_SERVER
-        onClickDebugLobbyServer();
+        //onClickDebugLobbyServer();
 #endif
     }
 
@@ -84,26 +106,77 @@ public class MenuController : MonoBehaviour
     void FixedUpdate()
     {
         animator.Update();
-        _updateRoom();
     }
 
-    private void _updateRoom()
+    private void _updateRoom(Lobby.Room room)
     {
+        if (room == null)
+            return;
+
         foreach (Transform child in playerListPanel.transform)
         {
             Destroy(child.gameObject);
         }
         
-        for (int i = 0; i < networkRoomManager.roomSlots.Count; i++)
+        for (int i = 0; i < room.PlayerList.Count; i++)
         {
-            NetworkRoomPlayer roomPlayer = networkRoomManager.roomSlots[i];
-            CustomRoomPlayer customRoomPlayer = roomPlayer.GetComponent<CustomRoomPlayer>();
+            Lobby.Player roomPlayer = room.PlayerList[i];
             GameObject playerRowObj = Instantiate(playerInfoRowPrefab.gameObject, Vector3.zero, Quaternion.identity, playerListPanel.transform);
             PlayerInfoRow playerRow = playerRowObj.GetComponent<PlayerInfoRow>();
-            playerRow.setPlayerNameText(customRoomPlayer.playerName);
-            playerRow.setReadyText(customRoomPlayer.readyToBegin);
+            playerRow.setPlayerNameText(roomPlayer.Name);
+            playerRow.setReadyText(roomPlayer.IsReady);
             RectTransform tf = playerRowObj.GetComponent<RectTransform>();
             tf.localPosition  = new Vector3(0, GUI_ROOMPANEL_HEIGH - i * (tf.rect.height + GUI_ROOMPANEL_PLAYERINFOROW_GAP), 0);
+        }
+    }
+
+    private void onConnectingLobby(List<Lobby.Room> roomList)
+    {
+        roomListPanel.UpdateRoom(roomList);
+        if (state == MenuState.ConnectingLobby)
+        {
+            _setAllPlanelInactive();
+            lobbyPanel.SetActive(true);
+            state = MenuState.Lobby;
+        }
+    }
+
+    private void onReceiveJoinRoomResponse(Lobby.ErrorType errorCode)
+    {
+        if (state != MenuState.JoiningRoom)
+            return;
+
+        if (errorCode == Lobby.ErrorType.None)
+        {
+            _setAllPlanelInactive();
+            roomPanel.SetActive(true);
+            state = MenuState.Room;
+        }
+        else
+        {
+            GameObject textObj = lobbyErrorPanel.transform.Find("Text").gameObject;
+            string message = "";
+            switch (errorCode)
+            {
+                case Lobby.ErrorType.InternalError:
+                    message = "Lobby server internal error.";
+                    break;
+                case Lobby.ErrorType.LobbyTimeout:
+                    message = "Connection time out.";
+                    break;
+                case Lobby.ErrorType.RoomFull:
+                    message = "The room is full.";
+                    break;
+                case Lobby.ErrorType.RoomNotExist:
+                    message = "The room no loner exist.";
+                    break;
+            }
+            Text text = textObj.GetComponent<Text>();
+            text.text = message;
+
+            _setAllPlanelInactive();
+            lobbyErrorPanel.SetActive(true);
+            state = MenuState.LobbyError;
         }
     }
 
@@ -113,10 +186,11 @@ public class MenuController : MonoBehaviour
     public void onClick_LoginPanel_Confirm()
     {
         InputField inputField = nameInputField.GetComponent<InputField>();
-        myName = inputField.text;
-        Debug.Log("Debug: set name to " + myName);
+        gameConfiguration.MyName = inputField.text;
+        Debug.Log("Debug: set name to " + gameConfiguration.MyName);
         loginPanel.SetActive(false);
         mainMenuPanel.SetActive(true);
+        state = MenuState.MainMenu;
     }
 /************************************************************************************************
                                              MainMenuPanel                                             
@@ -124,9 +198,9 @@ public class MenuController : MonoBehaviour
     public void onClickStartButton()
     {
         _setAllPlanelInactive();
-        lobbyPanel.SetActive(true);
-
-        roomDiscovery.StartDiscovery();
+        connectingLobbyPanel.SetActive(true);
+        state = MenuState.ConnectingLobby;
+        lobbyNetworkManager.ClientConnectLobby();
     }
 
     public void onClickSettingButton() {}
@@ -136,18 +210,6 @@ public class MenuController : MonoBehaviour
         Application.Quit();
     }
 
-    public void onClickDebugLobbyServer() {
-        _setAllPlanelInactive();
-        roomPanel.SetActive(true);
-
-        //hide all buttons in roomPanel
-        roomPanel.transform.Find("Room_BackButton").gameObject.SetActive(false);
-        roomPanel.transform.Find("Room_ReadyButton").gameObject.SetActive(false);
-
-        roomDiscovery.AdvertiseServer();
-        networkRoomManager.StartServer();
-        flag_isHost = true;
-    }
 /************************************************************************************************
                                              LobbyPanel                                             
 ************************************************************************************************/
@@ -162,48 +224,34 @@ public class MenuController : MonoBehaviour
 
     public void onClick_Lobby_BackButton()
     {
+        flag_client_actively_disconnect = true;
         _setAllPlanelInactive();
         mainMenuPanel.SetActive(true);
-
-        roomDiscovery.StartDiscovery();
+        state = MenuState.MainMenu;
+        lobbyNetworkManager.Disconnect();
     }
 
-    public void onClick_Lobby_RoomRow()
+    public void onClick_Lobby_RoomRow(string uuid)
     {
         _setAllPlanelInactive();
-        networkRoomManager.StartClient();
-        roomDiscovery.StopDiscovery();
-        flag_isHost = false;
-        roomPanel.SetActive(true);
+        lobbyNetworkManager.JoinRoom(uuid);
+        joiningRoomPanel.SetActive(true);
+        state = MenuState.JoiningRoom;
     }
-/************************************************************************************************
-                                             RoomPanel                                             
-************************************************************************************************/
+    /************************************************************************************************
+                                                 RoomPanel                                             
+    ************************************************************************************************/
     public void onClick_Room_BackButton()
     {
+        lobbyNetworkManager.LeaveRoom();
         _setAllPlanelInactive();
         lobbyPanel.SetActive(true);
-        if (flag_isHost)
-        {
-            networkRoomManager.StopHost();
-        }
-        else
-        {
-            flag_client_actively_disconnect = true;
-            networkRoomManager.StopClient();
-        }
+        state = MenuState.Lobby;
     }
 
     public void onClick_Room_ReadyButton()
     {
-        foreach (NetworkRoomPlayer roomPlayer in networkRoomManager.roomSlots)
-        {
-            // If a roomPlayer represents the this computer's client, roomPlayer.isLocalPlayer is true.
-            if (roomPlayer.isLocalPlayer)
-            {
-                roomPlayer.CmdChangeReadyState(!roomPlayer.readyToBegin);
-            }
-        }
+        lobbyNetworkManager.sendReadySignal();
     }
 /************************************************************************************************
                                              ServerDisconnectPanel                                             
@@ -212,6 +260,7 @@ public class MenuController : MonoBehaviour
     {
         _setAllPlanelInactive();
         mainMenuPanel.SetActive(true);
+        state = MenuState.MainMenu;
     }
 
     public void onServer_Disconnect()
@@ -225,6 +274,15 @@ public class MenuController : MonoBehaviour
     }
 
 /************************************************************************************************
+                                             LobbyErrorPanel                                            
+************************************************************************************************/
+    public void onClick_LobbyErrorPanel_Confirm()
+    {
+        _setAllPlanelInactive();
+        lobbyPanel.SetActive(true);
+        state = MenuState.Lobby;
+    }
+/************************************************************************************************
                                         Helper Functions                                             
 ************************************************************************************************/
     private void _setAllPlanelInactive()
@@ -234,6 +292,9 @@ public class MenuController : MonoBehaviour
         roomPanel.SetActive(false);
         loginPanel.SetActive(false);
         serverDisconnectPanel.SetActive(false);
+        connectingLobbyPanel.SetActive(false);
+        joiningRoomPanel.SetActive(false);
+        lobbyErrorPanel.SetActive(false);
     }
 
 }

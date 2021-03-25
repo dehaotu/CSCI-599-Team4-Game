@@ -7,8 +7,11 @@ EditorBuildSettings:
   m_Scenes:
   - enabled: 1
     path: Assets/_Scenes/Menu.unity
-    guid: a99c9796faed3424bb01bc45fdc1a1cb
+    guid: 0710f89aaf8b96c42800255b33494815
   - enabled: 1
-    path: Assets/_Scenes/TestScene.unity
-    guid: 7aafbc01f0202f9478693ff73bcb5de0
+    path: Assets/_Scenes/PreTestScene.unity
+    guid: f93207ca7e5345b49b732fe3a16fca0c
+  - enabled: 1
+    path: Assets/_Scenes/TinsTestScene.unity
+    guid: 92a6e1f4db88f8f42abcf75dcc6732f6
   m_configObjects: {}
