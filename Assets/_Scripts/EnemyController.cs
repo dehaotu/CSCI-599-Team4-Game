@@ -29,6 +29,7 @@ public class EnemyController : NetworkBehaviour
     bool stopAction = false;
     bool isPlayerClose = false;
     GameObject targetObject;
+    bool isReached = false;
 
     [SerializeField]
     [SyncVar]
@@ -76,7 +77,6 @@ public class EnemyController : NetworkBehaviour
         Vector2 newPos = currentPos + movement * Time.fixedDeltaTime;
         if (!stopAction) isoRenderer.SetDirection(movement);
         rbody.MovePosition(newPos);
-        /*CmdSyncPos(gameObject.transform.position);*/
     }
 
     // Update is called once per frame
@@ -121,7 +121,14 @@ public class EnemyController : NetworkBehaviour
                 }
             } else
             {
-                Move(targetPosition);
+                if (transform.position.Equals(targetPosition))
+                {
+                    isReached = true;
+                    targetPosition = (gameObject.tag.Equals("EnemyMinion") ? new Vector2(-17.65f, -16.53f) : new Vector2(18f, 20f));
+                }
+
+                if (!isReached) Move(targetPosition);
+                else Move(targetPosition);
             }
         }
     }
@@ -150,22 +157,7 @@ public class EnemyController : NetworkBehaviour
     {
         return alive;
     }
-    /*
-        [Command]
-        public void CmdSyncPos(Vector2 localPosition)
-        {
-            RpcSyncPos(localPosition);
-        }
 
-        [ClientRpc]
-        void RpcSyncPos(Vector2 localPosition)
-        {
-            if (!isLocalPlayer)
-            {
-                transform.localPosition = localPosition;
-            }
-        }
-    */
     public void TakeDamage(int damage)
     {
         currentHealthPoints -= damage;
