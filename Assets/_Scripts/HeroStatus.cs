@@ -280,6 +280,7 @@ public class HeroStatus : NetworkBehaviour
     public void EarnCoin(int amount)
     {
         this.coinAmount += amount;
+        
         coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
         coins = coinAmount;
     }
