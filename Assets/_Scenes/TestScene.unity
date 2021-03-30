@@ -702,6 +702,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Tower (2)
       objectReference: {fileID: 0}
+    - target: {fileID: 9099581092916373636, guid: 9f32b8b5ee4844a5fb7568201a79cefa,
+        type: 3}
+      propertyPath: m_TagString
+      value: EnemyTower
+      objectReference: {fileID: 0}
     - target: {fileID: 9099581092916373637, guid: 9f32b8b5ee4844a5fb7568201a79cefa,
         type: 3}
       propertyPath: m_RootOrder
@@ -2591,6 +2596,11 @@ PrefabInstance:
       propertyPath: m_Name
       value: Tower
       objectReference: {fileID: 0}
+    - target: {fileID: 9099581092916373636, guid: 9f32b8b5ee4844a5fb7568201a79cefa,
+        type: 3}
+      propertyPath: m_TagString
+      value: EnemyTower
+      objectReference: {fileID: 0}
     - target: {fileID: 9099581092916373637, guid: 9f32b8b5ee4844a5fb7568201a79cefa,
         type: 3}
       propertyPath: m_RootOrder
@@ -3901,6 +3911,11 @@ PrefabInstance:
         type: 3}
       propertyPath: m_Name
       value: Tower (1)
+      objectReference: {fileID: 0}
+    - target: {fileID: 9099581092916373636, guid: 9f32b8b5ee4844a5fb7568201a79cefa,
+        type: 3}
+      propertyPath: m_TagString
+      value: EnemyTower
       objectReference: {fileID: 0}
     - target: {fileID: 9099581092916373637, guid: 9f32b8b5ee4844a5fb7568201a79cefa,
         type: 3}
