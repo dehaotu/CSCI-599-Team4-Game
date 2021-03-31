@@ -219,7 +219,7 @@ public uint MaxSendRate =>
 bool ReceiveNextReliable(out KcpHeader header, out ArraySegment<byte> message)
         {
             int msgSize = kcp.PeekSize();
-            Log.Warning("Size of Packet: " + msgSize.ToString());
+            //Log.Warning("Size of Packet: " + msgSize.ToString());
             if (msgSize > 0)
             {
                 // only allow receiving up to buffer sized messages.

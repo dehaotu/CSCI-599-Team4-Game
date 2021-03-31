@@ -171,7 +171,7 @@ public class IsometricPlayerMovementController : NetworkBehaviour
         }
         else if (isMonsterClose)
         {
-            Debug.Log("In attack");
+            //Debug.Log("In attack");
             targetObject.GetComponent<MonsterController>().TakeDamage(heroStatus.BasicAttackPoints);
         }
     }

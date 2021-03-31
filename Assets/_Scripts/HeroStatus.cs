@@ -90,7 +90,7 @@ public class HeroStatus : NetworkBehaviour
         }
         transform.Find("Status Canvas/Name").GetComponent<Text>().text = playerName;
         StatusBoard.Instance.setParentLocalPlayer(gameObject);
-        Debug.Log(GetComponent<NetworkIdentity>().netId.ToString());
+        //Debug.Log(GetComponent<NetworkIdentity>().netId.ToString());
         agent = gameObject.GetComponent<NavMeshAgent>();
         
     }

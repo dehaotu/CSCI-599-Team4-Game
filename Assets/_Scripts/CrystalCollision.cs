@@ -18,7 +18,7 @@ public class CrystalCollision : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        Debug.Log(collision.gameObject.name);
+        //Debug.Log(collision.gameObject.name);
 
         if (!crystalStatus.isAlly && collision.gameObject.name == "PlayerCollider")
         {
