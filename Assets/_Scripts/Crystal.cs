@@ -104,7 +104,7 @@ public class Crystal : NetworkBehaviour
             bullet.GetComponent<AudioSource>().Play();
         }
 
-        Debug.Log("shoot");
+        //Debug.Log("shoot");
     }
 
     public bool checkAlive()
