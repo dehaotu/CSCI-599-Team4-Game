@@ -166,12 +166,15 @@ public class EnemyController : NetworkBehaviour
             }
         }
     */
-    public void TakeDamage(int damage)
+    public int TakeDamage(int damage)
     {
         currentHealthPoints -= damage;
         if (currentHealthPoints <= 0)
         {
             alive = false;
+            Debug.Log("Add Coin!");
+            return 10;
         }
+        return 0;
     }
 }
