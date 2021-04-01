@@ -23,6 +23,7 @@ public class EnemyController : NetworkBehaviour
     public HealthBar healthBar;
 
     public Vector2 targetPosition;
+    public Vector2 fixedTargetPosition;
 
     IsometricCharacterRenderer isoRenderer;
     Rigidbody2D rbody;
@@ -41,6 +42,7 @@ public class EnemyController : NetworkBehaviour
         rbody = GetComponent<Rigidbody2D>();
         isoRenderer = GetComponentInChildren<IsometricCharacterRenderer>();
         timer = 0f;
+        fixedTargetPosition = targetPosition;
         currentHealthPoints = maxHealthPoints;
         healthBar.SetMaxHealth(maxHealthPoints);
         //NetworkServer.Spawn(this.gameObject);
@@ -98,7 +100,6 @@ public class EnemyController : NetworkBehaviour
                 }
                 else if (isPlayerClose && timer > waitingTime)
                 {
-                    
                     timer = 0f;
                     isoRenderer.SetDirection(Vector2.zero);
                     if (targetObject.tag.Equals("Player"))
@@ -140,11 +141,20 @@ public class EnemyController : NetworkBehaviour
             isoRenderer.SetDirection(Vector2.zero);
             isPlayerClose = true;
             targetObject = other.gameObject;
-        } else if (gameObject.tag.Equals("PlayerMinion") && (other.gameObject.CompareTag("EnemyMinion") || other.gameObject.CompareTag("EnemyTower")))
+        }
+        else if (gameObject.tag.Equals("PlayerMinion") && (other.gameObject.CompareTag("EnemyMinion") || other.gameObject.CompareTag("EnemyTower")))
         {
             isoRenderer.SetDirection(Vector2.zero);
             isPlayerClose = true;
             targetObject = other.gameObject;
+        }
+        else if (gameObject.tag.Equals("PlayerMinion") && (other.gameObject.CompareTag("PlayerMinion") || other.gameObject.CompareTag("PlayerTower")))
+        {
+            targetPosition = new Vector2(Random.Range(-10f, 10f), Random.Range(-10f, 10f));
+        }
+        else if (gameObject.tag.Equals("EnemyMinion") && (other.gameObject.CompareTag("EnemyMinion") || other.gameObject.CompareTag("EnemyTower")))
+        {
+            targetPosition = new Vector2(Random.Range(-10f, 10f), Random.Range(-10f, 10f));
         }
     }
 
@@ -152,6 +162,7 @@ public class EnemyController : NetworkBehaviour
     {
         isPlayerClose = false;
         targetObject = null;
+        targetPosition = fixedTargetPosition;
     }
     public bool checkAlive()
     {
