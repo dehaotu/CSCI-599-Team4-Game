@@ -671,7 +671,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   customNetworkRoomManager: {fileID: 766126376}
-  DebugMode: 1
+  DebugMode: 0
 --- !u!4 &1199703266
 Transform:
   m_ObjectHideFlags: 0
