@@ -3,6 +3,7 @@ using Mirror;
 
 public class MonsterStatus : NetworkBehaviour
 {
+
     [SyncVar]
     public int maxHP = 100;
 
@@ -19,6 +20,8 @@ public class MonsterStatus : NetworkBehaviour
 
     void Start()
     {
+        //GameManager.Instance.AddCoins(5);
+
         currHP = maxHP;
         healthBar.SetMaxHealth(maxHP);
     }
@@ -55,12 +58,15 @@ public class MonsterStatus : NetworkBehaviour
         CreateHeal(autoHealPerFrame);
     }
 
-    public void TakeDamage(int damage)
+    public int TakeDamage(int damage)
     {
         currHP -= damage;
         if (currHP <= 0)
         {
             alive = false;
+            Debug.Log("ADD Moster Money!!");
+            return 5;
         }
+        return 0;
     }
 }
