@@ -30,7 +30,6 @@ public class EnemyController : NetworkBehaviour
     bool stopAction = false;
     bool isPlayerClose = false;
     GameObject targetObject;
-    bool isReached = false;
 
     [SerializeField]
     [SyncVar]
@@ -79,6 +78,7 @@ public class EnemyController : NetworkBehaviour
         Vector2 newPos = currentPos + movement * Time.fixedDeltaTime;
         if (!stopAction) isoRenderer.SetDirection(movement);
         rbody.MovePosition(newPos);
+        /*CmdSyncPos(gameObject.transform.position);*/
     }
 
     // Update is called once per frame
@@ -105,12 +105,12 @@ public class EnemyController : NetworkBehaviour
                     if (targetObject.tag.Equals("Player"))
                     {
                         if (!targetObject.GetComponent<HeroStatus>().checkAlive()) return; //only attack when player is still alive
-                        targetObject.GetComponent<HeroStatus>().TakeDamage(basicAttackPoints - targetObject.GetComponent<HeroStatus>().BasicDefensePoints);
+                        targetObject.GetComponent<HeroStatus>().TakeDamage(basicAttackPoints);
                         isoRenderer.Attack();
                     } else if (targetObject.tag.Equals("PlayerMinion") || targetObject.tag.Equals("EnemyMinion"))
                     {
                         if (!targetObject.GetComponent<EnemyController>().checkAlive()) return;
-                        targetObject.GetComponent<EnemyController>().TakeDamage(basicAttackPoints - targetObject.GetComponent<EnemyController>().basicDefensePoints);
+                        targetObject.GetComponent<EnemyController>().TakeDamage(basicAttackPoints);
                         isoRenderer.Attack();
                     }
                     else if (targetObject.tag.Equals("PlayerTower") || targetObject.tag.Equals("EnemyTower"))
@@ -122,14 +122,7 @@ public class EnemyController : NetworkBehaviour
                 }
             } else
             {
-                if (transform.position.Equals(targetPosition))
-                {
-                    isReached = true;
-                    targetPosition = (gameObject.tag.Equals("EnemyMinion") ? new Vector2(-17.65f, -16.53f) : new Vector2(18f, 20f));
-                }
-
-                if (!isReached) Move(targetPosition);
-                else Move(targetPosition);
+                Move(targetPosition);
             }
         }
     }
@@ -168,13 +161,31 @@ public class EnemyController : NetworkBehaviour
     {
         return alive;
     }
+    /*
+        [Command]
+        public void CmdSyncPos(Vector2 localPosition)
+        {
+            RpcSyncPos(localPosition);
+        }
 
-    public void TakeDamage(int damage)
+        [ClientRpc]
+        void RpcSyncPos(Vector2 localPosition)
+        {
+            if (!isLocalPlayer)
+            {
+                transform.localPosition = localPosition;
+            }
+        }
+    */
+    public int TakeDamage(int damage)
     {
-        currentHealthPoints -= (damage - basicDefensePoints) < 0 ? 0 : (damage - basicDefensePoints);
+        currentHealthPoints -= damage;
         if (currentHealthPoints <= 0)
         {
             alive = false;
+            Debug.Log("Add Coin!");
+            return 10;
         }
+        return 0;
     }
 }

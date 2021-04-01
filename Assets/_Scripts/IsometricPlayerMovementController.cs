@@ -27,6 +27,8 @@ public class IsometricPlayerMovementController : NetworkBehaviour
 
     [SyncVar]
     public bool isMonsterClose = false;
+    [SyncVar]
+    public bool isTowerClose = false;
 
     private void Awake()
     {
@@ -152,6 +154,12 @@ public class IsometricPlayerMovementController : NetworkBehaviour
             isMonsterClose = true;
             targetObject = otherGameObject;
         }
+        else if (otherGameObject.CompareTag("EnemyTower"))
+        {
+            isoRenderer.SetDirection(Vector2.zero);
+            isTowerClose = true;
+            targetObject = otherGameObject;
+        }
     }
 
     [Command]
@@ -159,6 +167,7 @@ public class IsometricPlayerMovementController : NetworkBehaviour
     {
         isEnemyClose = false;
         isMonsterClose = false;
+        isTowerClose = false;
         targetObject = null;
     }
 
@@ -167,12 +176,18 @@ public class IsometricPlayerMovementController : NetworkBehaviour
     {
         if (isEnemyClose)
         {
-            targetObject.GetComponent<EnemyController>().TakeDamage(heroStatus.BasicAttackPoints);
+            int goldDrop = targetObject.GetComponent<EnemyController>().TakeDamage(heroStatus.BasicAttackPoints);
+            heroStatus.EarnCoin(goldDrop);
         }
         else if (isMonsterClose)
         {
             //Debug.Log("In attack");
             targetObject.GetComponent<MonsterController>().TakeDamage(heroStatus.BasicAttackPoints);
+        }
+        else if (isTowerClose)
+        {
+            //Debug.Log("In attack");
+            targetObject.GetComponent<TowerStatus>().TakeDamage(heroStatus.BasicAttackPoints);
         }
     }
 }

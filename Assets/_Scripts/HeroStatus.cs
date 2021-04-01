@@ -51,7 +51,7 @@ public class HeroStatus : NetworkBehaviour
     private Text coinText;  //Get gold amount from Coin GameObject
     [SyncVar]
     private int coins;
-    private int coinAmount = 100;  //Gold owned by the player, can be used to purchase items
+    private int coinAmount = 1000;  //Gold owned by the player, can be used to purchase items
     public int CoinAmount
     {
         get { return coinAmount; }
@@ -72,6 +72,30 @@ public class HeroStatus : NetworkBehaviour
             RpcReceive(message.Trim());
     }
 
+    //public void RpcEarnMoney(int amount)
+    //{
+    //    coins += amount;
+    //}
+
+    public void EarnMoney(int amount)
+    {
+        //if (isServer)
+        //{
+        //    RpcEarnMoney(amount);
+        //}
+        //if (isLocalPlayer)
+        //{
+        //    CmdEarnMoney(amount);
+        //}
+        coins += amount;
+    }
+
+    //[Command]
+    //public void CmdEarnMoney(int amount)
+    //{
+    //    coins += amount;
+    //}
+
     [ClientRpc]
     public void RpcReceive(string message)
     {
@@ -90,7 +114,7 @@ public class HeroStatus : NetworkBehaviour
         }
         transform.Find("Status Canvas/Name").GetComponent<Text>().text = playerName;
         StatusBoard.Instance.setParentLocalPlayer(gameObject);
-        //Debug.Log(GetComponent<NetworkIdentity>().netId.ToString());
+        Debug.Log(GetComponent<NetworkIdentity>().netId.ToString());
         agent = gameObject.GetComponent<NavMeshAgent>();
         
     }
@@ -280,9 +304,18 @@ public class HeroStatus : NetworkBehaviour
     public void EarnCoin(int amount)
     {
         this.coinAmount += amount;
-        
-        coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
+        coinText = transform.Find("Inventory Menu/Coin").GetComponentInChildren<Text>();
+        //CmdEarnMoney(amount);
         coins = coinAmount;
+        RpcUpdateCoinAmout(coinAmount);
+        //coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
+        Debug.Log("这个是：" + coinAmount) ;
+        //coinText.text = "1000";  
+    }
+
+    [ClientRpc]
+    public void RpcUpdateCoinAmout(int amount) {
+        coinText.text = amount.ToString();
     }
 
     /// <summary>

@@ -176,8 +176,8 @@ public class MonsterController : NetworkBehaviour
             return player.transform.position;
     }
 
-    public void TakeDamage(int damage)
+    public int TakeDamage(int damage)
     {
-        monsterStatus.TakeDamage(damage: damage);
+        return monsterStatus.TakeDamage(damage: damage);
     }
 }
