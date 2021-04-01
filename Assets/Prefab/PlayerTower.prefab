@@ -252,7 +252,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 1
     m_LineSpacing: 1
-  m_Text: Left Tower
+  m_Text: PlayerTower
 --- !u!114 &9099581092659417744
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -483,11 +483,12 @@ GameObject:
   m_Component:
   - component: {fileID: 9099581092916373637}
   - component: {fileID: 4680470537678105877}
-  - component: {fileID: 9099581092916373634}
   - component: {fileID: 9099581092916373635}
   - component: {fileID: 8335199003028593040}
+  - component: {fileID: 99386071602749594}
+  - component: {fileID: 723060021036784162}
   m_Layer: 0
-  m_Name: Tower_left
+  m_Name: PlayerTower
   m_TagString: PlayerTower
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -559,30 +560,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &9099581092916373634
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9099581092916373636}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a639846e86fe7f4bb4b2402ec0d1784, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  maxCrystalHealth: 100
-  currentCrystalHealth: 100
-  CrystalHealthBar: {fileID: 9099581092880510723}
-  timeBtShots: 0
-  startTimeBtShots: 1
-  firingRange: 3
-  CrystalBulletPrefab: {fileID: 7394611567786144978, guid: d73bebf838f3d3640a7384b019b7b254,
-    type: 3}
-  isAlly: 0
-  alive: 1
 --- !u!114 &9099581092916373635
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -633,6 +610,40 @@ PolygonCollider2D:
       - {x: 0.8059285, y: -0.28284895}
       - {x: 0.07164669, y: -0.16226019}
       - {x: -0.7241381, y: -0.4121098}
+--- !u!114 &99386071602749594
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9099581092916373636}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c384fd432dcc4bdfbec6f35b8a7d5bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  BulletPrefab: {fileID: 7394611567786144978, guid: 2e9f756861c114bad821c3a98c8c271f,
+    type: 3}
+--- !u!114 &723060021036784162
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9099581092916373636}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdcceed7228974156a396f2b42b71b17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  maxHP: 100
+  currHP: 100
+  alive: 1
+  healthBar: {fileID: 9099581092880510723}
 --- !u!1001 &962752482347088736
 PrefabInstance:
   m_ObjectHideFlags: 0

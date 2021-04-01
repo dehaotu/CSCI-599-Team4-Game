@@ -54,7 +54,7 @@ public class Crystal : NetworkBehaviour
             return;
         }
 
-        if (timeBtShots <= 0.0f && player != null  && player.GetComponent<HeroStatus>().checkAlive() && currentCrystalHealth > 0)
+        if (timeBtShots <= 0.0f && player != null && player.GetComponent<HeroStatus>().checkAlive() && currentCrystalHealth > 0)
         {
             Shoot();
             timeBtShots = startTimeBtShots;
@@ -94,7 +94,7 @@ public class Crystal : NetworkBehaviour
     {
         // "object casting": create a temporary gameObject for Instantiate object
         GameObject bulletInst = (GameObject)Instantiate(CrystalBulletPrefab, transform.position, Quaternion.identity);
-        CrystalBullet bullet = bulletInst.GetComponent<CrystalBullet>();
+        Bullet bullet = bulletInst.GetComponent<Bullet>();
 
         if (bullet != null)
         {
