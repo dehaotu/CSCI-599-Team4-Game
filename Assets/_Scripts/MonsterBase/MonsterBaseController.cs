@@ -1,30 +1,30 @@
-﻿using System.Collections;
+﻿// Server Only Script
+
+using System.Collections;
 using UnityEngine;
 using Mirror;
 
 public abstract class MonsterBaseController : NetworkBehaviour
 {
-    public float respawnWaitTime = 5.0f;
+    public float instantiateWaitTime = 5.0f;
     [SerializeField]
     protected PolygonCollider2D monsterBaseCollider;
-    bool initialMonsterInit = true; //one time usage, only start first monster init if server is active
+
+    private bool isInitiating = false;
+
     // Start game.
     public virtual void Start()
     {
         monsterBaseCollider = GetComponent<PolygonCollider2D>();
+        Instantiate();
     }
 
     // Update per frame.
-    public void Update()
+    public virtual void Update()
     {
-        if (isServer && initialMonsterInit)
+        if (IsInstantiatable() && !isInitiating)
         {
-            InstantiateMonsters();
-            initialMonsterInit = false;
-        }
-        if (IsSpawnable())
-        {
-            StartCoroutine(DestroyAndInstantiate(respawnWaitTime));
+            StartCoroutine(Reinstantiate(instantiateWaitTime));
         }
         else
         {
@@ -33,20 +33,17 @@ public abstract class MonsterBaseController : NetworkBehaviour
     }
 
     // Destroy and instantiate monsters after waiting for several seconds.
-    IEnumerator DestroyAndInstantiate(float seconds)
+    IEnumerator Reinstantiate(float seconds)
     {
-        DestroyMonsters();
+        isInitiating = true;
         yield return new WaitForSeconds(seconds);
-        InstantiateMonsters();
+        Instantiate();
+        isInitiating = false;
     }
 
-
-    // Check if the monsters are spwanablel.
-    public abstract bool IsSpawnable();
+    // Check if the monsters base can be instantiate.
+    public abstract bool IsInstantiatable();
 
     // Instantiate monsters.
-    public abstract void InstantiateMonsters();
-
-    // Destroy monsters.
-    public abstract void DestroyMonsters();
+    public abstract void Instantiate();
 }
