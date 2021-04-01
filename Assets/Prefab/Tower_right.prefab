@@ -483,9 +483,10 @@ GameObject:
   m_Component:
   - component: {fileID: 9099581092916373637}
   - component: {fileID: 4680470537678105877}
-  - component: {fileID: 9099581092916373634}
   - component: {fileID: 9099581092916373635}
   - component: {fileID: 5694339240045798608}
+  - component: {fileID: 3067923838793772667}
+  - component: {fileID: 1902689191192949634}
   m_Layer: 0
   m_Name: Tower_right
   m_TagString: PlayerTower
@@ -559,30 +560,6 @@ SpriteRenderer:
   m_WasSpriteAssigned: 1
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
---- !u!114 &9099581092916373634
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 9099581092916373636}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 3a639846e86fe7f4bb4b2402ec0d1784, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncMode: 0
-  syncInterval: 0.1
-  maxCrystalHealth: 100
-  currentCrystalHealth: 100
-  CrystalHealthBar: {fileID: 9099581092880510723}
-  timeBtShots: 0
-  startTimeBtShots: 1
-  firingRange: 3
-  CrystalBulletPrefab: {fileID: 7394611567786144978, guid: d73bebf838f3d3640a7384b019b7b254,
-    type: 3}
-  isAlly: 0
-  alive: 1
 --- !u!114 &9099581092916373635
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -634,6 +611,40 @@ PolygonCollider2D:
       - {x: 0.54851484, y: -0.19653614}
       - {x: 0.059870183, y: -0.09147946}
       - {x: -0.3788071, y: -0.20298757}
+--- !u!114 &3067923838793772667
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9099581092916373636}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5c384fd432dcc4bdfbec6f35b8a7d5bc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  BulletPrefab: {fileID: 7394611567786144978, guid: 2e9f756861c114bad821c3a98c8c271f,
+    type: 3}
+--- !u!114 &1902689191192949634
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9099581092916373636}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cdcceed7228974156a396f2b42b71b17, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  maxHP: 100
+  currHP: 100
+  alive: 1
+  healthBar: {fileID: 9099581092880510723}
 --- !u!1001 &962752482347088736
 PrefabInstance:
   m_ObjectHideFlags: 0
