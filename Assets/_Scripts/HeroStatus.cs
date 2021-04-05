@@ -41,17 +41,17 @@ public class HeroStatus : NetworkBehaviour
     [SerializeField]
     [SyncVar]
     private int basicDefensePoints = 10;
-    public int BasicDefensePoints { get { return basicDefensePoints; } set { SetDefense(value); } }  //Basic Defense Points
+    public int BasicDefensePoints{ get { return basicDefensePoints; } set { SetDefense(value); } }  //Basic Defense Points
 
     private int originalAP = 10;
-    public int OriginalAP { get { return originalAP; } }
+    public int OriginalAP {get {return originalAP;}}
     private int originalDP = 10;
-    public int OriginalDP { get { return originalDP; } }
-
+    public int OriginalDP {get {return originalDP;}}
+    
     private Text coinText;  //Get gold amount from Coin GameObject
     [SyncVar]
     private int coins;
-    private int coinAmount = 100;  //Gold owned by the player, can be used to purchase items
+    private int coinAmount = 1000;  //Gold owned by the player, can be used to purchase items
     public int CoinAmount
     {
         get { return coinAmount; }
@@ -63,7 +63,7 @@ public class HeroStatus : NetworkBehaviour
 
     private Rigidbody2D rb;
     private NavMeshAgent agent;
-
+    
 
     [Command]
     public void CmdSend(string message)
@@ -71,6 +71,30 @@ public class HeroStatus : NetworkBehaviour
         if (message.Trim() != "")
             RpcReceive(message.Trim());
     }
+
+    //public void RpcEarnMoney(int amount)
+    //{
+    //    coins += amount;
+    //}
+
+    public void EarnMoney(int amount)
+    {
+        //if (isServer)
+        //{
+        //    RpcEarnMoney(amount);
+        //}
+        //if (isLocalPlayer)
+        //{
+        //    CmdEarnMoney(amount);
+        //}
+        coins += amount;
+    }
+
+    //[Command]
+    //public void CmdEarnMoney(int amount)
+    //{
+    //    coins += amount;
+    //}
 
     [ClientRpc]
     public void RpcReceive(string message)
@@ -92,7 +116,7 @@ public class HeroStatus : NetworkBehaviour
         StatusBoard.Instance.setParentLocalPlayer(gameObject);
         Debug.Log(GetComponent<NetworkIdentity>().netId.ToString());
         agent = gameObject.GetComponent<NavMeshAgent>();
-
+        
     }
 
     private void FixedUpdate()
@@ -141,9 +165,9 @@ public class HeroStatus : NetworkBehaviour
             {
                 respawnCountDown -= Time.deltaTime;
             }
-            else if (!alive && respawning && respawnCountDown <= 0)
+            else if (!alive && respawning && respawnCountDown <= 0 )
             {
-
+                
                 agent.enabled = false;
                 CanvasGroup deathCanvas = transform.Find("DeathCanvas").GetComponent<CanvasGroup>();
                 deathCanvas.alpha = 0;
@@ -171,9 +195,8 @@ public class HeroStatus : NetworkBehaviour
     [Command]
     void CmdRespawn()
     {
-        alive = true;
-        currentHealth = maxHealth;
         RpcRespawn();
+        
     }
 
     [ClientRpc]
@@ -181,10 +204,12 @@ public class HeroStatus : NetworkBehaviour
     {
         GameObject[] sapwnPoints = GameObject.FindGameObjectsWithTag("PlayerSpawns");
         GameObject chosenSpawn = sapwnPoints[UnityEngine.Random.Range(0, sapwnPoints.Length)];
-
+        
         transform.position = chosenSpawn.transform.position;
         agent.enabled = true;
+        alive = true;
         respawning = false;
+        currentHealth = maxHealth;
         /* Debug.Log("teleported");
         Debug.Log(chosenSpawn.name);
         Debug.Log(chosenSpawn.transform.position);*/
@@ -254,33 +279,43 @@ public class HeroStatus : NetworkBehaviour
             return true;  //消费成功 Successful purchase
         }
         else return false;  //否则消费失败 Failed purchase
-
+        
     }
 
     void ConsumeCoinHelper(int amount)
     {
-
+        
         coinAmount -= amount;
         coinText = transform.Find("Inventory Menu/Coin").GetComponentInChildren<Text>();
         coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
         coins = coinAmount;
 
-
+        
     }
 
-    /*  [Command]
-      void CmdConsumeCoin(int amount)
-      {
-          ConsumeCoinHelper(amount);
-      }
-  */
+  /*  [Command]
+    void CmdConsumeCoin(int amount)
+    {
+        ConsumeCoinHelper(amount);
+    }
+*/
     //赚取金币
     //Earn Coins
     public void EarnCoin(int amount)
     {
         this.coinAmount += amount;
-        coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
+        coinText = transform.Find("Inventory Menu/Coin").GetComponentInChildren<Text>();
+        //CmdEarnMoney(amount);
         coins = coinAmount;
+        RpcUpdateCoinAmout(coinAmount);
+        //coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
+        Debug.Log("这个是：" + coinAmount) ;
+        //coinText.text = "1000";  
+    }
+
+    [ClientRpc]
+    public void RpcUpdateCoinAmout(int amount) {
+        coinText.text = amount.ToString();
     }
 
     /// <summary>
