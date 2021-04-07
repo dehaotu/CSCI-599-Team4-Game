@@ -142,12 +142,12 @@ public class MenuController : MonoBehaviour
         }
     }
 
-    private void onReceiveJoinRoomResponse(Lobby.ErrorType errorCode)
+    private void onReceiveJoinRoomResponse(Lobby.RoomErrorType errorCode)
     {
         if (state != MenuState.JoiningRoom)
             return;
 
-        if (errorCode == Lobby.ErrorType.None)
+        if (errorCode == Lobby.RoomErrorType.None)
         {
             _setAllPlanelInactive();
             roomPanel.SetActive(true);
@@ -159,16 +159,16 @@ public class MenuController : MonoBehaviour
             string message = "";
             switch (errorCode)
             {
-                case Lobby.ErrorType.InternalError:
+                case Lobby.RoomErrorType.InternalError:
                     message = "Lobby server internal error.";
                     break;
-                case Lobby.ErrorType.LobbyTimeout:
+                case Lobby.RoomErrorType.LobbyTimeout:
                     message = "Connection time out.";
                     break;
-                case Lobby.ErrorType.RoomFull:
+                case Lobby.RoomErrorType.RoomFull:
                     message = "The room is full.";
                     break;
-                case Lobby.ErrorType.RoomNotExist:
+                case Lobby.RoomErrorType.RoomNotExist:
                     message = "The room no loner exist.";
                     break;
             }
@@ -208,46 +208,45 @@ public class MenuController : MonoBehaviour
         InputField passwordField = passwordInputField.GetComponent<InputField>();
         string password = passwordField.text;
 
-        //--------------------------------------TEST-------------------------------------
-        const string MONGO_URI = "mongodb+srv://team4:Team4sGameIsGreat@cluster0.xchoj.mongodb.net";
-        const string DATABASE_NAME = "TeamForce";
-        MongoClient client;
-        IMongoDatabase db;
-        client = new MongoClient(MONGO_URI);
-        db = client.GetDatabase(DATABASE_NAME);
-        Debug.Log("Success connect to MongoDB!");
-
-        IMongoCollection<Test_Model> userCollection = db.GetCollection<Test_Model>("Account");
-        Test_Model modelUser = userCollection.Find(user => user.account.Equals(account)).SingleOrDefault();
-        if (modelUser != null)
+        Action<LobbyNetworkManager.LoginErrorCode> callbackFunc = (errorCode) =>
         {
-            if (modelUser.pw == password)
+            if (errorCode == LobbyNetworkManager.LoginErrorCode.WrongPassword)
             {
-                Debug.Log("Login: Found playerName = " + modelUser.playerName);
-                gameConfiguration.MyName = modelUser.playerName;
-                loginPanel.SetActive(false);
-                mainMenuPanel.SetActive(true);
-                state = MenuState.MainMenu;
-            }
-            else
-            {
-                Debug.Log("Login: Incorrect password!");
                 GameObject loginErrorTextObj = loginErrorPanel.transform.Find("Text").gameObject;
                 Text errorText = loginErrorTextObj.GetComponent<Text>();
                 errorText.text = "Incorrect password!";
                 _setAllPlanelInactive();
                 loginErrorPanel.SetActive(true);
             }
-        }
-        else
-        {
-            Debug.Log("Login: account not found!");
-            GameObject loginErrorTextObj = loginErrorPanel.transform.Find("Text").gameObject;
-            Text errorText = loginErrorTextObj.GetComponent<Text>();
-            errorText.text = "Account not found!";
-            _setAllPlanelInactive();
-            loginErrorPanel.SetActive(true);
-        }
+            else if (errorCode == LobbyNetworkManager.LoginErrorCode.Timeout)
+            {
+                GameObject loginErrorTextObj = loginErrorPanel.transform.Find("Text").gameObject;
+                Text errorText = loginErrorTextObj.GetComponent<Text>();
+                errorText.text = "Connection timeout.";
+                Debug.Log("LOGLOLOG");
+                _setAllPlanelInactive();
+                loginErrorPanel.SetActive(true);
+            }
+            else if (errorCode == LobbyNetworkManager.LoginErrorCode.AccountNotFound)
+            {
+                GameObject loginErrorTextObj = loginErrorPanel.transform.Find("Text").gameObject;
+                Text errorText = loginErrorTextObj.GetComponent<Text>();
+                errorText.text = "Account not found!";
+                _setAllPlanelInactive();
+                loginErrorPanel.SetActive(true);
+            }
+            else
+            {
+                _setAllPlanelInactive();
+                loginPanel.SetActive(false);
+                mainMenuPanel.SetActive(true);
+                state = MenuState.MainMenu;
+            }
+        };
+
+        lobbyNetworkManager.authenticateAsync(account, password, callbackFunc);
+        _setAllPlanelInactive();
+        connectingLobbyPanel.SetActive(true);
     }
 
     public void onClick_LoginPanel_DebugLogin()

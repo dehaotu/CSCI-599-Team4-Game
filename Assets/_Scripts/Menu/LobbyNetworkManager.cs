@@ -7,6 +7,11 @@ using UnityEngine.SceneManagement;
 using kcp2k;
 using Mirror;
 using Lobby;
+using System.Net;
+using System.Text;
+using System.Net.Http;
+using System.Security.Cryptography;
+using System.Threading.Tasks;
 
 /************************************************************************************************************************
                                                     Lobby Support Class
@@ -27,7 +32,7 @@ namespace Lobby
         StartGame
     }
 
-    public enum ErrorType: byte
+    public enum RoomErrorType: byte
     {
         None,
         LobbyTimeout,
@@ -209,9 +214,9 @@ namespace Lobby
     // The reply of MsgJoinRoomRequest. If success, ErrorCode = ErrorType.None, else, the errorcode is set.
     public class MsgJoinRoomResponse : LobbyMsgBase
     {
-        public ErrorType ErrorCode;
+        public RoomErrorType ErrorCode;
 
-        public MsgJoinRoomResponse(ErrorType errorCode = ErrorType.None)
+        public MsgJoinRoomResponse(RoomErrorType errorCode = RoomErrorType.None)
         {
             this.ErrorCode = errorCode;
         }
@@ -228,7 +233,7 @@ namespace Lobby
         {
             return LobbyMsgHelper.InterpretMsg<MsgJoinRoomResponse>(data, (reader) => {
                 bool success = reader.ReadBoolean();
-                ErrorType errorCode = (ErrorType) reader.ReadByte();
+                RoomErrorType errorCode = (RoomErrorType) reader.ReadByte();
                 return new MsgJoinRoomResponse(errorCode);
             });
         }
@@ -381,7 +386,7 @@ public class LobbyNetworkManager : MonoBehaviour
     public Action<Room> Event_ReceiveRoomUpdate = (room) => { };
 
     // Define what to do after client receive JoinRoomResponse.
-    public Action<ErrorType> Event_ReceiveJoinRoomResponse = (errorType) => { };
+    public Action<RoomErrorType> Event_ReceiveJoinRoomResponse = (errorType) => { };
 
     // Define what to do after client diconnected from lobby server.
     public Action Event_ClientDisconnected = () => { };
@@ -531,7 +536,7 @@ public class LobbyNetworkManager : MonoBehaviour
         MsgJoinRoomResponse response;
         if (!UuidToRoom.TryGetValue(packet.RoomUuid, out room))
         {
-            response = new MsgJoinRoomResponse(ErrorType.RoomNotExist);
+            response = new MsgJoinRoomResponse(RoomErrorType.RoomNotExist);
             LobbyServer.Send(connectionId, response.Serialize(), KcpChannel.Reliable);
             return;
         }
@@ -539,19 +544,19 @@ public class LobbyNetworkManager : MonoBehaviour
         if (!ConnIdToPlayer.TryGetValue(connectionId, out player))
         {
             Debug.LogError("Unknown connectionId=" + connectionId.ToString() + " is trying to join a room.");
-            response = new MsgJoinRoomResponse(ErrorType.InternalError);
+            response = new MsgJoinRoomResponse(RoomErrorType.InternalError);
             LobbyServer.Send(connectionId, response.Serialize(), KcpChannel.Reliable);
             return;
         }
 
         if (room.NumPlayers > GameConfiguration.MAX_ROOM_PLAYERS)
         {
-            response = new MsgJoinRoomResponse(ErrorType.RoomFull);
+            response = new MsgJoinRoomResponse(RoomErrorType.RoomFull);
             LobbyServer.Send(connectionId, response.Serialize(), KcpChannel.Reliable);
             return;
         }
 
-        response = new MsgJoinRoomResponse(ErrorType.None);
+        response = new MsgJoinRoomResponse(RoomErrorType.None);
         LobbyServer.Send(connectionId, response.Serialize(), KcpChannel.Reliable);
 
         UuidToRoom[packet.RoomUuid].PlayerList.Add(player);
@@ -808,6 +813,77 @@ public class LobbyNetworkManager : MonoBehaviour
     {
         MsgReadySignal msg = new MsgReadySignal();
         Client.Send(msg.Serialize(), KcpChannel.Reliable);
+    }
+
+    public enum LoginErrorCode { None, WrongPassword, Timeout, AccountNotFound};
+
+    // Connect to authentication server to get session key. Note: This function currently cannot handle timeout properly.
+    public async void authenticateAsync(string playerName, string password, Action<LoginErrorCode> callback)
+    {
+        string url = "https://csci599teamforcelogin.azurewebsites.net/api/HttpTrigger?code=JcSGfYNCmC9MvKuoiXdPaiujXsmqafrlzLcWApCdVZdzFwOoaNq6lw==";
+
+        HttpClient client = new HttpClient();
+        client.Timeout = TimeSpan.FromMilliseconds(10000);
+        HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Get, url+ "&accountId=" + playerName);
+
+        HttpResponseMessage response;
+        try
+        {
+            response = await client.SendAsync(req);
+            string msg = await response.Content.ReadAsStringAsync();
+            if (msg.Equals("Target not found!"))
+            {
+                callback.Invoke(LoginErrorCode.AccountNotFound);
+                return;
+            }
+        }
+        catch (TaskCanceledException e)
+        {
+            callback.Invoke(LoginErrorCode.Timeout);
+            return;
+        }
+
+        byte[] responseByteArray = await response.Content.ReadAsByteArrayAsync();
+        const int BLOCK_SIZE = 16;
+        byte[] initVector = new byte[BLOCK_SIZE];
+        Array.Copy(responseByteArray, 0, initVector, 0, BLOCK_SIZE);
+        byte[] cipherText = new byte[responseByteArray.Length - BLOCK_SIZE];
+        Array.Copy(responseByteArray, BLOCK_SIZE, cipherText, 0, responseByteArray.Length - BLOCK_SIZE);
+
+        string responseText;
+        using (Aes aes = Aes.Create())
+        {
+            SHA256 sha256 = SHA256.Create();
+            byte[] hashedPassword = sha256.ComputeHash(Encoding.ASCII.GetBytes(password));
+            byte[] clampedHashedPassword = new byte[32];
+            Array.Copy(hashedPassword, 0, clampedHashedPassword, 0, 32);
+
+            aes.Padding = PaddingMode.PKCS7;
+            aes.Mode = CipherMode.CBC;
+            aes.IV = initVector;
+            aes.KeySize = 256;
+
+            ICryptoTransform decryptor = aes.CreateDecryptor(clampedHashedPassword, aes.IV);
+
+            //Create the streams used for decryption
+            var msDecrypt = new MemoryStream(cipherText);
+            var csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read);
+            var srDecrypt = new StreamReader(csDecrypt);
+            try
+            {
+                responseText = srDecrypt.ReadToEnd();
+                Debug.Log(responseText);
+                string[] texts = responseText.Split(',');
+                Config.SessionKey = texts[0];
+                Config.MyName = texts[1];
+                callback.Invoke(LoginErrorCode.None);
+            }
+            catch (CryptographicException e)
+            {
+                Debug.Log("Cannot decrypt. Incorrect password.");
+                callback.Invoke(LoginErrorCode.WrongPassword);
+            }
+        }
     }
 #endregion
 }
