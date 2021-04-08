@@ -223,7 +223,6 @@ public class MenuController : MonoBehaviour
                 GameObject loginErrorTextObj = loginErrorPanel.transform.Find("Text").gameObject;
                 Text errorText = loginErrorTextObj.GetComponent<Text>();
                 errorText.text = "Connection timeout.";
-                Debug.Log("LOGLOLOG");
                 _setAllPlanelInactive();
                 loginErrorPanel.SetActive(true);
             }
@@ -362,6 +361,8 @@ public class MenuController : MonoBehaviour
         InputField inputField = debugLoginInputField.GetComponent<InputField>();
         gameConfiguration.MyName = inputField.text;
         Debug.Log("Debug: set name to " + gameConfiguration.MyName);
+        gameConfiguration.SessionKey = "sessionKey";
+        Debug.Log("Debug: set sessionkey=\'" + gameConfiguration.SessionKey + "\'");
         _setAllPlanelInactive();
         loginPanel.SetActive(false);
         mainMenuPanel.SetActive(true);

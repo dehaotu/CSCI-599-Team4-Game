@@ -101,7 +101,7 @@ namespace Lobby
         {
             using (MemoryStream m = new MemoryStream(data.Array))
             {
-                m.Seek(2, SeekOrigin.Begin);    //skip 2 bytes, because the first byte is Kcp header, the second byte is LobbyPacketHeader.
+                m.Seek(1, SeekOrigin.Begin);    //skip 1 bytes, because the first byte  is LobbyPacketHeader.
                 using (BinaryReader reader = new BinaryReader(m))
                 {
                     return readingFunction.Invoke(reader);
@@ -123,62 +123,66 @@ namespace Lobby
             ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
 
             byte[] encryptedPacket;
-            // Create the streams used for encryption.
             using (MemoryStream msEncrypt = new MemoryStream())
             {
                 using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
                 {
-                    using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
-                    {
-                        //Write all data to the stream.
-                        swEncrypt.Write(System.Text.Encoding.Default.GetString(packet.Array));
-                    }
+                    csEncrypt.Write(packet.Array, 0, packet.Array.Length);
+                    csEncrypt.FlushFinalBlock();
                     encryptedPacket = msEncrypt.ToArray();
                 }
             }
 
-            // combined packet = IV + encrypted Packet
-            byte[] combinedPacket = new byte[aes.IV.Length + encryptedPacket.Length];
-            Array.Copy(aes.IV, 0, combinedPacket, 0, aes.IV.Length);
-            Array.Copy(encryptedPacket, 0, combinedPacket, aes.IV.Length, encryptedPacket.Length);
-            return new ArraySegment<byte>(combinedPacket);
+            using (MemoryStream m = new MemoryStream())
+            {
+                using (BinaryWriter writer = new BinaryWriter(m))
+                {
+                    writer.Write(aes.IV.Length);
+                    writer.Write(aes.IV);
+                    writer.Write(encryptedPacket.Length);
+                    writer.Write(encryptedPacket);
+                }
+                return new ArraySegment<byte>(m.ToArray());
+            }
         }
 
         // Decrypt the packet using the sessionKey
         public static ArraySegment<byte> Decrypt(ArraySegment<byte> packet, string key)
         {
-            const int IV_LENGTH = 16;
-            const int VALID_KEYSIZE = 32;
-            Aes aes = Aes.Create();
+            byte[] IV, encryptedMsg;
+            using (MemoryStream m = new MemoryStream(packet.Array))
+            {
+                m.Seek(1, SeekOrigin.Begin);
+                using (BinaryReader reader = new BinaryReader(m))
+                {
+                    int ivLength = reader.ReadInt32();
+                    IV = reader.ReadBytes(ivLength);
+                    int msgLength = reader.ReadInt32();
+                    encryptedMsg = reader.ReadBytes(msgLength);
+                }
+            }
 
+            const int VALID_KEYSIZE = 32;
+
+            Aes aes = Aes.Create();
             key = key.PadRight(VALID_KEYSIZE, '\0');
             aes.Key = Encoding.ASCII.GetBytes(key);
-
-            byte[] IV = new byte[IV_LENGTH];
-            byte[] cipherText = new byte[packet.Array.Length - IV_LENGTH];
-
-            Array.Copy(packet.Array, IV, IV_LENGTH);
-            Array.Copy(packet.Array, IV_LENGTH, cipherText, 0, cipherText.Length);
             aes.IV = IV;
-
             ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
 
-            string plainText;
-            // Create the streams used for decryption.
-            using (MemoryStream msDecrypt = new MemoryStream(cipherText))
+            byte[] decryptedMsg;
+            using (MemoryStream msDecrypt = new MemoryStream(encryptedMsg))
             {
                 using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
                 {
-                    using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                    using (BinaryReader reader = new BinaryReader(csDecrypt))
                     {
-
-                        // Read the decrypted bytes from the decrypting stream
-                        // and place them in a string.
-                        plainText = srDecrypt.ReadToEnd();
+                        decryptedMsg = reader.ReadBytes(encryptedMsg.Length);
                     }
                 }
             }
-            return new ArraySegment<byte>(Encoding.ASCII.GetBytes(plainText));
+
+            return new ArraySegment<byte>(decryptedMsg);
         }
     }
 
@@ -304,9 +308,8 @@ namespace Lobby
         public new static MsgJoinRoomResponse Desserialize(ArraySegment<byte> data)
         {
             return LobbyMsgHelper.InterpretMsg<MsgJoinRoomResponse>(data, (reader) => {
-                bool success = reader.ReadBoolean();
                 RoomErrorType errorCode = (RoomErrorType) reader.ReadByte();
-                return new MsgJoinRoomResponse(errorCode);
+                return new MsgJoinRoomResponse();
             });
         }
     }
@@ -469,6 +472,7 @@ public class LobbyNetworkManager : MonoBehaviour
         UuidToRoom = new Dictionary<string, Room>();
 
 #if UNITY_SERVER
+        Config.SessionKey = "sessionKey";
         LobbyServer = new KcpServer(
             (connectionId) => OnServerConnected(connectionId),
             (connectionId, message) => OnServerDataReceived(connectionId, message),
@@ -521,15 +525,17 @@ public class LobbyNetworkManager : MonoBehaviour
     // BoardCast the LobbyMessage to all connections in the list
     void MultiCast(LobbyMsgBase packet, int[] conns)
     {
+        ArraySegment<byte> encryptedPacket = LobbyMsgHelper.Encrypt(packet.Serialize(), Config.SessionKey);
         foreach (int connectionId in conns)
-            LobbyServer.Send(connectionId, packet.Serialize(), KcpChannel.Reliable);
+            LobbyServer.Send(connectionId, encryptedPacket, KcpChannel.Reliable);
     }
 
     // BoardCast the LobbyMessage to all players in the server
     void BoardCast(LobbyMsgBase packet)
     {
+        ArraySegment<byte> encryptedPacket = LobbyMsgHelper.Encrypt(packet.Serialize(), Config.SessionKey);
         foreach (int connectionId in ConnIdToPlayer.Keys)
-            LobbyServer.Send(connectionId, packet.Serialize(), KcpChannel.Reliable);
+            LobbyServer.Send(connectionId, encryptedPacket, KcpChannel.Reliable);
     }
 
     // Invoked when a client connects to the server.
@@ -541,18 +547,19 @@ public class LobbyNetworkManager : MonoBehaviour
     // Invoked when a server receives a message from client.
     void OnServerDataReceived(int connectionId, ArraySegment<byte> message)
     {
+        ArraySegment<byte> decryptedMsg = LobbyMsgHelper.Decrypt(message, Config.SessionKey);
         // Read the LobbyPacketHeader in the packet
-        MemoryStream m = new MemoryStream(message.Array);
-        m.Seek(1, SeekOrigin.Begin);        // Skip 1 byte, because the first byte is Kcp header.
+        MemoryStream m = new MemoryStream(decryptedMsg.Array);
+        //m.Seek(1, SeekOrigin.Begin);        // Skip 1 byte, because the first byte is Kcp header.
         BinaryReader reader = new BinaryReader(m);
         LobbyPacketHeader header = (LobbyPacketHeader) reader.ReadByte();
         switch (header)
         {
             case LobbyPacketHeader.PlayerInfoUpdate:
-                HandlePlayerInfoUpdate(connectionId, MsgPlayerInfoUpdate.Desserialize(message));
+                HandlePlayerInfoUpdate(connectionId, MsgPlayerInfoUpdate.Desserialize(decryptedMsg));
                 break;
             case LobbyPacketHeader.JoinRoomRequest:
-                HandleJoinRoomRequest(connectionId, MsgJoinRoomRequest.Desserialize(message));
+                HandleJoinRoomRequest(connectionId, MsgJoinRoomRequest.Desserialize(decryptedMsg));
                 break;
             case LobbyPacketHeader.ReadySignal:
                 HandleReadySignal(connectionId);
@@ -592,7 +599,8 @@ public class LobbyNetworkManager : MonoBehaviour
 
         MsgLobbyInfoUpdate msg = new MsgLobbyInfoUpdate();
         msg.RoomList = new List<Room>(UuidToRoom.Values);
-        LobbyServer.Send(connectionId, msg.Serialize(), KcpChannel.Reliable);
+        ArraySegment<byte> encryptedMsg = LobbyMsgHelper.Encrypt(msg.Serialize(), Config.SessionKey);
+        LobbyServer.Send(connectionId, encryptedMsg, KcpChannel.Reliable);
     }
 
     // When a player join a room, the server should first check if the room has reached numPlayer limit.
@@ -609,7 +617,8 @@ public class LobbyNetworkManager : MonoBehaviour
         if (!UuidToRoom.TryGetValue(packet.RoomUuid, out room))
         {
             response = new MsgJoinRoomResponse(RoomErrorType.RoomNotExist);
-            LobbyServer.Send(connectionId, response.Serialize(), KcpChannel.Reliable);
+            ArraySegment<byte> encrpytedErrorMsg = LobbyMsgHelper.Encrypt(response.Serialize(), Config.SessionKey);
+            LobbyServer.Send(connectionId, encrpytedErrorMsg, KcpChannel.Reliable);
             return;
         }
 
@@ -617,19 +626,22 @@ public class LobbyNetworkManager : MonoBehaviour
         {
             Debug.LogError("Unknown connectionId=" + connectionId.ToString() + " is trying to join a room.");
             response = new MsgJoinRoomResponse(RoomErrorType.InternalError);
-            LobbyServer.Send(connectionId, response.Serialize(), KcpChannel.Reliable);
+            ArraySegment<byte> encrpytedErrorMsg = LobbyMsgHelper.Encrypt(response.Serialize(), Config.SessionKey);
+            LobbyServer.Send(connectionId, encrpytedErrorMsg, KcpChannel.Reliable);
             return;
         }
 
         if (room.NumPlayers > GameConfiguration.MAX_ROOM_PLAYERS)
         {
             response = new MsgJoinRoomResponse(RoomErrorType.RoomFull);
-            LobbyServer.Send(connectionId, response.Serialize(), KcpChannel.Reliable);
+            ArraySegment<byte> encrpytedErrorMsg = LobbyMsgHelper.Encrypt(response.Serialize(), Config.SessionKey);
+            LobbyServer.Send(connectionId, encrpytedErrorMsg, KcpChannel.Reliable);
             return;
         }
 
         response = new MsgJoinRoomResponse(RoomErrorType.None);
-        LobbyServer.Send(connectionId, response.Serialize(), KcpChannel.Reliable);
+        ArraySegment<byte> encrpytedResponse = LobbyMsgHelper.Encrypt(response.Serialize(), Config.SessionKey);
+        LobbyServer.Send(connectionId, encrpytedResponse, KcpChannel.Reliable);
 
         UuidToRoom[packet.RoomUuid].PlayerList.Add(player);
         UuidToRoom[packet.RoomUuid].NumPlayers = room.PlayerList.Count;
@@ -779,30 +791,32 @@ public class LobbyNetworkManager : MonoBehaviour
     void OnClientConnected()
     {
         MsgPlayerInfoUpdate msg = new MsgPlayerInfoUpdate(Config.MyName);
-        Client.Send(msg.Serialize(), KcpChannel.Reliable);
+        ArraySegment<byte> encryptedMsg = LobbyMsgHelper.Encrypt(msg.Serialize(), Config.SessionKey);
+        Client.Send(encryptedMsg, KcpChannel.Reliable);
     }
 
     // Invoked when a client receives a message from the lobby server.
     void OnClientDataReceived(ArraySegment<byte> message)
     {
+        ArraySegment<byte> decrpytedMsg = LobbyMsgHelper.Decrypt(message, Config.SessionKey);
         // Read the LobbyPacketHeader in the packet
-        MemoryStream m = new MemoryStream(message.Array);
-        m.Seek(1, SeekOrigin.Begin);        //skip 1 byte, because the first byte is Kcp header
+        MemoryStream m = new MemoryStream(decrpytedMsg.Array);
+        //m.Seek(1, SeekOrigin.Begin);        //skip 1 byte, because the first byte is Kcp header
         BinaryReader reader = new BinaryReader(m);
         LobbyPacketHeader header = (LobbyPacketHeader)reader.ReadByte();
         switch (header)
         {
             case LobbyPacketHeader.LobbyInfoUpdate:
-                HandleLobbyInfoUpdate(MsgLobbyInfoUpdate.Desserialize(message));
+                HandleLobbyInfoUpdate(MsgLobbyInfoUpdate.Desserialize(decrpytedMsg));
                 break;
             case LobbyPacketHeader.JoinRoomResponse:
-                HandleJoinRoomResponse(MsgJoinRoomResponse.Desserialize(message));
+                HandleJoinRoomResponse(MsgJoinRoomResponse.Desserialize(decrpytedMsg));
                 break;
             case LobbyPacketHeader.RoomUpdate:
-                HandleRoomUpdate(MsgRoomUpdate.Desserialize(message));
+                HandleRoomUpdate(MsgRoomUpdate.Desserialize(decrpytedMsg));
                 break;
             case LobbyPacketHeader.StartGame:
-                HandleGameStartSignal(MsgGameStartSignal.Desserialize(message));
+                HandleGameStartSignal(MsgGameStartSignal.Desserialize(decrpytedMsg));
                 break;
         }
     }
@@ -863,7 +877,8 @@ public class LobbyNetworkManager : MonoBehaviour
     public void JoinRoom(string roomUUID)
     {
         MsgJoinRoomRequest msg = new MsgJoinRoomRequest(roomUUID);
-        Client.Send(msg.Serialize(), KcpChannel.Reliable);
+        ArraySegment<byte> encryptedMsg = LobbyMsgHelper.Encrypt(msg.Serialize(), Config.SessionKey);
+        Client.Send(encryptedMsg, KcpChannel.Reliable);
     }
 
     // Send the leaveRoom message to server.
@@ -871,7 +886,8 @@ public class LobbyNetworkManager : MonoBehaviour
     {
         CurrRoom = null;
         MsgLeaveRoomSignal msg = new MsgLeaveRoomSignal();
-        Client.Send(msg.Serialize(), KcpChannel.Reliable);
+        ArraySegment<byte> encryptedMsg = LobbyMsgHelper.Encrypt(msg.Serialize(), Config.SessionKey);
+        Client.Send(encryptedMsg, KcpChannel.Reliable);
     }
 
     // Close client socket.
@@ -884,7 +900,8 @@ public class LobbyNetworkManager : MonoBehaviour
     public void sendReadySignal()
     {
         MsgReadySignal msg = new MsgReadySignal();
-        Client.Send(msg.Serialize(), KcpChannel.Reliable);
+        ArraySegment<byte> encryptedMsg = LobbyMsgHelper.Encrypt(msg.Serialize(), Config.SessionKey);
+        Client.Send(encryptedMsg, KcpChannel.Reliable);
     }
 
     public enum LoginErrorCode { None, WrongPassword, Timeout, AccountNotFound};
