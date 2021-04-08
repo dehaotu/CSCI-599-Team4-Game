@@ -108,6 +108,78 @@ namespace Lobby
                 }
             }
         }
+
+        // Encrpyt the packet using the sessionKey
+        public static ArraySegment<byte> Encrypt(ArraySegment<byte> packet, string key)
+        {
+            Aes aes = Aes.Create();
+            aes.GenerateIV();
+            aes.Mode = CipherMode.CBC;
+
+            const int VALID_KEYSIZE = 32;
+            key = key.PadRight(VALID_KEYSIZE, '\0');
+            aes.Key = Encoding.ASCII.GetBytes(key);
+
+            ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+
+            byte[] encryptedPacket;
+            // Create the streams used for encryption.
+            using (MemoryStream msEncrypt = new MemoryStream())
+            {
+                using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+                {
+                    using (StreamWriter swEncrypt = new StreamWriter(csEncrypt))
+                    {
+                        //Write all data to the stream.
+                        swEncrypt.Write(System.Text.Encoding.Default.GetString(packet.Array));
+                    }
+                    encryptedPacket = msEncrypt.ToArray();
+                }
+            }
+
+            // combined packet = IV + encrypted Packet
+            byte[] combinedPacket = new byte[aes.IV.Length + encryptedPacket.Length];
+            Array.Copy(aes.IV, 0, combinedPacket, 0, aes.IV.Length);
+            Array.Copy(encryptedPacket, 0, combinedPacket, aes.IV.Length, encryptedPacket.Length);
+            return new ArraySegment<byte>(combinedPacket);
+        }
+
+        // Decrypt the packet using the sessionKey
+        public static ArraySegment<byte> Decrypt(ArraySegment<byte> packet, string key)
+        {
+            const int IV_LENGTH = 16;
+            const int VALID_KEYSIZE = 32;
+            Aes aes = Aes.Create();
+
+            key = key.PadRight(VALID_KEYSIZE, '\0');
+            aes.Key = Encoding.ASCII.GetBytes(key);
+
+            byte[] IV = new byte[IV_LENGTH];
+            byte[] cipherText = new byte[packet.Array.Length - IV_LENGTH];
+
+            Array.Copy(packet.Array, IV, IV_LENGTH);
+            Array.Copy(packet.Array, IV_LENGTH, cipherText, 0, cipherText.Length);
+            aes.IV = IV;
+
+            ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+
+            string plainText;
+            // Create the streams used for decryption.
+            using (MemoryStream msDecrypt = new MemoryStream(cipherText))
+            {
+                using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
+                {
+                    using (StreamReader srDecrypt = new StreamReader(csDecrypt))
+                    {
+
+                        // Read the decrypted bytes from the decrypting stream
+                        // and place them in a string.
+                        plainText = srDecrypt.ReadToEnd();
+                    }
+                }
+            }
+            return new ArraySegment<byte>(Encoding.ASCII.GetBytes(plainText));
+        }
     }
 
     // All LobbyMessage must be able to be serialized. Deserialize is optional because some message are just signals 

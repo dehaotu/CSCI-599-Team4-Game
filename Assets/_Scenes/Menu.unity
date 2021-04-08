@@ -669,7 +669,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Port: 27777
-  LobbyServerIP: 52.183.4.114
+  LobbyServerIP: localhost
   NoDelay: 1
   Interval: 10
   FastResend: 2
@@ -2010,7 +2010,7 @@ MonoBehaviour:
     m_HorizontalOverflow: 0
     m_VerticalOverflow: 0
     m_LineSpacing: 1
-  m_Text: Cannot connect to database server.
+  m_Text: Account not found!
 --- !u!222 &683966344
 CanvasRenderer:
   m_ObjectHideFlags: 0
