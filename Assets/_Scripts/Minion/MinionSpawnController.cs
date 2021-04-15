@@ -5,7 +5,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Mirror;
 
-public class EnemySpawnController : NetworkBehaviour
+public class MinionSpawnController : NetworkBehaviour
 {
     public float waitingTime = 5f;
     public Vector2 targetPosition;
@@ -27,7 +27,7 @@ public class EnemySpawnController : NetworkBehaviour
         if (timer > waitingTime)
         {
             GameObject minion = Instantiate(minionPrefab, transform.position, Quaternion.identity) as GameObject;
-            var minionController = minion.GetComponent<EnemyController>();
+            var minionController = minion.GetComponent<MinionController>();
             minionController.targetPosition = targetPosition;
             minionController.gameObject.tag = (isEnemySide) ? "EnemyMinion" : "PlayerMinion";
             minion.GetComponentInChildren<Text>().text = (isEnemySide) ? "Enemy Minion" : "Player Minion";

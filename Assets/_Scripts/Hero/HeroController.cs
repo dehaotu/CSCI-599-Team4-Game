@@ -4,7 +4,7 @@ using UnityEngine;
 using UnityEngine.AI;
 using Mirror;
 
-public class IsometricPlayerMovementController : NetworkBehaviour
+public class HeroController : NetworkBehaviour
 {
 
     public float movementSpeed = 1f;
@@ -176,7 +176,7 @@ public class IsometricPlayerMovementController : NetworkBehaviour
     {
         if (isEnemyClose)
         {
-            int coins = targetObject.GetComponent<EnemyController>().TakeDamage(heroStatus.BasicAttackPoints);
+            int coins = targetObject.GetComponent<MinionController>().TakeDamage(heroStatus.BasicAttackPoints);
             heroStatus.EarnCoin(coins);
         }
         else if (isMonsterClose)

@@ -1,11 +1,9 @@
-﻿using System.Collections;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
-using UnityEngine.UI;
 using Mirror;
 
-public class EnemyController : NetworkBehaviour
+public class MinionController : NetworkBehaviour
 {
     [SyncVar]
     public int currentHealthPoints = 0;
@@ -84,13 +82,14 @@ public class EnemyController : NetworkBehaviour
     // Update is called once per frame
     void Update()
     {
-        string[] findTags = gameObject.tag.Equals("EnemyMinion") ? new string[]{ "Player", "PlayerMinion", "PlayerTower" } : new string[]{ "EnemyMinion", "EnemyTower" };
+        string[] findTags = gameObject.tag.Equals("EnemyMinion") ? new string[] { "Player", "PlayerMinion", "PlayerTower" } : new string[] { "EnemyMinion", "EnemyTower" };
         GameObject findObject = FindNearestObjectByTags(findTags);
         timer += Time.deltaTime;
 
         if (!alive) NetworkServer.Destroy(this.gameObject);
         healthBar.SetHealth(currentHealthPoints);
-        if (findObject != null) {
+        if (findObject != null)
+        {
             Vector2 playerPosition = findObject.transform.position;
             if (Vector2.Distance(playerPosition, rbody.position) <= maxChaseDistance)
             {
@@ -107,10 +106,11 @@ public class EnemyController : NetworkBehaviour
                         if (!targetObject.GetComponent<HeroStatus>().checkAlive()) return; //only attack when player is still alive
                         targetObject.GetComponent<HeroStatus>().TakeDamage(basicAttackPoints);
                         isoRenderer.Attack();
-                    } else if (targetObject.tag.Equals("PlayerMinion") || targetObject.tag.Equals("EnemyMinion"))
+                    }
+                    else if (targetObject.tag.Equals("PlayerMinion") || targetObject.tag.Equals("EnemyMinion"))
                     {
-                        if (!targetObject.GetComponent<EnemyController>().checkAlive()) return;
-                        targetObject.GetComponent<EnemyController>().TakeDamage(basicAttackPoints);
+                        if (!targetObject.GetComponent<MinionController>().checkAlive()) return;
+                        targetObject.GetComponent<MinionController>().TakeDamage(basicAttackPoints);
                         isoRenderer.Attack();
                     }
                     else if (targetObject.tag.Equals("PlayerTower") || targetObject.tag.Equals("EnemyTower"))
@@ -120,7 +120,8 @@ public class EnemyController : NetworkBehaviour
                         isoRenderer.Attack();
                     }
                 }
-            } else
+            }
+            else
             {
                 Move(targetPosition);
             }
