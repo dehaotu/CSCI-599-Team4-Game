@@ -23,10 +23,12 @@ namespace Mirror
 
             // show rtt in bottom right corner, right aligned
             GUI.color = color;
-            Rect rect = new Rect(Screen.width - width - padding, Screen.height - height - padding, width, height);
-            GUIStyle style = GUI.skin.GetStyle("Label");
-            style.alignment = TextAnchor.MiddleRight;
-            GUI.Label(rect, $"RTT: {Math.Round(NetworkTime.rtt * 1000)}ms", style);
+            Rect rect = new Rect(Screen.width / 2, Screen.height / 2, width, height);
+            GUIStyle newStyle = new GUIStyle();
+            newStyle.alignment = TextAnchor.MiddleRight;
+            newStyle.normal.textColor = Color.white;
+            newStyle.fontSize = 50;
+            GUI.Label(rect, $"RTT: {Math.Round(NetworkTime.rtt * 1000)}ms", newStyle);
             GUI.color = Color.white;
         }
     }
