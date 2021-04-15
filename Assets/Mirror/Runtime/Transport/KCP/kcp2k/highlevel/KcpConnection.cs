@@ -2,10 +2,6 @@ using System;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using System.Linq;
-using System.IO;
-using System.Text;
-using UnityEngine;
 
 namespace kcp2k
 {
@@ -110,22 +106,18 @@ namespace kcp2k
         public int SendBufferCount => kcp.snd_buf.Count;
         public int ReceiveBufferCount => kcp.rcv_buf.Count;
 
-        /// Dan: Debug Metrics
-        private short tempCount = 0;
-        StreamWriter _fileStreamWriter = File.CreateText(Application.absoluteURL + "TeamForce_Metrics_" + DateTime.Now.ToString().Replace("/", "-").Replace(" ", "_").Replace(":", "-") + "_" + ".csv");
-
-// maximum send rate per second can be calculated from kcp parameters
-// source: https://translate.google.com/translate?sl=auto&tl=en&u=https://wetest.qq.com/lab/view/391.html
-//
-// KCP can send/receive a maximum of WND*MTU per interval.
-// multiple by 1000ms / interval to get the per-second rate.
-//
-// example:
-//   WND(32) * MTU(1400) = 43.75KB
-//   => 43.75KB * 1000 / INTERVAL(10) = 4375KB/s
-//
-// returns bytes/second!
-public uint MaxSendRate =>
+        // maximum send rate per second can be calculated from kcp parameters
+        // source: https://translate.google.com/translate?sl=auto&tl=en&u=https://wetest.qq.com/lab/view/391.html
+        //
+        // KCP can send/receive a maximum of WND*MTU per interval.
+        // multiple by 1000ms / interval to get the per-second rate.
+        //
+        // example:
+        //   WND(32) * MTU(1400) = 43.75KB
+        //   => 43.75KB * 1000 / INTERVAL(10) = 4375KB/s
+        //
+        // returns bytes/second!
+        public uint MaxSendRate =>
             kcp.snd_wnd * kcp.mtu * 1000 / kcp.interval;
 
         public uint MaxReceiveRate =>
@@ -151,7 +143,6 @@ public uint MaxSendRate =>
             state = KcpState.Connected;
 
             refTime.Start();
-            Tick();
         }
 
         void HandleTimeout(uint time)
@@ -212,14 +203,11 @@ public uint MaxSendRate =>
             }
         }
 
-        
-
-// reads the next reliable message type & content from kcp.
-// -> to avoid buffering, unreliable messages call OnData directly.
-bool ReceiveNextReliable(out KcpHeader header, out ArraySegment<byte> message)
+        // reads the next reliable message type & content from kcp.
+        // -> to avoid buffering, unreliable messages call OnData directly.
+        bool ReceiveNextReliable(out KcpHeader header, out ArraySegment<byte> message)
         {
             int msgSize = kcp.PeekSize();
-            //Log.Warning("Size of Packet: " + msgSize.ToString());
             if (msgSize > 0)
             {
                 // only allow receiving up to buffer sized messages.
@@ -233,20 +221,6 @@ bool ReceiveNextReliable(out KcpHeader header, out ArraySegment<byte> message)
                         // extract header & content without header
                         header = (KcpHeader)kcpMessageBuffer[0];
                         message = new ArraySegment<byte>(kcpMessageBuffer, 1, msgSize - 1);
-
-                        /// Dan: Debug Print Out Messages
-                        /*tempCount += 1;
-                        byte[] byteArray = kcpMessageBuffer;
-                        byte[] truncatedMsg = new byte[msgSize];
-                        for (int i = 0; i < msgSize; i++) truncatedMsg[i] =  kcpMessageBuffer.Take(msgSize).ElementAt(i) ;
-                        Log.Warning("Total Size of Packet: " + msgSize.ToString() + " Received Message: " + BitConverter.ToString(truncatedMsg));*/
-                        //get timestamp for file name 
-                        float timeInSeconds = Time.timeSinceLevelLoad;
-                        float secondsDisplay = Mathf.Floor((timeInSeconds % 60));
-                        float minutesDisplay = Mathf.Floor((timeInSeconds / 60));
-                        string dataLine = "Packet Size" + "," + "," + minutesDisplay.ToString() + ":" + secondsDisplay.ToString() + "," + msgSize.ToString() + Environment.NewLine;
-                        _fileStreamWriter.Write(dataLine.ToString());
-                        ///
                         lastReceiveTime = (uint)refTime.ElapsedMilliseconds;
                         return true;
                     }
@@ -270,15 +244,13 @@ bool ReceiveNextReliable(out KcpHeader header, out ArraySegment<byte> message)
             return false;
         }
 
-        void TickConnected(uint time)
+        void TickIncoming_Connected(uint time)
         {
             // detect common events & ping
             HandleTimeout(time);
             HandleDeadLink();
             HandlePing(time);
             HandleChoked();
-
-            kcp.Update(time);
 
             // any reliable kcp message received?
             if (ReceiveNextReliable(out KcpHeader header, out ArraySegment<byte> message))
@@ -312,15 +284,13 @@ bool ReceiveNextReliable(out KcpHeader header, out ArraySegment<byte> message)
             }
         }
 
-        void TickAuthenticated(uint time)
+        void TickIncoming_Authenticated(uint time)
         {
             // detect common events & ping
             HandleTimeout(time);
             HandleDeadLink();
             HandlePing(time);
             HandleChoked();
-
-            kcp.Update(time);
 
             // process all received messages
             //
@@ -379,7 +349,7 @@ bool ReceiveNextReliable(out KcpHeader header, out ArraySegment<byte> message)
             }
         }
 
-        public void Tick()
+        public void TickIncoming()
         {
             uint time = (uint)refTime.ElapsedMilliseconds;
 
@@ -389,12 +359,54 @@ bool ReceiveNextReliable(out KcpHeader header, out ArraySegment<byte> message)
                 {
                     case KcpState.Connected:
                     {
-                        TickConnected(time);
+                        TickIncoming_Connected(time);
                         break;
                     }
                     case KcpState.Authenticated:
                     {
-                        TickAuthenticated(time);
+                        TickIncoming_Authenticated(time);
+                        break;
+                    }
+                    case KcpState.Disconnected:
+                    {
+                        // do nothing while disconnected
+                        break;
+                    }
+                }
+            }
+            catch (SocketException exception)
+            {
+                // this is ok, the connection was closed
+                Log.Info($"KCP Connection: Disconnecting because {exception}. This is fine.");
+                Disconnect();
+            }
+            catch (ObjectDisposedException exception)
+            {
+                // fine, socket was closed
+                Log.Info($"KCP Connection: Disconnecting because {exception}. This is fine.");
+                Disconnect();
+            }
+            catch (Exception ex)
+            {
+                // unexpected
+                Log.Error(ex.ToString());
+                Disconnect();
+            }
+        }
+
+        public void TickOutgoing()
+        {
+            uint time = (uint)refTime.ElapsedMilliseconds;
+
+            try
+            {
+                switch (state)
+                {
+                    case KcpState.Connected:
+                    case KcpState.Authenticated:
+                    {
+                        // update flushes out messages
+                        kcp.Update(time);
                         break;
                     }
                     case KcpState.Disconnected:

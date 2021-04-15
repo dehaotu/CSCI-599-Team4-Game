@@ -45,11 +45,7 @@ public class #SCRIPTNAME# : NetworkDiscoveryBase<DiscoveryRequest, DiscoveryResp
     /// Override if you wish to provide more information to the clients
     /// such as the name of the host player
     /// </remarks>
-<<<<<<< HEAD
-    /// <param name="request">Request comming from client</param>
-=======
     /// <param name="request">Request coming from client</param>
->>>>>>> master
     /// <param name="endpoint">Address of the client that sent the request</param>
     /// <returns>A message containing information about this server</returns>
     protected override DiscoveryResponse ProcessRequest(DiscoveryRequest request, IPEndPoint endpoint) 
