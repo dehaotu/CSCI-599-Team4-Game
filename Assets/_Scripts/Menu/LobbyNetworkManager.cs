@@ -152,7 +152,7 @@ namespace Lobby
             byte[] IV, encryptedMsg;
             using (MemoryStream m = new MemoryStream(packet.Array))
             {
-                m.Seek(1, SeekOrigin.Begin);
+                m.Seek(1, SeekOrigin.Begin);   // Skip 1 byte, because the first byte is Kcp header.
                 using (BinaryReader reader = new BinaryReader(m))
                 {
                     int ivLength = reader.ReadInt32();
@@ -550,7 +550,7 @@ public class LobbyNetworkManager : MonoBehaviour
         ArraySegment<byte> decryptedMsg = LobbyMsgHelper.Decrypt(message, Config.SessionKey);
         // Read the LobbyPacketHeader in the packet
         MemoryStream m = new MemoryStream(decryptedMsg.Array);
-        //m.Seek(1, SeekOrigin.Begin);        // Skip 1 byte, because the first byte is Kcp header.
+        //m.Seek(1, SeekOrigin.Begin);        
         BinaryReader reader = new BinaryReader(m);
         LobbyPacketHeader header = (LobbyPacketHeader) reader.ReadByte();
         switch (header)
@@ -700,7 +700,7 @@ public class LobbyNetworkManager : MonoBehaviour
         if (DebugLocalServers)
             return new MsgGameStartSignal("localhost", 7777);
         //to be changed, not implemented yet
-        return new MsgGameStartSignal("52.183.4.114", 7777); 
+        return new MsgGameStartSignal(LobbyServerIP, 7777); 
     }
 
     // When player leaves the room, remove player from room's playerList, set
