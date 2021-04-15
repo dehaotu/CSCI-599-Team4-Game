@@ -29,7 +29,8 @@ namespace Lobby
         LeaveRoomSignal,
         RoomUpdate,
         ReadySignal,
-        StartGame
+        StartGame,
+        GameServerRegistry
     }
 
     public enum RoomErrorType: byte
@@ -408,6 +409,42 @@ namespace Lobby
             });
         }
     }
+
+    public class MsgGameServerRegistry : LobbyMsgBase
+    {
+        public string GameServerIP { set; get; }
+        public int GameServerPort { set; get; }
+        public string GameServerName { set; get; }
+
+        public MsgGameServerRegistry(string address, int port, string name)
+        {
+            this.GameServerIP = address;
+            this.GameServerPort = port;
+            this.GameServerName = name;
+        }
+
+        override public ArraySegment<byte> Serialize()
+        {
+            return LobbyMsgHelper.GenerateMsg((writer) =>
+            {
+                writer.Write((byte)LobbyPacketHeader.GameServerRegistry);
+                writer.Write(GameServerIP);
+                writer.Write(GameServerPort);
+                writer.Write(GameServerName);
+            });
+        }
+
+        public new static MsgGameServerRegistry Desserialize(ArraySegment<byte> data)
+        {
+            return LobbyMsgHelper.InterpretMsg<MsgGameServerRegistry>(data, (reader) => {
+                reader.ReadByte();
+                string ip = reader.ReadString();
+                int port = reader.ReadInt32();
+                string name = reader.ReadString();
+                return new MsgGameServerRegistry(ip, port, name);
+            });
+        }
+    }
 }
 #endregion
 
@@ -422,6 +459,8 @@ public class LobbyNetworkManager : MonoBehaviour
     public ushort Port = 27777;
     [Tooltip("The IP Address of Lobby server.")]
     public string LobbyServerIP = "localhost";
+    [Tooltip("For Lobby server only: The port for listening game server's connection.")]
+    public ushort GameServerManagementPort = 24601;
     [Tooltip("NoDelay is recommended to reduce latency. This also scales better without buffers getting full.")]
     public bool NoDelay = true;
     [Tooltip("KCP internal update interval. 100ms is KCP default, but a lower interval is recommended to minimize latency and to scale to more networked entities.")]
@@ -444,10 +483,12 @@ public class LobbyNetworkManager : MonoBehaviour
 
     //variables
     KcpServer LobbyServer;
-    //KcpServer GameServerManagement;
+    KcpServer GameServerManagement;
     KcpClient Client;
     Dictionary<int, Player> ConnIdToPlayer;       // For server only.
     Dictionary<string, Room> UuidToRoom;
+    Dictionary<string, Tuple<string, int>> UuidToIPAndPort;
+    Dictionary<int, string> ConnIdToUuid;
     public Room CurrRoom;             //to be changed, please add getters
 
     //events
@@ -470,6 +511,8 @@ public class LobbyNetworkManager : MonoBehaviour
     {
         ConnIdToPlayer = new Dictionary<int, Player>();
         UuidToRoom = new Dictionary<string, Room>();
+        UuidToIPAndPort = new Dictionary<string, Tuple<string, int>>();
+        ConnIdToUuid = new Dictionary<int, string>();
 
 #if UNITY_SERVER
         Config.SessionKey = "sessionKey";
@@ -485,6 +528,17 @@ public class LobbyNetworkManager : MonoBehaviour
             ReceiveWindowSize
         );
         LobbyServer.Start(Port);
+        Debug.Log("Start listening for player connections.");
+
+        GameServerManagement = new KcpServer(
+            (connectionId) => OnGameServerConnected(connectionId),
+            (connectionId, message) => OnGameServerDataReceived(connectionId, message),
+            (connectionId) => OnGameServerDisconnected(connectionId),
+            true,
+            10
+        );
+        GameServerManagement.Start(GameServerManagementPort);
+        Debug.Log("Start listening for game server connections.");
 #else
         Client = new KcpClient(
             () => OnClientConnected(),
@@ -495,12 +549,12 @@ public class LobbyNetworkManager : MonoBehaviour
 
         //To be changed. For now we assume there is already a game server in the list.
 #if UNITY_SERVER
-        Room gameRoom1 = new Room();
-        UuidToRoom.Add(gameRoom1.uuid, gameRoom1);
-        Room gameRoom2 = new Room();
-        UuidToRoom.Add(gameRoom2.uuid, gameRoom2);
-        Room gameRoom3 = new Room();
-        UuidToRoom.Add(gameRoom3.uuid, gameRoom3);
+        //Room gameRoom1 = new Room();
+        //UuidToRoom.Add(gameRoom1.uuid, gameRoom1);
+        //Room gameRoom2 = new Room();
+        //UuidToRoom.Add(gameRoom2.uuid, gameRoom2);
+        //Room gameRoom3 = new Room();
+        //UuidToRoom.Add(gameRoom3.uuid, gameRoom3);
 #endif
     }
 
@@ -508,6 +562,7 @@ public class LobbyNetworkManager : MonoBehaviour
     {
 #if UNITY_SERVER
         LobbyServer.Tick();
+        GameServerManagement.Tick();
 #else
         Client.Tick();
 #endif
@@ -686,7 +741,7 @@ public class LobbyNetworkManager : MonoBehaviour
 
         if (allReady)
         {
-            MsgGameStartSignal gameStartSignal = SearchGameServer();
+            MsgGameStartSignal gameStartSignal = PrepareGameStartSignal(player.CurrRoom);
             List<int> connList = new List<int>();
             foreach (Player p in player.CurrRoom.PlayerList)
             {
@@ -699,12 +754,13 @@ public class LobbyNetworkManager : MonoBehaviour
     // This helper function searchs the available game server, then
     // tells the server player information, then construct a new
     // MsgGameStartSignal containing the game server's ip and port.
-    private MsgGameStartSignal SearchGameServer()
+    private MsgGameStartSignal PrepareGameStartSignal(Room room)
     {
         if (DebugLocalServers)
             return new MsgGameStartSignal("localhost", 7777);
         //to be changed, not implemented yet
-        return new MsgGameStartSignal(LobbyServerIP, 7777); 
+        Tuple<string, int> IPAndPortPair = UuidToIPAndPort[room.uuid];
+        return new MsgGameStartSignal(IPAndPortPair.Item1, IPAndPortPair.Item2); 
     }
 
     // When player leaves the room, remove player from room's playerList, set
@@ -759,23 +815,59 @@ public class LobbyNetworkManager : MonoBehaviour
     // Invoked when a game server connects to the lobby.
     void OnGameServerConnected(int connectionId)
     {
-
+        Debug.Log("New game server connected.");
     }
 
     // Invoked when a server receives a message from game server.
     void OnGameServerDataReceived(int connectionId, ArraySegment<byte> message)
     {
-
+        MemoryStream m = new MemoryStream(message.Array);
+        m.Seek(1, SeekOrigin.Begin);
+        BinaryReader reader = new BinaryReader(m);
+        LobbyPacketHeader header = (LobbyPacketHeader)reader.ReadByte();
+        switch (header)
+        {
+            case LobbyPacketHeader.GameServerRegistry:
+                HandleGameRegistry(MsgGameServerRegistry.Desserialize(message), connectionId);
+                break;
+        }
     }
 
     // Invoked when a game server shuts down or offline.
     void OnGameServerDisconnected(int connectionId)
     {
+        Debug.Log("Game Server " + connectionId + " disconnected.");
+        string roomUuid = ConnIdToUuid[connectionId];
+        UuidToRoom.Remove(roomUuid);
+        UuidToIPAndPort.Remove(roomUuid);
+        ConnIdToUuid.Remove(connectionId);
 
+        //TODO: Send game server down signal to players already in that game server room, so they can return to lobby
+        //TODO
+
+        //boardcast the removal of game server to all players
+        MsgLobbyInfoUpdate lobbyInfoMsg = new MsgLobbyInfoUpdate();
+        lobbyInfoMsg.RoomList = new List<Room>(UuidToRoom.Values);
+        BoardCast(lobbyInfoMsg);
     }
-#endregion
 
-#region Client
+    void HandleGameRegistry(MsgGameServerRegistry packet, int connectionId)
+    {
+        Room gameRoom = new Room(roomName: packet.GameServerName);
+        UuidToRoom.Add(gameRoom.uuid, gameRoom);
+        UuidToIPAndPort.Add(gameRoom.uuid, new Tuple<string, int>(packet.GameServerIP, packet.GameServerPort));
+        ConnIdToUuid.Add(connectionId, gameRoom.uuid);
+
+        Debug.Log("Adding game server" + packet.GameServerName + " to roomList");
+
+        //boardcast the new server to all players
+        MsgLobbyInfoUpdate lobbyInfoMsg = new MsgLobbyInfoUpdate();
+        lobbyInfoMsg.RoomList = new List<Room>(UuidToRoom.Values);
+        BoardCast(lobbyInfoMsg);
+    }
+    #endregion
+
+    #region Client
     // Start connect to the lobby server.
     public void ClientConnectLobby()
     {

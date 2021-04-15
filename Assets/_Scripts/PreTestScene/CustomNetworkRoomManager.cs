@@ -1,6 +1,9 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using Mirror;
+using kcp2k;
+using System.Net;
+using Lobby;
 
 /*
 	Documentation: https://mirror-networking.com/docs/Components/NetworkRoomManager.html
@@ -19,7 +22,67 @@ using Mirror;
 /// </summary>
 public class CustomNetworkRoomManager : NetworkRoomManager
 {
-    #region Server Callbacks
+    KcpClient LobbyCommunicationClient;
+    [Tooltip("For Game server only: The IP Address of lobby server location for communication.")]
+    public string LobbyServerAddress = "localhost";
+    [Tooltip("For Game server only: The Port of lobby server location for communication.")]
+    public ushort LobbyServerPort = 24601;
+    [Tooltip("For Game server only: The name of the server.")]
+    public string GameServerName = "Room";
+
+    #region LobbyServer Communication
+    public void Awake()
+    {
+#if UNITY_SERVER
+        Debug.Log("Looking for Lobby server at " + LobbyServerAddress + ":" + LobbyServerPort + "...");
+        LobbyCommunicationClient = new KcpClient(OnConnected, OnDataReceived, OnDisconnected);
+        try
+        {
+            LobbyCommunicationClient.Connect(LobbyServerAddress, LobbyServerPort, true, 10);
+        }
+        catch (System.Exception e)
+        {
+            Debug.Log("Lobby server Not found! (The game server will continue running and remain operational, but no lobby server will forward to players to this game server)");
+        }
+#endif
+    }
+
+    void Update()
+    {
+#if UNITY_SERVER
+        LobbyCommunicationClient.Tick();
+#endif
+    }
+
+    void OnConnected()
+    {
+        Debug.Log("Lobby server found.");
+        string hostName = Dns.GetHostName();
+        string myIP = Dns.GetHostEntry(hostName).AddressList[0].ToString();
+        KcpTransport kcpTransport = GetComponent<KcpTransport>();
+        if (kcpTransport == null)
+        {
+            Debug.LogError("Error: cannot get component<KcpTransport> !");
+        }
+        Debug.Log("Registering myIP=" + myIP + ":" + kcpTransport.Port + " to lobby server.");
+        MsgGameServerRegistry registryMsg = new MsgGameServerRegistry(myIP, kcpTransport.Port, GameServerName);
+        LobbyCommunicationClient.Send(registryMsg.Serialize(), KcpChannel.Reliable);
+        Debug.Log("Register complete!");
+    }
+
+    void OnDataReceived(System.ArraySegment<byte> message)
+    {
+
+    }
+
+    void OnDisconnected()
+    {
+        Debug.Log("Disconnected from lobby server.");
+    }
+
+#endregion
+
+#region Server Callbacks
 
     /// <summary>
     /// This is called on the server when the server is started - including when a host is started.
@@ -142,9 +205,9 @@ public class CustomNetworkRoomManager : NetworkRoomManager
     /// </summary>
     public override void OnRoomServerPlayersNotReady() { }
 
-    #endregion
+#endregion
 
-    #region Client Callbacks
+#region Client Callbacks
 
     /// <summary>
     /// This is a hook to allow custom behaviour when the game client enters the room.
@@ -216,14 +279,14 @@ public class CustomNetworkRoomManager : NetworkRoomManager
         base.OnRoomClientAddPlayerFailed();
     }
 
-    #endregion
+#endregion
 
-    #region Optional UI
+#region Optional UI
 
     public override void OnGUI()
     {
         base.OnGUI();
     }
 
-    #endregion
+#endregion
 }
