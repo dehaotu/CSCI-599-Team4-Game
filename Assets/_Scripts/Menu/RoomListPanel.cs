@@ -16,6 +16,18 @@ public class RoomListPanel : MonoBehaviour
 
     public void UpdateRoom(List<Lobby.Room> roomList)
     {
+        Debug.Log("There are " + roomList.Count + " rooms.");
+        for (int i = 0; i < roomList.Count; i++)
+        {
+            Lobby.Room room = roomList[i];
+            GameObject newRow = Instantiate(roomRowPrefab, this.transform);
+            Button roomRow = newRow.GetComponent<Button>();
+            roomRow.GetComponentInChildren<Text>().text = "Room     " + room.NumPlayers.ToString() + "/" + NUM_PLAYERS.ToString();
+            roomRow.onClick.AddListener(() => { menuController.onClick_Lobby_RoomRow(room.uuid); });
+            RectTransform tf = roomRow.GetComponent<RectTransform>();
+            tf.localPosition = new Vector3(0, 100 - i * (tf.rect.height + 3), 0);
+        }
+        /*
         foreach (Lobby.Room room in roomList)
         {
             GameObject newRow = Instantiate(roomRowPrefab, this.transform);
@@ -23,6 +35,7 @@ public class RoomListPanel : MonoBehaviour
             roomRow.GetComponentInChildren<Text>().text = "Room     " + room.NumPlayers.ToString() + "/" + NUM_PLAYERS.ToString();
             roomRow.onClick.AddListener(() => { menuController.onClick_Lobby_RoomRow(room.uuid); });
         }
+        */
     }
 
     

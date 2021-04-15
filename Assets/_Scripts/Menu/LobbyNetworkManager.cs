@@ -497,6 +497,10 @@ public class LobbyNetworkManager : MonoBehaviour
 #if UNITY_SERVER
         Room gameRoom1 = new Room();
         UuidToRoom.Add(gameRoom1.uuid, gameRoom1);
+        Room gameRoom2 = new Room();
+        UuidToRoom.Add(gameRoom2.uuid, gameRoom2);
+        Room gameRoom3 = new Room();
+        UuidToRoom.Add(gameRoom3.uuid, gameRoom3);
 #endif
     }
 
