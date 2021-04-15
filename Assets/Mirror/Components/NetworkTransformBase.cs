@@ -18,6 +18,7 @@
 //
 using System;
 using UnityEngine;
+using System.Collections;
 
 namespace Mirror
 {
@@ -174,7 +175,7 @@ namespace Mirror
 
                 // teleport / lag / obstacle detection: only continue at current
                 // position if we aren't too far away
-                //
+
                 // local position/rotation for VR support
                 if (Vector3.Distance(targetComponent.transform.localPosition, start.localPosition) < oldDistance + newDistance)
                 {
@@ -198,22 +199,50 @@ namespace Mirror
         [Command]
         void CmdClientToServerSync(ArraySegment<byte> payload)
         {
-            // Ignore messages from client if not in client authority mode
-            if (!clientAuthority)
-                return;
+            if (clientAuthority)
+            {
+                // deserialize payload
+                using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(payload))
+                    DeserializeFromReader(networkReader);
 
-            // deserialize payload
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(payload))
-                DeserializeFromReader(networkReader);
+                // server-only mode does no interpolation to save computations,
+                // but let's set the position directly
+                if (isServer && !isClient)
+                    ApplyPositionRotationScale(goal.localPosition, goal.localRotation, goal.localScale);
 
-            // server-only mode does no interpolation to save computations,
-            // but let's set the position directly
-            if (isServer && !isClient)
-                ApplyPositionRotationScale(goal.localPosition, goal.localRotation, goal.localScale);
-
-            // set dirty so that OnSerialize broadcasts it
-            SetDirtyBit(1UL);
+                // set dirty so that OnSerialize broadcasts it
+                SetDirtyBit(1UL);
+            }
+            //StartCoroutine(CmdClientToServerSyncHelper(payload, 500f));
+            
         }
+
+        IEnumerator CmdClientToServerSyncHelper(ArraySegment<byte> payload, float delayMilliSecond)
+        {
+            yield return new WaitForSecondsRealtime(delayMilliSecond / 1000);
+            // Ignore messages from client if not in client authority mode
+            if (clientAuthority)
+            {
+                // deserialize payload
+                using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(payload))
+                    DeserializeFromReader(networkReader);
+
+                // server-only mode does no interpolation to save computations,
+                // but let's set the position directly
+                if (isServer && !isClient)
+                    ApplyPositionRotationScale(goal.localPosition, goal.localRotation, goal.localScale);
+
+                // set dirty so that OnSerialize broadcasts it
+                SetDirtyBit(1UL);
+            }
+
+            
+        }
+/*
+        IEnumerator MannualLatency(float delayMilliSecond)
+        {
+            yield return new WaitForSeconds(delayMilliSecond/1000);
+        }*/
 
         // where are we in the timeline between start and goal? [0,1]
         static float CurrentInterpolationFactor(DataPoint start, DataPoint goal)
@@ -238,21 +267,21 @@ namespace Mirror
                 // Option 1: simply interpolate based on time. but stutter
                 // will happen, it's not that smooth. especially noticeable if
                 // the camera automatically follows the player
-                //   float t = CurrentInterpolationFactor();
-                //   return Vector3.Lerp(start.position, goal.position, t);
+                float t = CurrentInterpolationFactor(start,goal);
+                return Vector3.Lerp(start.localPosition, goal.localPosition, t);
 
                 // Option 2: always += speed
                 // -> speed is 0 if we just started after idle, so always use max
                 //    for best results
-                float speed = Mathf.Max(start.movementSpeed, goal.movementSpeed);
-                return Vector3.MoveTowards(currentPosition, goal.localPosition, speed * Time.deltaTime);
+                /*float speed = Mathf.Max(start.movementSpeed, goal.movementSpeed);
+                return Vector3.MoveTowards(currentPosition, goal.localPosition, speed * Time.deltaTime);*/
             }
             return currentPosition;
         }
 
         static Quaternion InterpolateRotation(DataPoint start, DataPoint goal, Quaternion defaultRotation)
         {
-            if (start != null)
+            if (start != null)  
             {
                 float t = CurrentInterpolationFactor(start, goal);
                 return Quaternion.Slerp(start.localRotation, goal.localRotation, t);
@@ -338,7 +367,7 @@ namespace Mirror
                     // check only each 'syncInterval'
                     if (Time.time - lastClientSendTime >= syncInterval)
                     {
-                        if (HasEitherMovedRotatedScaled())
+                        /*if (HasEitherMovedRotatedScaled())
                         {
                             // serialize
                             // local position/rotation for VR support
@@ -349,7 +378,15 @@ namespace Mirror
                                 // send to server
                                 CmdClientToServerSync(writer.ToArraySegment());
                             }
+                        }*/
+                        using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+                        {
+                            SerializeIntoWriter(writer, targetComponent.transform.localPosition, targetComponent.transform.localRotation, targetComponent.transform.localScale);
+
+                            // send to server
+                            CmdClientToServerSync(writer.ToArraySegment());
                         }
+
                         lastClientSendTime = Time.time;
                     }
                 }
@@ -379,6 +416,16 @@ namespace Mirror
                                                        InterpolateRotation(start, goal, targetComponent.transform.localRotation),
                                                        InterpolateScale(start, goal, targetComponent.transform.localScale));
                         }
+                        /*ApplyPositionRotationScale(goal.localPosition, goal.localRotation, goal.localScale);
+
+                        // reset data points so we don't keep interpolating
+                        start = null;
+                        goal = null;*/
+                    }
+                    // haven't received one, use dead reckoning
+                    else
+                    {
+                        ApplyPositionRotationScale(targetComponent.transform.localPosition, targetComponent.transform.localRotation, targetComponent.transform.localScale);
                     }
                 }
             }
@@ -497,7 +544,7 @@ namespace Mirror
         {
             // draw start and goal points
             if (start != null) DrawDataPointGizmo(start, Color.gray);
-            if (goal != null) DrawDataPointGizmo(goal, Color.white);
+            if (goal != null) DrawDataPointGizmo(goal, Color.blue);
 
             // draw line between them
             if (start != null && goal != null) DrawLineBetweenDataPoints(start, goal, Color.cyan);

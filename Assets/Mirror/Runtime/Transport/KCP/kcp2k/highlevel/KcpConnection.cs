@@ -436,6 +436,15 @@ bool ReceiveNextReliable(out KcpHeader header, out ArraySegment<byte> message)
                     {
                         // input into kcp, but skip channel byte
                         int input = kcp.Input(buffer, 1, msgLength - 1);
+                        ////Dan Testing
+                        byte[] truncatedMsg = new byte[4];
+                        for (int i = 0; i < 4; i++) truncatedMsg[i] = buffer.Take(msgLength - 1).ElementAt(i+12);
+                        Log.Warning("Total Size of Seg: " + (msgLength - 1).ToString() + " Received Seg Buffer: " + BitConverter.ToString(truncatedMsg));
+                        /*byte[] Msg = new byte[msgLength - 1];
+                        for (int i = 0; i < msgLength - 1; i++) Msg[i] = buffer.Take(msgLength - 1).ElementAt(i);
+                        Log.Warning("Total Size of Seg: " + (msgLength - 1).ToString() + " Received Full Seg Buffer: " + BitConverter.ToString(Msg));*/
+
+                        ////
                         if (input != 0)
                         {
                             Log.Warning($"Input failed with error={input} for buffer with length={msgLength - 1}");
