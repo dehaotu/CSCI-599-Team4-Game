@@ -11,10 +11,12 @@ public class MonsterStatus : NetworkBehaviour
     public int currHP = 100;
 
     [SyncVar]
-    public int autoHealPerFrame = 1;
+    public int healPointPerFrame = 1;
 
     [SyncVar]
     [SerializeField] private bool alive = true;
+
+    public int coins = 0;
 
     public HealthBar healthBar;
 
@@ -36,37 +38,38 @@ public class MonsterStatus : NetworkBehaviour
         return alive;
     }
 
-    public void CreateDamage(int damagePoint)
+    // Apply damage and get coins if the monster is dead.
+    public int ApplyDamage(int damagePoint)
     {
+        if (!alive)
+        {
+            Debug.LogWarning("ApplyDamange to a dead monster.");
+            return 0;
+        }
         currHP -= damagePoint;
         if (currHP <= 0)
         {
             alive = false;
+            return coins;
         }
+        return 0;
     }
 
-    public void CreateHeal(int healPoint)
+    // Apply heal by healPoint.
+    public void ApplyHeal(int healPoint)
     {
         if (alive)
         {
             currHP = Mathf.Min(currHP + healPoint, maxHP);
         }
+        else
+        {
+            Debug.LogWarning("ApplyHeal to a dead monster.");
+        }
     }
 
     public void AutoHeal()
     {
-        CreateHeal(autoHealPerFrame);
-    }
-
-    public int TakeDamage(int damage)
-    {
-        currHP -= damage;
-        if (currHP <= 0)
-        {
-            alive = false;
-            Debug.Log("ADD Moster Money!!");
-            return 5;
-        }
-        return 0;
+        ApplyHeal(healPointPerFrame);
     }
 }

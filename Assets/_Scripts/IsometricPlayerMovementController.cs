@@ -176,13 +176,13 @@ public class IsometricPlayerMovementController : NetworkBehaviour
     {
         if (isEnemyClose)
         {
-            int goldDrop = targetObject.GetComponent<EnemyController>().TakeDamage(heroStatus.BasicAttackPoints);
-            heroStatus.EarnCoin(goldDrop);
+            int coins = targetObject.GetComponent<EnemyController>().TakeDamage(heroStatus.BasicAttackPoints);
+            heroStatus.EarnCoin(coins);
         }
         else if (isMonsterClose)
         {
-            //Debug.Log("In attack");
-            targetObject.GetComponent<MonsterController>().TakeDamage(heroStatus.BasicAttackPoints);
+            int coins = targetObject.GetComponent<MonsterController>().ApplyDamage(heroStatus.BasicAttackPoints);
+            heroStatus.EarnCoin(coins);
         }
         else if (isTowerClose)
         {
