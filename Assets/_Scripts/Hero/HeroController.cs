@@ -176,7 +176,7 @@ public class HeroController : NetworkBehaviour
     {
         if (isEnemyClose)
         {
-            int coins = targetObject.GetComponent<MinionController>().TakeDamage(heroStatus.BasicAttackPoints);
+            int coins = targetObject.GetComponent<MinionController>().ApplyDamage(heroStatus.BasicAttackPoints);
             heroStatus.EarnCoin(coins);
         }
         else if (isMonsterClose)
