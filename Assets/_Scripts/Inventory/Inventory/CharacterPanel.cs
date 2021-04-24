@@ -28,7 +28,8 @@ public class CharacterPanel : Inventory
     public override void Start()
     {
         base.Start();
-        characterPropertyText = transform.Find("CharacterPropertyPanel/Text").GetComponent<Text>();
+        // characterPropertyText = transform.Find("CharacterPropertyPanel/Text").GetComponent<Text>();
+        characterPropertyText = GameObject.Find("CharacterPropertyPanel/Text").GetComponent<Text>();
         player = GameObject.FindWithTag("Player").GetComponent<HeroStatus>();
         UpdatePropertyText();//初始化显示角色属性值
         //Hide();
