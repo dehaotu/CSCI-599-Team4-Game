@@ -439,7 +439,7 @@ bool ReceiveNextReliable(out KcpHeader header, out ArraySegment<byte> message)
                         ////Dan Testing
                         byte[] truncatedMsg = new byte[4];
                         for (int i = 0; i < 4; i++) truncatedMsg[i] = buffer.Take(msgLength - 1).ElementAt(i+12);
-                        Log.Warning("Total Size of Seg: " + (msgLength - 1).ToString() + " Received Seg Buffer: " + BitConverter.ToString(truncatedMsg));
+                        //Log.Warning("Total Size of Seg: " + (msgLength - 1).ToString() + " Received Seg Buffer: " + BitConverter.ToString(truncatedMsg));
                         /*byte[] Msg = new byte[msgLength - 1];
                         for (int i = 0; i < msgLength - 1; i++) Msg[i] = buffer.Take(msgLength - 1).ElementAt(i);
                         Log.Warning("Total Size of Seg: " + (msgLength - 1).ToString() + " Received Full Seg Buffer: " + BitConverter.ToString(Msg));*/

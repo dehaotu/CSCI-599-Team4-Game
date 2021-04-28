@@ -1220,11 +1220,12 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   syncMode: 0
-  syncInterval: 1
+  syncInterval: 0.1
   clientAuthority: 1
   localPositionSensitivity: 0.01
   localRotationSensitivity: 0.01
   localScaleSensitivity: 0.01
+  deadReckoningMethod: 2
 --- !u!114 &955068360392453339
 MonoBehaviour:
   m_ObjectHideFlags: 0
