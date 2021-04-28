@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using Mirror;
 
-public class EndGame : NetworkBehaviour
+public class endGame : NetworkBehaviour
 {
     private Canvas endGameCanvas;
     private Canvas topCanvas;

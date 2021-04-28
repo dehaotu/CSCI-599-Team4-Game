@@ -128,10 +128,10 @@ public class HeroStatus : NetworkBehaviour
     {
         //按下B键控制背包的显示和隐藏
         //Bag
-        if (Input.GetKeyDown(KeyCode.B) && !ChatWindow.isEditingInputField)
-        {
-            Knapscak.Instance.DisplaySwitch();
-        }
+        // if (Input.GetKeyDown(KeyCode.B) && !ChatWindow.isEditingInputField)
+        // {
+        //     Knapscak.Instance.DisplaySwitch();
+        // }
         //按下V键控制角色面板的显示和隐藏
         //Character Panel
         if (Input.GetKeyDown(KeyCode.V) && !ChatWindow.isEditingInputField)

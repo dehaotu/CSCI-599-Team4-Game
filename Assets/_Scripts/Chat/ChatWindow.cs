@@ -26,7 +26,7 @@ public class ChatWindow : MonoBehaviour
         isEditingInputField = chatMessage.GetComponentInChildren<InputField>().isFocused;
         // Debug.Log(isEditingInputField);
         if (!isEditingInputField) {
-            if (Input.GetKeyDown(KeyCode.C)) 
+            if (Input.GetKeyDown(KeyCode.T)) 
             {
                 if(canvasGroup.alpha == 0.0f) {
                     canvasGroup.alpha = 1.0f;
@@ -68,7 +68,7 @@ public class ChatWindow : MonoBehaviour
 
     IEnumerator AppendAndScroll(string message)
     {
-        chatHistory.text += message + "\n";
+        chatHistory.text += " " + message + "\n";
 
         // it takes 2 frames for the UI to update ?!?!
         yield return null;
