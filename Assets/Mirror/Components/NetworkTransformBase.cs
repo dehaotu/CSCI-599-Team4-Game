@@ -52,8 +52,9 @@ namespace Mirror
             none,
             stayStill,
             quadradic,
+            quadradicWithSmooth,
             velocityBlending,
-            cubicSpline
+            
         }
         [Tooltip("Changes the dead reckoning methods")]
         public DeadReckoningMethod deadReckoningMethod = DeadReckoningMethod.none;
@@ -61,6 +62,17 @@ namespace Mirror
         private NavMeshAgent player;
         private float currSpeed;
         private float currAccerleration;
+
+        // used to store calculated points from cubic spline
+        const int numSteps = 10;
+        private Vector3[] nextExtrapolatedLocations = new Vector3[numSteps];
+        // used to store DR predicted next location
+        DataPoint next;
+        DataPoint beforeStart;
+        int lerpSteps = 5;
+        int currLerp = 0;
+        /* float lerpStep = 0.1f;
+         float currLerp = 0f;*/
 
         // target transform to sync. can be on a child.
         protected abstract Transform targetComponent { get; }
@@ -121,6 +133,7 @@ namespace Mirror
         {
             Vector3 delta = to.localPosition - (from != null ? from.localPosition : transform.localPosition);
             float elapsed = from != null ? to.timeStamp - from.timeStamp : sendInterval;
+
             // avoid NaN
             return elapsed > 0 ? delta.magnitude / elapsed : 0;
         }
@@ -429,16 +442,16 @@ namespace Mirror
                         // haven't received one, use dead reckoning
                         if (deadReckoningMethod == DeadReckoningMethod.quadradic)
                         {
-                            Debug.Log(Time.time * 1000 - lastPacketReceivedTime);
+                            //Debug.Log(Time.time * 1000 - lastPacketReceivedTime);
                             DRQuadradic();
                         }
                         else if (deadReckoningMethod == DeadReckoningMethod.velocityBlending)
                         {
                             ApplyPositionRotationScale(targetComponent.transform.localPosition, targetComponent.transform.localRotation, targetComponent.transform.localScale);
                         }
-                        else if (deadReckoningMethod == DeadReckoningMethod.cubicSpline)
+                        else if (deadReckoningMethod == DeadReckoningMethod.quadradicWithSmooth)
                         {
-                            ApplyPositionRotationScale(targetComponent.transform.localPosition, targetComponent.transform.localRotation, targetComponent.transform.localScale);
+                            DRQuadradic();
                         } else
                         {
                             // received one yet? (initialized?)
@@ -492,26 +505,30 @@ namespace Mirror
             }
         }
 
-        public void DRQuadradic()
+        public void DRQuadradic(bool withSmoothing=false)
         {
-            DataPoint next = new DataPoint
+            if (currLerp % lerpSteps == 0)
             {
-                localPosition = targetComponent.transform.localPosition,
-                localRotation = targetComponent.transform.localRotation,
-                localScale = targetComponent.transform.localScale
-            };
-            float interval = Time.deltaTime;
+                next = new DataPoint
+                {
+                    timeStamp = Time.time,
+                    localPosition = targetComponent.transform.localPosition,
+                    localRotation = targetComponent.transform.localRotation,
+                    localScale = targetComponent.transform.localScale
+                };
+            }
+            currLerp++;
+            float interval = Time.deltaTime/lerpSteps;
             if (goal != null)
             {
                 if (NeedsTeleport())
                 {
-                    // local position/rotation for VR support
                     ApplyPositionRotationScale(goal.localPosition, goal.localRotation, goal.localScale);
-
                     // reset data points so we don't keep interpolating
                     start = null;
                     goal = null;
-                } else
+                }
+                else
                 {
                     // velocity per second
                     Vector3 velocity = (goal.localPosition - start.localPosition) / ((Time.time * 1000 - lastPacketReceivedTime) / 1000);
@@ -521,6 +538,8 @@ namespace Mirror
                 }
             }
             ApplyPositionRotationScale(next.localPosition, next.localRotation, next.localScale);
+
+         
         }
 
         #region Server Teleport (force move player)
