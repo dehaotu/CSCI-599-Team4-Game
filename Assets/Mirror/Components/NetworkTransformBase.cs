@@ -18,6 +18,8 @@
 //
 using System;
 using UnityEngine;
+using UnityEngine.AI;
+using System.Collections;
 
 namespace Mirror
 {
@@ -45,6 +47,32 @@ namespace Mirror
         public float localRotationSensitivity = .01f;
         [Tooltip("Changes to the transform must exceed these values to be transmitted on the network.")]
         public float localScaleSensitivity = .01f;
+        public enum DeadReckoningMethod
+        {
+            none,
+            stayStill,
+            quadradic,
+            quadradicWithSmooth,
+            velocityBlending,
+            
+        }
+        [Tooltip("Changes the dead reckoning methods")]
+        public DeadReckoningMethod deadReckoningMethod = DeadReckoningMethod.none;
+        private float lastPacketReceivedTime; // in ms
+        private NavMeshAgent player;
+        private float currSpeed;
+        private float currAccerleration;
+
+        // used to store calculated points from cubic spline
+        const int numSteps = 10;
+        private Vector3[] nextExtrapolatedLocations = new Vector3[numSteps];
+        // used to store DR predicted next location
+        DataPoint next;
+        DataPoint beforeStart;
+        int lerpSteps = 5;
+        int currLerp = 0;
+        /* float lerpStep = 0.1f;
+         float currLerp = 0f;*/
 
         // target transform to sync. can be on a child.
         protected abstract Transform targetComponent { get; }
@@ -70,6 +98,12 @@ namespace Mirror
 
         // local authority send time
         float lastClientSendTime;
+
+        private void Start()
+        {
+            player = GetComponent<NavMeshAgent>();
+        }
+
 
         // serialization is needed by OnSerialize and by manual sending from authority
         // public only for tests
@@ -99,6 +133,7 @@ namespace Mirror
         {
             Vector3 delta = to.localPosition - (from != null ? from.localPosition : transform.localPosition);
             float elapsed = from != null ? to.timeStamp - from.timeStamp : sendInterval;
+
             // avoid NaN
             return elapsed > 0 ? delta.magnitude / elapsed : 0;
         }
@@ -174,7 +209,7 @@ namespace Mirror
 
                 // teleport / lag / obstacle detection: only continue at current
                 // position if we aren't too far away
-                //
+
                 // local position/rotation for VR support
                 if (Vector3.Distance(targetComponent.transform.localPosition, start.localPosition) < oldDistance + newDistance)
                 {
@@ -190,6 +225,7 @@ namespace Mirror
 
         public override void OnDeserialize(NetworkReader reader, bool initialState)
         {
+            lastPacketReceivedTime = Time.time * 1000;
             // deserialize
             DeserializeFromReader(reader);
         }
@@ -198,22 +234,50 @@ namespace Mirror
         [Command]
         void CmdClientToServerSync(ArraySegment<byte> payload)
         {
-            // Ignore messages from client if not in client authority mode
-            if (!clientAuthority)
-                return;
+            if (clientAuthority)
+            {
+                // deserialize payload
+                using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(payload))
+                    DeserializeFromReader(networkReader);
 
-            // deserialize payload
-            using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(payload))
-                DeserializeFromReader(networkReader);
+                // server-only mode does no interpolation to save computations,
+                // but let's set the position directly
+                if (isServer && !isClient)
+                    ApplyPositionRotationScale(goal.localPosition, goal.localRotation, goal.localScale);
 
-            // server-only mode does no interpolation to save computations,
-            // but let's set the position directly
-            if (isServer && !isClient)
-                ApplyPositionRotationScale(goal.localPosition, goal.localRotation, goal.localScale);
-
-            // set dirty so that OnSerialize broadcasts it
-            SetDirtyBit(1UL);
+                // set dirty so that OnSerialize broadcasts it
+                SetDirtyBit(1UL);
+            }
+            //StartCoroutine(CmdClientToServerSyncHelper(payload, 500f));
+            
         }
+
+        IEnumerator CmdClientToServerSyncHelper(ArraySegment<byte> payload, float delayMilliSecond)
+        {
+            yield return new WaitForSecondsRealtime(delayMilliSecond / 1000);
+            // Ignore messages from client if not in client authority mode
+            if (clientAuthority)
+            {
+                // deserialize payload
+                using (PooledNetworkReader networkReader = NetworkReaderPool.GetReader(payload))
+                    DeserializeFromReader(networkReader);
+
+                // server-only mode does no interpolation to save computations,
+                // but let's set the position directly
+                if (isServer && !isClient)
+                    ApplyPositionRotationScale(goal.localPosition, goal.localRotation, goal.localScale);
+
+                // set dirty so that OnSerialize broadcasts it
+                SetDirtyBit(1UL);
+            }
+
+            
+        }
+/*
+        IEnumerator MannualLatency(float delayMilliSecond)
+        {
+            yield return new WaitForSeconds(delayMilliSecond/1000);
+        }*/
 
         // where are we in the timeline between start and goal? [0,1]
         static float CurrentInterpolationFactor(DataPoint start, DataPoint goal)
@@ -238,21 +302,21 @@ namespace Mirror
                 // Option 1: simply interpolate based on time. but stutter
                 // will happen, it's not that smooth. especially noticeable if
                 // the camera automatically follows the player
-                //   float t = CurrentInterpolationFactor();
-                //   return Vector3.Lerp(start.position, goal.position, t);
+                float t = CurrentInterpolationFactor(start, goal);
+                return Vector3.Lerp(start.localPosition, goal.localPosition, t);
 
                 // Option 2: always += speed
                 // -> speed is 0 if we just started after idle, so always use max
                 //    for best results
-                float speed = Mathf.Max(start.movementSpeed, goal.movementSpeed);
-                return Vector3.MoveTowards(currentPosition, goal.localPosition, speed * Time.deltaTime);
+                /*float speed = Mathf.Max(start.movementSpeed, goal.movementSpeed);
+                return Vector3.MoveTowards(currentPosition, goal.localPosition, speed * Time.deltaTime);*/
             }
             return currentPosition;
         }
 
         static Quaternion InterpolateRotation(DataPoint start, DataPoint goal, Quaternion defaultRotation)
         {
-            if (start != null)
+            if (start != null)  
             {
                 float t = CurrentInterpolationFactor(start, goal);
                 return Quaternion.Slerp(start.localRotation, goal.localRotation, t);
@@ -331,6 +395,11 @@ namespace Mirror
             // no 'else if' since host mode would be both
             if (isClient)
             {
+                if (player != null)
+                {
+                    currSpeed = player.speed;
+                    currAccerleration = player.acceleration;
+                }
                 // send to server if we have local authority (and aren't the server)
                 // -> only if connectionToServer has been initialized yet too
                 if (!isServer && IsClientWithAuthority)
@@ -338,7 +407,7 @@ namespace Mirror
                     // check only each 'syncInterval'
                     if (Time.time - lastClientSendTime >= syncInterval)
                     {
-                        if (HasEitherMovedRotatedScaled())
+                        /*if (HasEitherMovedRotatedScaled())
                         {
                             // serialize
                             // local position/rotation for VR support
@@ -349,7 +418,15 @@ namespace Mirror
                                 // send to server
                                 CmdClientToServerSync(writer.ToArraySegment());
                             }
+                        }*/
+                        using (PooledNetworkWriter writer = NetworkWriterPool.GetWriter())
+                        {
+                            SerializeIntoWriter(writer, targetComponent.transform.localPosition, targetComponent.transform.localRotation, targetComponent.transform.localScale);
+
+                            // send to server
+                            CmdClientToServerSync(writer.ToArraySegment());
                         }
+
                         lastClientSendTime = Time.time;
                     }
                 }
@@ -359,29 +436,110 @@ namespace Mirror
                 // himself or another object that he was assigned authority over
                 if (!IsClientWithAuthority)
                 {
-                    // received one yet? (initialized?)
-                    if (goal != null)
+                    double rtt = NetworkTime.rtt * 1000; //rtt in ms
+                    if (Time.time * 1000 - lastPacketReceivedTime > rtt && player != null)
                     {
-                        // teleport or interpolate
-                        if (NeedsTeleport())
+                        // haven't received one, use dead reckoning
+                        if (deadReckoningMethod == DeadReckoningMethod.quadradic)
                         {
-                            // local position/rotation for VR support
-                            ApplyPositionRotationScale(goal.localPosition, goal.localRotation, goal.localScale);
-
-                            // reset data points so we don't keep interpolating
-                            start = null;
-                            goal = null;
+                            //Debug.Log(Time.time * 1000 - lastPacketReceivedTime);
+                            DRQuadradic();
                         }
-                        else
+                        else if (deadReckoningMethod == DeadReckoningMethod.velocityBlending)
                         {
-                            // local position/rotation for VR support
-                            ApplyPositionRotationScale(InterpolatePosition(start, goal, targetComponent.transform.localPosition),
-                                                       InterpolateRotation(start, goal, targetComponent.transform.localRotation),
-                                                       InterpolateScale(start, goal, targetComponent.transform.localScale));
+                            ApplyPositionRotationScale(targetComponent.transform.localPosition, targetComponent.transform.localRotation, targetComponent.transform.localScale);
+                        }
+                        else if (deadReckoningMethod == DeadReckoningMethod.quadradicWithSmooth)
+                        {
+                            DRQuadradic();
+                        } else
+                        {
+                            // received one yet? (initialized?)
+                            if (goal != null)
+                            {
+                                // teleport or interpolate
+                                if (NeedsTeleport())
+                                {
+                                    // local position/rotation for VR support
+                                    ApplyPositionRotationScale(goal.localPosition, goal.localRotation, goal.localScale);
+
+                                    // reset data points so we don't keep interpolating
+                                    start = null;
+                                    goal = null;
+                                }
+                                else
+                                {
+                                    // local position/rotation for VR support
+                                    ApplyPositionRotationScale(InterpolatePosition(start, goal, targetComponent.transform.localPosition),
+                                                               InterpolateRotation(start, goal, targetComponent.transform.localRotation),
+                                                               InterpolateScale(start, goal, targetComponent.transform.localScale));
+                                }
+                            }
+                        }
+                    }
+                    else
+                    {
+                        // received one yet? (initialized?)
+                        if (goal != null)
+                        {
+                            // teleport or interpolate
+                            if (NeedsTeleport())
+                            {
+                                // local position/rotation for VR support
+                                ApplyPositionRotationScale(goal.localPosition, goal.localRotation, goal.localScale);
+
+                                // reset data points so we don't keep interpolating
+                                start = null;
+                                goal = null;
+                            }
+                            else
+                            {
+                                // local position/rotation for VR support
+                                ApplyPositionRotationScale(InterpolatePosition(start, goal, targetComponent.transform.localPosition),
+                                                           InterpolateRotation(start, goal, targetComponent.transform.localRotation),
+                                                           InterpolateScale(start, goal, targetComponent.transform.localScale));
+                            }
                         }
                     }
                 }
             }
+        }
+
+        public void DRQuadradic(bool withSmoothing=false)
+        {
+            if (currLerp % lerpSteps == 0)
+            {
+                next = new DataPoint
+                {
+                    timeStamp = Time.time,
+                    localPosition = targetComponent.transform.localPosition,
+                    localRotation = targetComponent.transform.localRotation,
+                    localScale = targetComponent.transform.localScale
+                };
+            }
+            currLerp++;
+            float interval = Time.deltaTime/lerpSteps;
+            if (goal != null)
+            {
+                if (NeedsTeleport())
+                {
+                    ApplyPositionRotationScale(goal.localPosition, goal.localRotation, goal.localScale);
+                    // reset data points so we don't keep interpolating
+                    start = null;
+                    goal = null;
+                }
+                else
+                {
+                    // velocity per second
+                    Vector3 velocity = (goal.localPosition - start.localPosition) / ((Time.time * 1000 - lastPacketReceivedTime) / 1000);
+                    Vector3 accerlation = new Vector3(currAccerleration, currAccerleration, 0);
+                    Vector3 offset = velocity * interval + 1 / 2 * accerlation;
+                    next.localPosition = next.localPosition + offset;
+                }
+            }
+            ApplyPositionRotationScale(next.localPosition, next.localRotation, next.localScale);
+
+         
         }
 
         #region Server Teleport (force move player)
@@ -497,7 +655,7 @@ namespace Mirror
         {
             // draw start and goal points
             if (start != null) DrawDataPointGizmo(start, Color.gray);
-            if (goal != null) DrawDataPointGizmo(goal, Color.white);
+            if (goal != null) DrawDataPointGizmo(goal, Color.blue);
 
             // draw line between them
             if (start != null && goal != null) DrawLineBetweenDataPoints(start, goal, Color.cyan);

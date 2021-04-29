@@ -2,6 +2,8 @@
 // Kept as close to original as possible.
 using System;
 using System.Collections.Generic;
+using System.IO;
+using UnityEngine;
 
 namespace kcp2k
 {
@@ -86,6 +88,9 @@ namespace kcp2k
 
         // get how many packet is waiting to be sent
         public int WaitSnd => snd_buf.Count + snd_queue.Count;
+
+        //Dan: Metrics
+        StreamWriter _fileStreamWriter = File.CreateText(Application.absoluteURL + "TeamForce_Metrics_Package_Loss_" + DateTime.Now.ToString().Replace("/", "-").Replace(" ", "_").Replace(":", "-") + "_" + ".csv");
 
         // ikcp_create
         // create a new kcp control object, 'conv' must equal in two endpoint
@@ -799,6 +804,13 @@ namespace kcp2k
                     }
                     segment.resendts = current + (uint)segment.rto;
                     lost = true;
+                    Log.Warning("Package Lost");
+                    //Dan: Metrics
+                    float timeInSeconds = Time.timeSinceLevelLoad;
+                    float secondsDisplay = Mathf.Floor((timeInSeconds % 60));
+                    float minutesDisplay = Mathf.Floor((timeInSeconds / 60));
+                    string dataLine = "Packet Size" + "," + "," + minutesDisplay.ToString() + ":" + secondsDisplay.ToString() + "," + "Package Lost" + Environment.NewLine;
+                    _fileStreamWriter.Write(dataLine.ToString());
                 }
                 // fast retransmit
                 else if (segment.fastack >= resent)
