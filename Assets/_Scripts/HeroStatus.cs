@@ -50,7 +50,7 @@ public class HeroStatus : NetworkBehaviour
     
     private Text coinText;  //Get gold amount from Coin GameObject
     [SyncVar]
-    private int coins;
+    public int coins;
     private int coinAmount = 1000;  //Gold owned by the player, can be used to purchase items
     public int CoinAmount
     {
@@ -268,7 +268,7 @@ public class HeroStatus : NetworkBehaviour
         }
     }
 
-    //消费金币
+    //消费金币 TODO: command
     //Use Coins
     public bool ConsumeCoin(int amount)
     {
@@ -299,7 +299,7 @@ public class HeroStatus : NetworkBehaviour
         ConsumeCoinHelper(amount);
     }
 */
-    //赚取金币
+    //赚取金币 TODO: command
     //Earn Coins
     public void EarnCoin(int amount)
     {
