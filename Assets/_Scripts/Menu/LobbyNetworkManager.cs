@@ -1070,5 +1070,35 @@ public class LobbyNetworkManager : MonoBehaviour
             }
         }
     }
+
+    public enum SignUpErrorCode { None, AccountAlreadyExist, Timeout};
+
+    // Connect to sign up server to register account and password
+    public async void signUpAsync(string account, string password, string playerName, Action<SignUpErrorCode> callback)
+    {
+        const string url = "https://csci599teamforcesignup.azurewebsites.net/api/HttpTrigger1?code=HNzSs88aR8avrizNFfRA1HIzP9qDO51mjAKeZmMCFKBW/7XeHWIgYg==";
+        HttpClient client = new HttpClient();
+        client.Timeout = TimeSpan.FromMilliseconds(10000);
+        HttpRequestMessage req = new HttpRequestMessage(HttpMethod.Post, url + "&accountId=" + account + "&password=" + password + "&playerName=" + playerName);
+
+        HttpResponseMessage response;
+        try
+        {
+            response = await client.SendAsync(req);
+            string msg = await response.Content.ReadAsStringAsync();
+            if (msg.Equals("Account already exist!"))
+            {
+                callback.Invoke(SignUpErrorCode.AccountAlreadyExist);
+                return;
+            }
+        }
+        catch (TaskCanceledException e)
+        {
+            callback.Invoke(SignUpErrorCode.Timeout);
+            return;
+        }
+
+        callback.Invoke(SignUpErrorCode.Timeout);
+    }
 #endregion
 }
