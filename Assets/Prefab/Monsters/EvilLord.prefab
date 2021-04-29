@@ -271,7 +271,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   movementSpeed: 1
-  attackDamage: 5
+  attackDamage: 10
   monsterBaseCollider: {fileID: 0}
 --- !u!114 &8207291274246736843
 MonoBehaviour:
@@ -287,8 +287,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  maxHP: 150
-  currHP: 150
+  maxHP: 1000
+  currHP: 1000
   autoHealPerFrame: 1
   alive: 1
   coins: 1000
