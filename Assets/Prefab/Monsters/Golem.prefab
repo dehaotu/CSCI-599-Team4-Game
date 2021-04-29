@@ -293,6 +293,7 @@ MonoBehaviour:
   currHP: 50
   autoHealPerFrame: 1
   alive: 1
+  coins: 100
   healthBar: {fileID: 931492558059662320}
 --- !u!114 &-5487003430000364066
 MonoBehaviour:

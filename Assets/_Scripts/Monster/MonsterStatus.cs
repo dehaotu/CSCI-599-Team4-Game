@@ -16,6 +16,8 @@ public class MonsterStatus : NetworkBehaviour
     [SyncVar]
     [SerializeField] private bool alive = true;
 
+    public int coins = 0;
+
     public HealthBar healthBar;
 
     void Start()
@@ -64,7 +66,7 @@ public class MonsterStatus : NetworkBehaviour
         if (currHP <= 0)
         {
             alive = false;
-            return 5;
+            return coins;
         }
         return 0;
     }

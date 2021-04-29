@@ -80,7 +80,7 @@ public class endGame : NetworkBehaviour
     private void WinGame()
     {
         isGameOver = true;
-        endGameText.text = "VACTORY";
+        endGameText.text = "VICTORY";
     }
 
     private void LoseGame()

@@ -291,6 +291,7 @@ MonoBehaviour:
   currHP: 150
   autoHealPerFrame: 1
   alive: 1
+  coins: 1000
   healthBar: {fileID: 7792442864393766834}
 --- !u!114 &-5487003430000364066
 MonoBehaviour:
@@ -342,6 +343,7 @@ MonoBehaviour:
   localPositionSensitivity: 0.01
   localRotationSensitivity: 0.01
   localScaleSensitivity: 0.01
+  deadReckoningMethod: 0
 --- !u!210 &811935966815597568
 SortingGroup:
   m_ObjectHideFlags: 0

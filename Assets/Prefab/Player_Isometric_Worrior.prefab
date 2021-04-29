@@ -1161,6 +1161,7 @@ MonoBehaviour:
   healthBar: {fileID: 4889866394101842248}
   basicAttackPoints: 10
   basicDefensePoints: 10
+  coinAmount: 100
 --- !u!195 &955068360432007271
 NavMeshAgent:
   m_ObjectHideFlags: 0
@@ -1201,7 +1202,7 @@ MonoBehaviour:
   localPositionSensitivity: 0.01
   localRotationSensitivity: 0.01
   localScaleSensitivity: 0.01
-  deadReckoningMethod: 2
+  deadReckoningMethod: 0
 --- !u!114 &955068360392453339
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1489,11 +1490,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_SizeDelta.y
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5306991629391667584, guid: 210fd878e98a60e4f94d2b5e50528613,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6444144295367655658, guid: 210fd878e98a60e4f94d2b5e50528613,
         type: 3}
@@ -2294,11 +2290,6 @@ PrefabInstance:
         type: 3}
       propertyPath: m_AnchoredPosition.y
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8580561436358705482, guid: 210fd878e98a60e4f94d2b5e50528613,
-        type: 3}
-      propertyPath: m_IsActive
-      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 210fd878e98a60e4f94d2b5e50528613, type: 3}

@@ -262,7 +262,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   movementSpeed: 1
-  attackDamage: 50
+  attackDamage: 25
   monsterBaseCollider: {fileID: 0}
 --- !u!114 &8207291274246736843
 MonoBehaviour:
@@ -282,6 +282,7 @@ MonoBehaviour:
   currHP: 200
   autoHealPerFrame: 1
   alive: 1
+  coins: 100
   healthBar: {fileID: 7792442864393766834}
 --- !u!114 &-5487003430000364066
 MonoBehaviour:
@@ -333,6 +334,7 @@ MonoBehaviour:
   localPositionSensitivity: 0.01
   localRotationSensitivity: 0.01
   localScaleSensitivity: 0.01
+  deadReckoningMethod: 0
 --- !u!1001 &1140957942908232845
 PrefabInstance:
   m_ObjectHideFlags: 0
