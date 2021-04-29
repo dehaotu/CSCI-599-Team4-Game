@@ -23,14 +23,18 @@ public class CharacterPanel : Inventory
     private Text characterPropertyText;//对角色属性面板中Text组件的引用
     private HeroStatus player;//对角色脚本的引用
     private Text boardText;
-    private int attackPoints = 0, defensePoints = 0;
 
     public override void Start()
     {
         base.Start();
         // characterPropertyText = transform.Find("CharacterPropertyPanel/Text").GetComponent<Text>();
         characterPropertyText = GameObject.Find("CharacterPropertyPanel/Text").GetComponent<Text>();
-        player = GameObject.FindWithTag("Player").GetComponent<HeroStatus>();
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        foreach (GameObject currPlayer in players) {
+            if (currPlayer.GetComponent<HeroStatus>().isLocalPlayer) {
+                player = currPlayer.GetComponent<HeroStatus>();
+            }
+        }
         UpdatePropertyText();//初始化显示角色属性值
         //Hide();
     }
@@ -38,8 +42,8 @@ public class CharacterPanel : Inventory
     //更新角色属性显示
     private void UpdatePropertyText() 
     {
-        attackPoints = 0;
-        defensePoints = 0;
+        int currAttackPoints = 0;
+        int currDefensePoints = 0;
         foreach (EquipmentSlot slot in slotArray)//遍历角色面板中的装备物品槽
         {
             if (slot.transform.childCount > 0)//找到有物品的物品槽，获取里面装备的属性值
@@ -48,24 +52,24 @@ public class CharacterPanel : Inventory
                 if (item is Equipment)//如果物品是装备，那就加角色对应的属性
                 {
                     Equipment e = (Equipment)item;
-                    defensePoints += e.DefensePoints;
+                    currDefensePoints += e.DefensePoints;
                 }
                 else if (item is Weapon)///如果物品是武器，那就加角色的伤害属性
                 {
                     Weapon w = (Weapon)item;
-                    attackPoints += w.AttackPoints;
+                    currAttackPoints += w.AttackPoints;
                 }
             }
         }
-        attackPoints += player.OriginalAP;
-        defensePoints += player.OriginalDP;
+        currAttackPoints += player.OriginalAP;
+        currDefensePoints += player.OriginalDP;
         //if (!GetComponentInParent<HeroStatus>().thisIsSever() && GetComponentInParent<HeroStatus>().thisIsLocalPlayer()) CmdUpdateSB();
-        string text = string.Format("Attack：{0}\nDefense：{1}", attackPoints, defensePoints);
+        string text = string.Format("Attack：{0}\nDefense：{1}", currAttackPoints, currDefensePoints);
         characterPropertyText.text = text;
 
         // Update player attackpoints/defensepoints
-        player.BasicAttackPoints = attackPoints;
-        player.BasicDefensePoints = defensePoints;
+        player.CmdSetAttack(currAttackPoints);
+        player.CmdSetDefense(currDefensePoints);
     }
 
     //TODO:更新状态栏
