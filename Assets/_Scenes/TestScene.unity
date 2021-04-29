@@ -755,7 +755,8 @@ PrefabInstance:
       propertyPath: m_Name
       value: EvilLordBase
       objectReference: {fileID: 0}
-    m_RemovedComponents: []
+    m_RemovedComponents:
+    - {fileID: 4280523962037356593, guid: c89ca556217a8432ba512818b0e06c66, type: 3}
   m_SourcePrefab: {fileID: 100100000, guid: c89ca556217a8432ba512818b0e06c66, type: 3}
 --- !u!1001 &339394990
 PrefabInstance:
