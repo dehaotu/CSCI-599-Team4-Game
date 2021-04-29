@@ -50,8 +50,7 @@ public class HeroStatus : NetworkBehaviour
     
     private Text coinText;  //Get gold amount from Coin GameObject
     [SyncVar]
-    public int coins;
-    private int coinAmount = 1000;  //Gold owned by the player, can be used to purchase items
+    public int coinAmount = 100;  //Gold owned by the player, can be used to purchase items
     public int CoinAmount
     {
         get { return coinAmount; }
@@ -71,30 +70,6 @@ public class HeroStatus : NetworkBehaviour
         if (message.Trim() != "")
             RpcReceive(message.Trim());
     }
-
-    //public void RpcEarnMoney(int amount)
-    //{
-    //    coins += amount;
-    //}
-
-    public void EarnMoney(int amount)
-    {
-        //if (isServer)
-        //{
-        //    RpcEarnMoney(amount);
-        //}
-        //if (isLocalPlayer)
-        //{
-        //    CmdEarnMoney(amount);
-        //}
-        coins += amount;
-    }
-
-    //[Command]
-    //public void CmdEarnMoney(int amount)
-    //{
-    //    coins += amount;
-    //}
 
     [ClientRpc]
     public void RpcReceive(string message)
@@ -204,7 +179,7 @@ public class HeroStatus : NetworkBehaviour
     {
         GameObject[] sapwnPoints = GameObject.FindGameObjectsWithTag("PlayerSpawns");
         GameObject chosenSpawn = sapwnPoints[UnityEngine.Random.Range(0, sapwnPoints.Length)];
-        
+
         transform.position = chosenSpawn.transform.position;
         agent.enabled = true;
         alive = true;
@@ -288,9 +263,6 @@ public class HeroStatus : NetworkBehaviour
         coinAmount -= amount;
         coinText = transform.Find("Inventory Menu/Coin").GetComponentInChildren<Text>();
         coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
-        coins = coinAmount;
-
-        
     }
 
   /*  [Command]
@@ -306,7 +278,6 @@ public class HeroStatus : NetworkBehaviour
         this.coinAmount += amount;
         coinText = transform.Find("Inventory Menu/Coin").GetComponentInChildren<Text>();
         //CmdEarnMoney(amount);
-        coins = coinAmount;
         RpcUpdateCoinAmout(coinAmount);
         //coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
         Debug.Log("这个是：" + coinAmount) ;
