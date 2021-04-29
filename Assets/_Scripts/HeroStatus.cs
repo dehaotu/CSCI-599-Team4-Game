@@ -23,7 +23,7 @@ public class HeroStatus : NetworkBehaviour
     public int currentHealth;
     [SerializeField]
     [SyncVar]
-    private bool alive = true;
+    public bool alive = true;
     [SyncVar]
     [SerializeField]
     private float respawnCountDown;
