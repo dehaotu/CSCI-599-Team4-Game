@@ -24,7 +24,12 @@ public class Vendor : Inventory
     {
         base.Start();
         InitShop();
-        player = GameObject.FindWithTag("Player").GetComponent<HeroStatus>();
+        GameObject[] players = GameObject.FindGameObjectsWithTag("Player");
+        foreach (GameObject currPlayer in players) {
+            if (currPlayer.GetComponent<HeroStatus>().isLocalPlayer) {
+                player = currPlayer.GetComponent<HeroStatus>();
+            }
+        }
         Hide();
     }
 

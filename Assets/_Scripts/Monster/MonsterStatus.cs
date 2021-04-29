@@ -64,7 +64,6 @@ public class MonsterStatus : NetworkBehaviour
         if (currHP <= 0)
         {
             alive = false;
-            Debug.Log("ADD Moster Money!!");
             return 5;
         }
         return 0;
