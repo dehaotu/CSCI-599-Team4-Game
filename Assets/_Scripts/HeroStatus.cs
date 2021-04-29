@@ -194,7 +194,7 @@ public class HeroStatus : NetworkBehaviour
     public void SetAttack(int value)
     {
         if (isServer) basicAttackPoints = value;
-        else CmdSetAttack(value);
+        else if (isLocalPlayer) CmdSetAttack(value);
     }
 
     [Command]
@@ -206,7 +206,7 @@ public class HeroStatus : NetworkBehaviour
     public void SetDefense(int value)
     {
         if (isServer) basicDefensePoints = value;
-        else CmdSetDefense(value);
+        else if (isLocalPlayer) CmdSetDefense(value);
     }
 
     [Command]
