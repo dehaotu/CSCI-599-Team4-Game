@@ -20,7 +20,7 @@ public class endGame : NetworkBehaviour
 
     private void Start()
     {
-        endGameCountdown = 100.0f;
+        endGameCountdown = 300.0f;
         isGameOver = false;
 
         endGameCanvas = GameObject.Find("EndGameCanvas").GetComponent<Canvas>();
