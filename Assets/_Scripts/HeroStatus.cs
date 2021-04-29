@@ -223,7 +223,7 @@ public class HeroStatus : NetworkBehaviour
     }
 
     [Command]
-    void CmdSetAttack(int value)
+    public void CmdSetAttack(int value)
     {
         SetAttack(value);
     }
@@ -235,7 +235,7 @@ public class HeroStatus : NetworkBehaviour
     }
 
     [Command]
-    void CmdSetDefense(int value)
+    public void CmdSetDefense(int value)
     {
         SetDefense(value);
     }
