@@ -68,16 +68,6 @@ public class CharacterPanel : Inventory
         player.BasicDefensePoints = defensePoints;
     }
 
-    //TODO:更新状态栏
-    private void UpdateSB()
-    {
-    }
-
-/*    private void RpcUpdateSB()
-    {
-        characterPropertyText.text = GetComponentInParent<NetworkIdentity>().netId.ToString();
-        Debug.Log(GetComponent<NetworkIdentity>().netId.ToString());
-    }*/
 
 
     //直接穿戴功能（不需拖拽）
