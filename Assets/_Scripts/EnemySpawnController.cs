@@ -7,8 +7,10 @@ using Mirror;
 
 public class EnemySpawnController : NetworkBehaviour
 {
-    public float waitingTime = 5f;
+    private float waitingTime = 60f;     // wave intervals changed from 5s to 60s
+    private int numOfMinions = 2;    // number of minions per wave changed from 3 to 2
     public Vector2 targetPosition;
+    // public Transform targetPosition;
     public GameObject minionPrefab;
     public bool isEnemySide = true;
     private float timer = 0f;
@@ -23,20 +25,29 @@ public class EnemySpawnController : NetworkBehaviour
     void Update()
     {
         // Create Minion and Set the tag (PlayerMinion, EnemyMinion)
-        timer += Time.deltaTime;
-        if (timer > waitingTime)
+        // timer += Time.deltaTime;
+        // if (timer > waitingTime)
+        // {
+        //     timer = 0f;
+        if (timer <= 0.0f)
         {
-            GameObject minion = Instantiate(minionPrefab, transform.position, Quaternion.identity) as GameObject;
-            var minionController = minion.GetComponent<EnemyController>();
-            minionController.targetPosition = targetPosition;
-            minionController.gameObject.tag = (isEnemySide) ? "EnemyMinion" : "PlayerMinion";
-            minion.GetComponentInChildren<Text>().text = (isEnemySide) ? "Enemy Minion" : "Player Minion";
-            timer = 0f;
-            // only spawn if it's server
+            timer = waitingTime;
+
             if (isServer)
             {
-                NetworkServer.Spawn(minion);
+                for (int i = 0; i < numOfMinions; i++)
+                {
+                    GameObject minion = Instantiate(minionPrefab, transform.position, Quaternion.identity) as GameObject;
+                    var minionController = minion.GetComponent<EnemyController>();
+                    minionController.targetPosition = targetPosition;
+                    minionController.gameObject.tag = (isEnemySide) ? "EnemyMinion" : "PlayerMinion";
+                    minion.GetComponentInChildren<Text>().text = (isEnemySide) ? "Enemy Minion" : "Player Minion";
+                    NetworkServer.Spawn(minion);
+                }
             }
         }
+
+        timer -= Time.deltaTime;
+
     }
 }

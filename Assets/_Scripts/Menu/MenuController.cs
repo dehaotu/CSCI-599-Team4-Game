@@ -1,12 +1,9 @@
 ﻿using System;
-using System.Collections;
 using System.Collections.Generic;
-using System.Net;
 using UnityEngine;
-using UnityEngine.SceneManagement;
-using UnityEngine.Assertions;
 using UnityEngine.UI;
-using Mirror;
+using MongoDB.Driver;
+using MongoDB.Bson;
 
 /*
 A support class for helper MenuController to show animation effect in menu.
@@ -65,11 +62,16 @@ public class MenuController : MonoBehaviour
     public GameObject mainMenuPanel;
     public GameObject playerListPanel;
     public RoomListPanel roomListPanel;
-    public GameObject nameInputField;
+    public GameObject accountInputField;
+    public GameObject passwordInputField;
     public GameObject serverDisconnectPanel;
     public GameObject connectingLobbyPanel;
     public GameObject joiningRoomPanel;
     public GameObject lobbyErrorPanel;
+    public GameObject loginErrorPanel;
+    public GameObject debugLoginPanel;
+    public GameObject signUpPanel;
+    public GameObject debugLoginInputField;
     public GameConfiguration gameConfiguration;
     public LobbyNetworkManager lobbyNetworkManager;
     public PlayerInfoRow playerInfoRowPrefab;
@@ -141,12 +143,12 @@ public class MenuController : MonoBehaviour
         }
     }
 
-    private void onReceiveJoinRoomResponse(Lobby.ErrorType errorCode)
+    private void onReceiveJoinRoomResponse(Lobby.RoomErrorType errorCode)
     {
         if (state != MenuState.JoiningRoom)
             return;
 
-        if (errorCode == Lobby.ErrorType.None)
+        if (errorCode == Lobby.RoomErrorType.None)
         {
             _setAllPlanelInactive();
             roomPanel.SetActive(true);
@@ -158,16 +160,16 @@ public class MenuController : MonoBehaviour
             string message = "";
             switch (errorCode)
             {
-                case Lobby.ErrorType.InternalError:
+                case Lobby.RoomErrorType.InternalError:
                     message = "Lobby server internal error.";
                     break;
-                case Lobby.ErrorType.LobbyTimeout:
+                case Lobby.RoomErrorType.LobbyTimeout:
                     message = "Connection time out.";
                     break;
-                case Lobby.ErrorType.RoomFull:
+                case Lobby.RoomErrorType.RoomFull:
                     message = "The room is full.";
                     break;
-                case Lobby.ErrorType.RoomNotExist:
+                case Lobby.RoomErrorType.RoomNotExist:
                     message = "The room no loner exist.";
                     break;
             }
@@ -183,18 +185,87 @@ public class MenuController : MonoBehaviour
 /************************************************************************************************
                                              LoginPanel                                             
 ************************************************************************************************/
+    class Test_Model
+    {
+        public ObjectId _id { set; get; }
+        public string account { set; get; }
+        public string pw { set; get; }
+        public string playerName { set; get; }
+    }
+
     public void onClick_LoginPanel_Confirm()
     {
+        /*
         InputField inputField = nameInputField.GetComponent<InputField>();
         gameConfiguration.MyName = inputField.text;
         Debug.Log("Debug: set name to " + gameConfiguration.MyName);
         loginPanel.SetActive(false);
         mainMenuPanel.SetActive(true);
         state = MenuState.MainMenu;
+        */
+
+        InputField accountField = accountInputField.GetComponent<InputField>();
+        string account = accountField.text;
+        InputField passwordField = passwordInputField.GetComponent<InputField>();
+        string password = passwordField.text;
+
+        if (account == "" || password == "")
+            return;
+
+        Action<LobbyNetworkManager.LoginErrorCode> callbackFunc = (errorCode) =>
+        {
+            if (errorCode == LobbyNetworkManager.LoginErrorCode.WrongPassword)
+            {
+                GameObject loginErrorTextObj = loginErrorPanel.transform.Find("Text").gameObject;
+                Text errorText = loginErrorTextObj.GetComponent<Text>();
+                errorText.text = "Incorrect password!";
+                _setAllPlanelInactive();
+                loginErrorPanel.SetActive(true);
+            }
+            else if (errorCode == LobbyNetworkManager.LoginErrorCode.Timeout)
+            {
+                GameObject loginErrorTextObj = loginErrorPanel.transform.Find("Text").gameObject;
+                Text errorText = loginErrorTextObj.GetComponent<Text>();
+                errorText.text = "Connection timeout.";
+                _setAllPlanelInactive();
+                loginErrorPanel.SetActive(true);
+            }
+            else if (errorCode == LobbyNetworkManager.LoginErrorCode.AccountNotFound)
+            {
+                GameObject loginErrorTextObj = loginErrorPanel.transform.Find("Text").gameObject;
+                Text errorText = loginErrorTextObj.GetComponent<Text>();
+                errorText.text = "Account not found!";
+                _setAllPlanelInactive();
+                loginErrorPanel.SetActive(true);
+            }
+            else
+            {
+                _setAllPlanelInactive();
+                loginPanel.SetActive(false);
+                mainMenuPanel.SetActive(true);
+                state = MenuState.MainMenu;
+            }
+        };
+
+        lobbyNetworkManager.authenticateAsync(account, password, callbackFunc);
+        _setAllPlanelInactive();
+        connectingLobbyPanel.SetActive(true);
     }
-/************************************************************************************************
-                                             MainMenuPanel                                             
-************************************************************************************************/
+
+    public void onClick_LoginPanel_DebugLogin()
+    {
+        _setAllPlanelInactive();
+        debugLoginPanel.SetActive(true);
+    }
+
+    public void onClick_LoginPanel_SignUpButton()
+    {
+        _setAllPlanelInactive();
+        signUpPanel.SetActive(true);
+    }
+    /************************************************************************************************
+                                                 MainMenuPanel                                             
+    ************************************************************************************************/
     public void onClickStartButton()
     {
         _setAllPlanelInactive();
@@ -282,6 +353,93 @@ public class MenuController : MonoBehaviour
         lobbyPanel.SetActive(true);
         state = MenuState.Lobby;
     }
+
+/************************************************************************************************
+                                             LobbyErrorPanel                                            
+************************************************************************************************/
+    public void onClick_LoginErrorPanel_Confirm()
+    {
+        _setAllPlanelInactive();
+        loginPanel.SetActive(true);
+        state = MenuState.Login;
+    }
+/************************************************************************************************
+                                             DebugLoginPanel                                            
+************************************************************************************************/
+    public void onClick_DebugLoginPanel_Confirm()
+    {
+        InputField inputField = debugLoginInputField.GetComponent<InputField>();
+        gameConfiguration.MyName = inputField.text;
+        Debug.Log("Debug: set name to " + gameConfiguration.MyName);
+        gameConfiguration.SessionKey = "sessionKey";
+        Debug.Log("Debug: set sessionkey=\'" + gameConfiguration.SessionKey + "\'");
+        _setAllPlanelInactive();
+        loginPanel.SetActive(false);
+        mainMenuPanel.SetActive(true);
+        state = MenuState.MainMenu;
+    }
+/************************************************************************************************
+                                             SignUpPanel                                            
+************************************************************************************************/
+    public void onClick_SignUpPanel_BackButton()
+    {
+        _setAllPlanelInactive();
+        GameObject accountFieldObj = signUpPanel.transform.Find("SignUpAccountInputField").gameObject;
+        if (accountFieldObj != null)
+        {
+            InputField accountField = accountFieldObj.GetComponent<InputField>();
+            if (accountField != null)
+                accountField.text = "";
+        }
+        GameObject passwordFieldObj = signUpPanel.transform.Find("SignUpPasswordInputField").gameObject;
+        if (passwordFieldObj != null)
+        {
+            InputField passwordField = passwordFieldObj.GetComponent<InputField>();
+            if (passwordFieldObj != null)
+                passwordField.text = "";
+        }
+        loginPanel.SetActive(true);
+    }
+
+    public void onClick_SignUpPanel_ConfirmButton()
+    {
+        GameObject accountFieldObj = signUpPanel.transform.Find("SignUpAccountInputField").gameObject;
+        Debug.Assert(accountFieldObj != null);
+        InputField accountField = accountFieldObj.GetComponent<InputField>();
+        Debug.Assert(accountField != null);
+
+        GameObject passwordFieldObj = signUpPanel.transform.Find("SignUpPasswordInputField").gameObject;
+        Debug.Assert(passwordFieldObj != null);
+        InputField passwordField = passwordFieldObj.GetComponent<InputField>();
+        Debug.Assert(passwordField != null);
+
+        GameObject playerNameFieldObj = signUpPanel.transform.Find("CharacterNameInputField").gameObject;
+        Debug.Assert(passwordFieldObj != null);
+        InputField playerNameField = playerNameFieldObj.GetComponent<InputField>();
+        Debug.Assert(passwordField != null);
+
+        Action<LobbyNetworkManager.SignUpErrorCode> callbackFunc = (errorCode) =>
+        {
+            GameObject loginErrorTextObj = loginErrorPanel.transform.Find("Text").gameObject;
+            Text errorText = loginErrorTextObj.GetComponent<Text>();
+            if (errorCode == LobbyNetworkManager.SignUpErrorCode.AccountAlreadyExist)
+            {
+                errorText.text = "Failed: Account Already Exist!";
+            }
+            else
+            {
+                errorText.text = "Sign up completed!";
+            }
+            _setAllPlanelInactive();
+            loginErrorPanel.SetActive(true);
+        };
+
+        lobbyNetworkManager.signUpAsync(accountField.text, passwordField.text, playerNameField.text, callbackFunc);
+        _setAllPlanelInactive();
+        connectingLobbyPanel.SetActive(true);
+    }
+
+    
 /************************************************************************************************
                                         Helper Functions                                             
 ************************************************************************************************/
@@ -295,6 +453,9 @@ public class MenuController : MonoBehaviour
         connectingLobbyPanel.SetActive(false);
         joiningRoomPanel.SetActive(false);
         lobbyErrorPanel.SetActive(false);
+        debugLoginPanel.SetActive(false);
+        loginErrorPanel.SetActive(false);
+        signUpPanel.SetActive(false);
     }
 
 }

@@ -5,7 +5,7 @@ using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 using Mirror;
 
-public class EndGame : NetworkBehaviour
+public class endGame : NetworkBehaviour
 {
     private Canvas endGameCanvas;
     private Canvas topCanvas;
@@ -20,7 +20,7 @@ public class EndGame : NetworkBehaviour
 
     private void Start()
     {
-        endGameCountdown = 100.0f;
+        endGameCountdown = 300.0f;
         isGameOver = false;
 
         endGameCanvas = GameObject.Find("EndGameCanvas").GetComponent<Canvas>();
