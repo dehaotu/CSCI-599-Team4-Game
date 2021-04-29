@@ -21,11 +21,12 @@ public class Equipment : Item{
         Ring,       //戒指
         Leg,        //腿部
         Chest,    //胸部
-        Bracer,    //护腕
+        // Bracer,    //护腕
         Boots,     //鞋子
         Shoulder,//肩部
         Belt,       //腰带
-        OffHand //副手
+        OffHand, //副手
+        Cloaks
     }
 
     //对父方法Item.GetToolTipText()进行重写
@@ -49,9 +50,9 @@ public class Equipment : Item{
             case EquipmentType.Chest:
                 strEquipType = "Chest";
                 break;
-            case EquipmentType.Bracer:
-                strEquipType = "Bracer";
-                break;
+            // case EquipmentType.Bracer:
+            //     strEquipType = "Bracer";
+            //     break;
             case EquipmentType.Boots:
                 strEquipType = "Boots";
                 break;
@@ -63,6 +64,9 @@ public class Equipment : Item{
                 break;
             case EquipmentType.OffHand:
                 strEquipType = "OffHand";
+                break;
+            case EquipmentType.Cloaks:
+                strEquipType = "Cloaks";
                 break;
         }
 

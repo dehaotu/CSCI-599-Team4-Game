@@ -282,8 +282,8 @@ MonoBehaviour:
   maxHealthPoints: 30
   movementSpeed: 1
   waitingTime: 2
-  basicAttackPoints: 15
-  basicDefensePoints: 10
+  basicAttackPoints: 4
+  basicDefensePoints: 3
   maxChaseDistance: 3
   healthBar: {fileID: 7226297582729692934}
   targetPosition: {x: 0, y: 0}

@@ -15,6 +15,7 @@ public class GameConfiguration : MonoBehaviour
     public string MyName { set; get; }
     public string GameServerIP { set; get; }
     public int GameServerPort { set; get; }
+    public string SessionKey { set; get; }
     #endregion
 
     #region Constant
