@@ -10,7 +10,7 @@ public class StatusSection : NetworkBehaviour
     private uint playerNetId;
     private GameObject player;
     private CanvasGroup canvasGroup;
-
+    HeroStatus heroStatus;
 
     // Start is called before the first frame update
     void Start()
@@ -30,20 +30,28 @@ public class StatusSection : NetworkBehaviour
             canvasGroup.interactable = true;
             HeroStatus heroStatus = player.GetComponent<HeroStatus>();
             transform.Find("SectionFrame/Attributes").GetComponent<Text>().text = "Attack: " + heroStatus.BasicAttackPoints.ToString() + "\nDefense: " + heroStatus.BasicDefensePoints.ToString();
+        } else
+        {
+            canvasGroup.alpha = 0;
+            canvasGroup.interactable = false;
         }
     }
 
     public void setPlayer(uint netId)
     {
-        playerNetId = netId;
-        player = NetworkIdentity.spawned[playerNetId].gameObject;
+        if (player == null)
+        {
+            playerNetId = netId;
+            player = NetworkIdentity.spawned[playerNetId].gameObject;
+            heroStatus = player.GetComponent<HeroStatus>();
+        }
 
-        HeroStatus heroStatus = player.GetComponent<HeroStatus>();
-
+        
+/*        canvasGroup.alpha = 1;
+        canvasGroup.interactable = true;*/
         //set name
         transform.Find("SectionFrame/Name").GetComponent<Text>().text = heroStatus.transform.Find("Status Canvas/Name").GetComponent<Text>().text;
         transform.Find("SectionFrame/Attributes").GetComponent<Text>().text = "Attack: " + heroStatus.BasicAttackPoints.ToString() + "\nDefense: " + heroStatus.BasicDefensePoints.ToString();
 
     }
-
 }
