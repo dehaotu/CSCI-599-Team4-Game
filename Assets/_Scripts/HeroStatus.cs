@@ -41,13 +41,13 @@ public class HeroStatus : NetworkBehaviour
     [SerializeField]
     [SyncVar]
     private int basicDefensePoints = 10;
-    public int BasicDefensePoints{ get { return basicDefensePoints; } set { SetDefense(value); } }  //Basic Defense Points
+    public int BasicDefensePoints { get { return basicDefensePoints; } set { SetDefense(value); } }  //Basic Defense Points
 
     private int originalAP = 10;
-    public int OriginalAP {get {return originalAP;}}
+    public int OriginalAP { get { return originalAP; } }
     private int originalDP = 10;
-    public int OriginalDP {get {return originalDP;}}
-    
+    public int OriginalDP { get { return originalDP; } }
+
     private Text coinText;  //Get gold amount from Coin GameObject
     [SyncVar]
     public int coinAmount = 100;  //Gold owned by the player, can be used to purchase items
@@ -62,7 +62,7 @@ public class HeroStatus : NetworkBehaviour
 
     private Rigidbody2D rb;
     private NavMeshAgent agent;
-    
+
 
     [Command]
     public void CmdSend(string message)
@@ -91,7 +91,7 @@ public class HeroStatus : NetworkBehaviour
         StatusBoard.Instance.setParentLocalPlayer(gameObject);
         Debug.Log(GetComponent<NetworkIdentity>().netId.ToString());
         agent = gameObject.GetComponent<NavMeshAgent>();
-        
+
     }
 
     private void FixedUpdate()
@@ -140,9 +140,9 @@ public class HeroStatus : NetworkBehaviour
             {
                 respawnCountDown -= Time.deltaTime;
             }
-            else if (!alive && respawning && respawnCountDown <= 0 )
+            else if (!alive && respawning && respawnCountDown <= 0)
             {
-                
+
                 agent.enabled = false;
                 CanvasGroup deathCanvas = transform.Find("DeathCanvas").GetComponent<CanvasGroup>();
                 deathCanvas.alpha = 0;
@@ -171,7 +171,7 @@ public class HeroStatus : NetworkBehaviour
     void CmdRespawn()
     {
         RpcRespawn();
-        
+
     }
 
     [ClientRpc]
@@ -194,7 +194,7 @@ public class HeroStatus : NetworkBehaviour
     public void SetAttack(int value)
     {
         if (isServer) basicAttackPoints = value;
-        else if (isLocalPlayer) CmdSetAttack(value);
+        else CmdSetAttack(value);
     }
 
     [Command]
@@ -206,7 +206,7 @@ public class HeroStatus : NetworkBehaviour
     public void SetDefense(int value)
     {
         if (isServer) basicDefensePoints = value;
-        else if (isLocalPlayer) CmdSetDefense(value);
+        else CmdSetDefense(value);
     }
 
     [Command]
@@ -254,23 +254,23 @@ public class HeroStatus : NetworkBehaviour
             return true;  //消费成功 Successful purchase
         }
         else return false;  //否则消费失败 Failed purchase
-        
+
     }
 
     void ConsumeCoinHelper(int amount)
     {
-        
+
         coinAmount -= amount;
         coinText = transform.Find("Inventory Menu/Coin").GetComponentInChildren<Text>();
         coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
     }
 
-  /*  [Command]
-    void CmdConsumeCoin(int amount)
-    {
-        ConsumeCoinHelper(amount);
-    }
-*/
+    /*  [Command]
+      void CmdConsumeCoin(int amount)
+      {
+          ConsumeCoinHelper(amount);
+      }
+  */
     //赚取金币 TODO: command
     //Earn Coins
     public void EarnCoin(int amount)
@@ -280,12 +280,13 @@ public class HeroStatus : NetworkBehaviour
         //CmdEarnMoney(amount);
         RpcUpdateCoinAmout(coinAmount);
         //coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
-        Debug.Log("这个是：" + coinAmount) ;
+        Debug.Log("这个是：" + coinAmount);
         //coinText.text = "1000";  
     }
 
     [ClientRpc]
-    public void RpcUpdateCoinAmout(int amount) {
+    public void RpcUpdateCoinAmout(int amount)
+    {
         coinText.text = amount.ToString();
     }
 
