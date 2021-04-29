@@ -12,6 +12,6 @@ EditorBuildSettings:
     path: Assets/_Scenes/PreTestScene.unity
     guid: f93207ca7e5345b49b732fe3a16fca0c
   - enabled: 1
-    path: Assets/_Scenes/TinsTestScene.unity
-    guid: 92a6e1f4db88f8f42abcf75dcc6732f6
+    path: Assets/_Scenes/TestScene.unity
+    guid: 24c5f627c053549549b64f367f1419e7
   m_configObjects: {}
