@@ -29,6 +29,8 @@ public class CustomNetworkRoomManager : NetworkRoomManager
     public ushort LobbyServerPort = 24601;
     [Tooltip("For Game server only: The name of the server.")]
     public string GameServerName = "Room";
+    [Tooltip("The IP address of this game server being deployed to. If empty, it will use local address.")]
+    public string myIP = "";
 
     #region LobbyServer Communication
     public void Awake()
@@ -57,8 +59,10 @@ public class CustomNetworkRoomManager : NetworkRoomManager
     void OnConnected()
     {
         Debug.Log("Lobby server found.");
-        string hostName = Dns.GetHostName();
-        string myIP = Dns.GetHostEntry(hostName).AddressList[0].ToString();
+        
+        if (myIP == "")
+            myIP = Dns.GetHostEntry(Dns.GetHostName()).AddressList[0].ToString();
+
         KcpTransport kcpTransport = GetComponent<KcpTransport>();
         if (kcpTransport == null)
         {
