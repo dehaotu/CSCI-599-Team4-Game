@@ -2,10 +2,6 @@ using System;
 using System.Diagnostics;
 using System.Net;
 using System.Net.Sockets;
-using System.Linq;
-using System.IO;
-using System.Text;
-using UnityEngine;
 
 namespace kcp2k
 {
@@ -110,22 +106,18 @@ namespace kcp2k
         public int SendBufferCount => kcp.snd_buf.Count;
         public int ReceiveBufferCount => kcp.rcv_buf.Count;
 
-        /// Dan: Debug Metrics
-        private short tempCount = 0;
-        StreamWriter _fileStreamWriter = File.CreateText(Application.absoluteURL + "TeamForce_Metrics_" + DateTime.Now.ToString().Replace("/", "-").Replace(" ", "_").Replace(":", "-") + "_" + ".csv");
-
-// maximum send rate per second can be calculated from kcp parameters
-// source: https://translate.google.com/translate?sl=auto&tl=en&u=https://wetest.qq.com/lab/view/391.html
-//
-// KCP can send/receive a maximum of WND*MTU per interval.
-// multiple by 1000ms / interval to get the per-second rate.
-//
-// example:
-//   WND(32) * MTU(1400) = 43.75KB
-//   => 43.75KB * 1000 / INTERVAL(10) = 4375KB/s
-//
-// returns bytes/second!
-public uint MaxSendRate =>
+        // maximum send rate per second can be calculated from kcp parameters
+        // source: https://translate.google.com/translate?sl=auto&tl=en&u=https://wetest.qq.com/lab/view/391.html
+        //
+        // KCP can send/receive a maximum of WND*MTU per interval.
+        // multiple by 1000ms / interval to get the per-second rate.
+        //
+        // example:
+        //   WND(32) * MTU(1400) = 43.75KB
+        //   => 43.75KB * 1000 / INTERVAL(10) = 4375KB/s
+        //
+        // returns bytes/second!
+        public uint MaxSendRate =>
             kcp.snd_wnd * kcp.mtu * 1000 / kcp.interval;
 
         public uint MaxReceiveRate =>
@@ -212,14 +204,11 @@ public uint MaxSendRate =>
             }
         }
 
-        
-
-// reads the next reliable message type & content from kcp.
-// -> to avoid buffering, unreliable messages call OnData directly.
-bool ReceiveNextReliable(out KcpHeader header, out ArraySegment<byte> message)
+        // reads the next reliable message type & content from kcp.
+        // -> to avoid buffering, unreliable messages call OnData directly.
+        bool ReceiveNextReliable(out KcpHeader header, out ArraySegment<byte> message)
         {
             int msgSize = kcp.PeekSize();
-            //Log.Warning("Size of Packet: " + msgSize.ToString());
             if (msgSize > 0)
             {
                 // only allow receiving up to buffer sized messages.
@@ -233,20 +222,6 @@ bool ReceiveNextReliable(out KcpHeader header, out ArraySegment<byte> message)
                         // extract header & content without header
                         header = (KcpHeader)kcpMessageBuffer[0];
                         message = new ArraySegment<byte>(kcpMessageBuffer, 1, msgSize - 1);
-
-                        /// Dan: Debug Print Out Messages
-                        /*tempCount += 1;
-                        byte[] byteArray = kcpMessageBuffer;
-                        byte[] truncatedMsg = new byte[msgSize];
-                        for (int i = 0; i < msgSize; i++) truncatedMsg[i] =  kcpMessageBuffer.Take(msgSize).ElementAt(i) ;
-                        Log.Warning("Total Size of Packet: " + msgSize.ToString() + " Received Message: " + BitConverter.ToString(truncatedMsg));*/
-                        //get timestamp for file name 
-                        float timeInSeconds = Time.timeSinceLevelLoad;
-                        float secondsDisplay = Mathf.Floor((timeInSeconds % 60));
-                        float minutesDisplay = Mathf.Floor((timeInSeconds / 60));
-                        string dataLine = "Packet Size" + "," + "," + minutesDisplay.ToString() + ":" + secondsDisplay.ToString() + "," + msgSize.ToString() + Environment.NewLine;
-                        _fileStreamWriter.Write(dataLine.ToString());
-                        ///
                         lastReceiveTime = (uint)refTime.ElapsedMilliseconds;
                         return true;
                     }
@@ -287,27 +262,27 @@ bool ReceiveNextReliable(out KcpHeader header, out ArraySegment<byte> message)
                 switch (header)
                 {
                     case KcpHeader.Handshake:
-                    {
-                        // we were waiting for a handshake.
-                        // it proves that the other end speaks our protocol.
-                        Log.Info("KCP: received handshake");
-                        state = KcpState.Authenticated;
-                        OnAuthenticated?.Invoke();
-                        break;
-                    }
+                        {
+                            // we were waiting for a handshake.
+                            // it proves that the other end speaks our protocol.
+                            Log.Info("KCP: received handshake");
+                            state = KcpState.Authenticated;
+                            OnAuthenticated?.Invoke();
+                            break;
+                        }
                     case KcpHeader.Ping:
-                    {
-                        // ping keeps kcp from timing out. do nothing.
-                        break;
-                    }
+                        {
+                            // ping keeps kcp from timing out. do nothing.
+                            break;
+                        }
                     case KcpHeader.Data:
                     case KcpHeader.Disconnect:
-                    {
-                        // everything else is not allowed during handshake!
-                        Log.Warning($"KCP: received invalid header {header} while Connected. Disconnecting the connection.");
-                        Disconnect();
-                        break;
-                    }
+                        {
+                            // everything else is not allowed during handshake!
+                            Log.Warning($"KCP: received invalid header {header} while Connected. Disconnecting the connection.");
+                            Disconnect();
+                            break;
+                        }
                 }
             }
         }
@@ -341,40 +316,40 @@ bool ReceiveNextReliable(out KcpHeader header, out ArraySegment<byte> message)
                 switch (header)
                 {
                     case KcpHeader.Handshake:
-                    {
-                        // should never receive another handshake after auth
-                        Log.Warning($"KCP: received invalid header {header} while Authenticated. Disconnecting the connection.");
-                        Disconnect();
-                        break;
-                    }
-                    case KcpHeader.Data:
-                    {
-                        // call OnData IF the message contained actual data
-                        if (message.Count > 0)
                         {
-                            //Log.Warning($"Kcp recv msg: {BitConverter.ToString(message.Array, message.Offset, message.Count)}");
-                            OnData?.Invoke(message);
-                        }
-                        // empty data = attacker, or something went wrong
-                        else
-                        {
-                            Log.Warning("KCP: received empty Data message while Authenticated. Disconnecting the connection.");
+                            // should never receive another handshake after auth
+                            Log.Warning($"KCP: received invalid header {header} while Authenticated. Disconnecting the connection.");
                             Disconnect();
+                            break;
                         }
-                        break;
-                    }
+                    case KcpHeader.Data:
+                        {
+                            // call OnData IF the message contained actual data
+                            if (message.Count > 0)
+                            {
+                                //Log.Warning($"Kcp recv msg: {BitConverter.ToString(message.Array, message.Offset, message.Count)}");
+                                OnData?.Invoke(message);
+                            }
+                            // empty data = attacker, or something went wrong
+                            else
+                            {
+                                Log.Warning("KCP: received empty Data message while Authenticated. Disconnecting the connection.");
+                                Disconnect();
+                            }
+                            break;
+                        }
                     case KcpHeader.Ping:
-                    {
-                        // ping keeps kcp from timing out. do nothing.
-                        break;
-                    }
+                        {
+                            // ping keeps kcp from timing out. do nothing.
+                            break;
+                        }
                     case KcpHeader.Disconnect:
-                    {
-                        // disconnect might happen
-                        Log.Info("KCP: received disconnect message");
-                        Disconnect();
-                        break;
-                    }
+                        {
+                            // disconnect might happen
+                            Log.Info("KCP: received disconnect message");
+                            Disconnect();
+                            break;
+                        }
                 }
             }
         }
@@ -388,20 +363,20 @@ bool ReceiveNextReliable(out KcpHeader header, out ArraySegment<byte> message)
                 switch (state)
                 {
                     case KcpState.Connected:
-                    {
-                        TickConnected(time);
-                        break;
-                    }
+                        {
+                            TickConnected(time);
+                            break;
+                        }
                     case KcpState.Authenticated:
-                    {
-                        TickAuthenticated(time);
-                        break;
-                    }
+                        {
+                            TickAuthenticated(time);
+                            break;
+                        }
                     case KcpState.Disconnected:
-                    {
-                        // do nothing while disconnected
-                        break;
-                    }
+                        {
+                            // do nothing while disconnected
+                            break;
+                        }
                 }
             }
             catch (SocketException exception)
@@ -433,82 +408,73 @@ bool ReceiveNextReliable(out KcpHeader header, out ArraySegment<byte> message)
                 switch (channel)
                 {
                     case (byte)KcpChannel.Reliable:
-                    {
-                        // input into kcp, but skip channel byte
-                        int input = kcp.Input(buffer, 1, msgLength - 1);
-                        ////Dan Testing
-                        byte[] truncatedMsg = new byte[4];
-                        for (int i = 0; i < 4; i++) truncatedMsg[i] = buffer.Take(msgLength - 1).ElementAt(i+12);
-                        //Log.Warning("Total Size of Seg: " + (msgLength - 1).ToString() + " Received Seg Buffer: " + BitConverter.ToString(truncatedMsg));
-                        /*byte[] Msg = new byte[msgLength - 1];
-                        for (int i = 0; i < msgLength - 1; i++) Msg[i] = buffer.Take(msgLength - 1).ElementAt(i);
-                        Log.Warning("Total Size of Seg: " + (msgLength - 1).ToString() + " Received Full Seg Buffer: " + BitConverter.ToString(Msg));*/
-
-                        ////
-                        if (input != 0)
                         {
-                            Log.Warning($"Input failed with error={input} for buffer with length={msgLength - 1}");
-                        }
-                        break;
-                    }
-                    case (byte)KcpChannel.Unreliable:
-                    {
-                        // ideally we would queue all unreliable messages and
-                        // then process them in ReceiveNext() together with the
-                        // reliable messages, but:
-                        // -> queues/allocations/pools are slow and complex.
-                        // -> DOTSNET 10k is actually slower if we use pooled
-                        //    unreliable messages for transform messages.
-                        //
-                        //      DOTSNET 10k benchmark:
-                        //        reliable-only:         170 FPS
-                        //        unreliable queued: 130-150 FPS
-                        //        unreliable direct:     183 FPS(!)
-                        //
-                        //      DOTSNET 50k benchmark:
-                        //        reliable-only:         FAILS (queues keep growing)
-                        //        unreliable direct:     18-22 FPS(!)
-                        //
-                        // -> all unreliable messages are DATA messages anyway.
-                        // -> let's skip the magic and call OnData directly if
-                        //    the current state allows it.
-                        if (state == KcpState.Authenticated)
-                        {
-                            // only process messages while not paused for Mirror
-                            // scene switching etc.
-                            // -> if an unreliable message comes in while
-                            //    paused, simply drop it. it's unreliable!
-                            if (!paused)
+                            // input into kcp, but skip channel byte
+                            int input = kcp.Input(buffer, 1, msgLength - 1);
+                            if (input != 0)
                             {
-                                ArraySegment<byte> message = new ArraySegment<byte>(buffer, 1, msgLength - 1);
-                                OnData?.Invoke(message);
+                                Log.Warning($"Input failed with error={input} for buffer with length={msgLength - 1}");
                             }
-
-                            // set last receive time to avoid timeout.
-                            // -> we do this in ANY case even if not enabled.
-                            //    a message is a message.
-                            // -> we set last receive time for both reliable and
-                            //    unreliable messages. both count.
-                            //    otherwise a connection might time out even
-                            //    though unreliable were received, but no
-                            //    reliable was received.
-                            lastReceiveTime = (uint)refTime.ElapsedMilliseconds;
+                            break;
                         }
-                        else
+                    case (byte)KcpChannel.Unreliable:
                         {
-                            // should never
-                            Log.Warning($"KCP: received unreliable message in state {state}. Disconnecting the connection.");
-                            Disconnect();
+                            // ideally we would queue all unreliable messages and
+                            // then process them in ReceiveNext() together with the
+                            // reliable messages, but:
+                            // -> queues/allocations/pools are slow and complex.
+                            // -> DOTSNET 10k is actually slower if we use pooled
+                            //    unreliable messages for transform messages.
+                            //
+                            //      DOTSNET 10k benchmark:
+                            //        reliable-only:         170 FPS
+                            //        unreliable queued: 130-150 FPS
+                            //        unreliable direct:     183 FPS(!)
+                            //
+                            //      DOTSNET 50k benchmark:
+                            //        reliable-only:         FAILS (queues keep growing)
+                            //        unreliable direct:     18-22 FPS(!)
+                            //
+                            // -> all unreliable messages are DATA messages anyway.
+                            // -> let's skip the magic and call OnData directly if
+                            //    the current state allows it.
+                            if (state == KcpState.Authenticated)
+                            {
+                                // only process messages while not paused for Mirror
+                                // scene switching etc.
+                                // -> if an unreliable message comes in while
+                                //    paused, simply drop it. it's unreliable!
+                                if (!paused)
+                                {
+                                    ArraySegment<byte> message = new ArraySegment<byte>(buffer, 1, msgLength - 1);
+                                    OnData?.Invoke(message);
+                                }
+
+                                // set last receive time to avoid timeout.
+                                // -> we do this in ANY case even if not enabled.
+                                //    a message is a message.
+                                // -> we set last receive time for both reliable and
+                                //    unreliable messages. both count.
+                                //    otherwise a connection might time out even
+                                //    though unreliable were received, but no
+                                //    reliable was received.
+                                lastReceiveTime = (uint)refTime.ElapsedMilliseconds;
+                            }
+                            else
+                            {
+                                // should never
+                                Log.Warning($"KCP: received unreliable message in state {state}. Disconnecting the connection.");
+                                Disconnect();
+                            }
+                            break;
                         }
-                        break;
-                    }
                     default:
-                    {
-                        // not a valid channel. random data or attacks.
-                        Log.Info($"Disconnecting connection because of invalid channel header: {channel}");
-                        Disconnect();
-                        break;
-                    }
+                        {
+                            // not a valid channel. random data or attacks.
+                            Log.Info($"Disconnecting connection because of invalid channel header: {channel}");
+                            Disconnect();
+                            break;
+                        }
                 }
             }
         }
@@ -603,7 +569,7 @@ bool ReceiveNextReliable(out KcpHeader header, out ArraySegment<byte> message)
         // disconnect info needs to be delivered, so it goes over reliable
         void SendDisconnect() => SendReliable(KcpHeader.Disconnect, default);
 
-        protected virtual void Dispose() {}
+        protected virtual void Dispose() { }
 
         // disconnect this connection
         public void Disconnect()
