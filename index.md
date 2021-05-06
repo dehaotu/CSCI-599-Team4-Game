@@ -1,8 +1,15 @@
-<img src="./links/USC-Games.png" align="center" style="zoom:33%;" />
 
+
+<p align="center">
+  <img src="./links/USC-Games.png"  width="350" />
+</p>
 ## Teamforce Game
 
 Teamforce game is aimed at the next generation MOBA game, focusing more on collaboration than current MOBA games.
+<p align="center">
+  <img src="./links/img.png"  width="450" />
+</p>
+
 
 ### Gameplay Overview
 
@@ -21,11 +28,9 @@ Teamforce game is aimed at the next generation MOBA game, focusing more on colla
 - **MongoDB** to save user account information
 
 ### Demo
-```
 <a href="http://www.youtube.com/watch?feature=player_embedded&v=YOUTUBE_VIDEO_ID_HERE
 " target="_blank"><img src="http://img.youtube.com/vi/YOUTUBE_VIDEO_ID_HERE/0.jpg" 
-alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
-```
+alt="IMAGE ALT TEXT HERE" width="450" border="10" /></a>
 
 ### Team
 
@@ -43,7 +48,15 @@ alt="IMAGE ALT TEXT HERE" width="240" height="180" border="10" /></a>
 
 [Yijing Yang](https://www.linkedin.com/in/yijing-yang-02377317b/)
 
-### Documentation
+### Documents
 [EDD]()
 [Technical Paper]()
+
+---
+
+##### Special thanks to Professor Zyda, Powen Yao, Shrey Nahar, and artist__.
+
+
+
+
 
