@@ -825,7 +825,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Port: 27777
-  LobbyServerIP: localhost
+  LobbyServerIP: 52.183.4.114
   GameServerManagementPort: 24601
   NoDelay: 1
   Interval: 10

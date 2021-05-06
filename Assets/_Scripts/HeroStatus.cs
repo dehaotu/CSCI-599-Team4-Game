@@ -278,8 +278,8 @@ public class HeroStatus : NetworkBehaviour
         this.coinAmount += amount;
         coinText = transform.Find("Inventory Menu/Coin").GetComponentInChildren<Text>();
         //CmdEarnMoney(amount);
-        RpcUpdateCoinAmout(coinAmount);
-        //coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
+        //RpcUpdateCoinAmout(coinAmount);
+        coinText.text = coinAmount.ToString();  //更新金币数量 Update Coin Amount
         Debug.Log("这个是：" + coinAmount);
         //coinText.text = "1000";  
     }
