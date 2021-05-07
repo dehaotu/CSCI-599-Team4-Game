@@ -56,7 +56,7 @@ Teamforce game is aimed at the next generation MOBA game, focusing more on colla
 
 ---
 
-Special thanks to Professor Zyda, Powen Yao, Shrey Nahar, and artist__.
+Special thanks to Professor Zyda, Powen Yao, Shrey Nahar, and Sensen(森森).
 
 
 
